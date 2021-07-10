@@ -12,6 +12,7 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Model;
+using Ntk8.Models;
 
 namespace Ntk8.Helpers
 {
@@ -30,17 +31,12 @@ namespace Ntk8.Helpers
             return account;
         }
 
-        public static string RandomString(int length)
-        {
-            var random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-        public static string GenerateJwtToken(User userModel)
+        public static string GenerateJwtToken(
+            AuthenticationConfiguration configuration,
+            User userModel)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(RandomString(28));
+            var key = Encoding.ASCII.GetBytes(configuration.RefreshTokenSecret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new []
@@ -76,11 +72,13 @@ namespace Ntk8.Helpers
             return (refreshToken, account);
         }
 
-        public static void RemoveOldRefreshTokens(AppSettings appSettings, UserModel userModel)
+        public static void RemoveOldRefreshTokens(
+            AuthenticationConfiguration configuration,
+            User userModel)
         {
             userModel.RefreshTokens.RemoveAll(x => !x.IsActive &&
-                                              x.Created.AddDays(appSettings.RefreshTokenTTL)
-                                              <= DateTime.UtcNow);
+                                                   x.Created.AddDays(configuration.RefreshTokenTTL)
+                                                   <= DateTime.UtcNow);
         }
 
         public static RefreshToken GenerateRefreshToken(string ipAddress)

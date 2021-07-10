@@ -2,7 +2,7 @@
 {
     public class AuthenticationConfiguration
     {
-        public int RefreshTokenSecret { get; set; }
-        public string RefreshTokenTTL { get; set; }
+        public string RefreshTokenSecret { get; set; }
+        public int RefreshTokenTTL { get; set; }
     }
 }

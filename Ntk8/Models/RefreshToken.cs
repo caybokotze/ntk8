@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Ntk8.Models;
 
 namespace Ntk8.Model
 {

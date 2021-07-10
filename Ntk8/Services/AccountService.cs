@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using Dapper.CQRS;
 using Dispatch.K8;
+using HigLabo.Core;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Helpers;
 using Ntk8.Model;
+using Ntk8.Models;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
@@ -16,16 +18,19 @@ namespace Ntk8.Services
     {
         public IQueryExecutor QueryExecutor { get; }
         public ICommandExecutor CommandExecutor { get; }
+        public AuthenticationConfiguration Configuration { get; }
         public AuthenticationContextService AuthenticationContextService { get; }
 
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            AuthenticationContextService contextService)
+            AuthenticationContextService contextService,
+            AuthenticationConfiguration configuration)
         {
             QueryExecutor = queryExecutor;
             CommandExecutor = commandExecutor;
             AuthenticationContextService = contextService;
+            Configuration = configuration;
         }
         
         public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
@@ -41,16 +46,17 @@ namespace Ntk8.Services
             if (!user.IsVerified || 
                 !BC.Verify(model.Password, user.PasswordHash))
             {
-                throw new AppException("User is not verified or password is incorrect");
+                throw new InvalidPasswordException("User is not verified or password is incorrect");
             }
             
-            var jwtToken = AccountServiceHelpers.GenerateJwtToken(AppSettings, user);
+            var jwtToken = AccountServiceHelpers.GenerateJwtToken(Configuration, user);
             var refreshToken = AccountServiceHelpers.GenerateRefreshToken(ipAddress);
             user.RefreshTokens = new List<RefreshToken> { refreshToken };
-            AccountServiceHelpers.RemoveOldRefreshTokens(AppSettings, user);
+            AccountServiceHelpers.RemoveOldRefreshTokens(Configuration, user);
             CommandExecutor.Execute(new UpdateUser(user));
 
-            var response = Mapper.Map<AuthenticateResponse>(user);
+            var response = user.Map(new AuthenticateResponse());
+
             response.JwtToken = jwtToken;
             response.RefreshToken = refreshToken.Token;
             return response;
