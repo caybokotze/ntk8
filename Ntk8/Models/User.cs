@@ -14,11 +14,11 @@ namespace Ntk8.Models
         {
             ReferenceId = Guid.NewGuid();
             DateCreated = DateTime.Now;
-            DateUpdated = DateTime.Now;
+            DateModified = DateTime.Now;
         }
 
         public DateTime DateCreated { get; set; }
-        public DateTime DateUpdated { get; set; }
+        public DateTime DateModified { get; set; }
         
         public int Id { get; set; }
         public Guid ReferenceId { get; set; }

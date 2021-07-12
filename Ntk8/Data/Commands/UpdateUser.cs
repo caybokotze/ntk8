@@ -31,7 +31,9 @@ namespace Ntk8.Data.Commands
             verification_token = @VerificationToken,
             verification_date = @VerificationDate,
             password_reset_date = @PasswordResetDate,
-            reset_token_expires = @ResetTokenExpires
+            reset_token_expires = @ResetTokenExpires,
+                 date_modified = @DateModified,
+                 date_created = @DateCreated
             WHERE id = @Id;", User);
         }
     }

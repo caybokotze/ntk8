@@ -49,10 +49,16 @@ namespace Ntk8.Services
                 throw new InvalidPasswordException("User is not verified or password is incorrect");
             }
             
-            var jwtToken = AccountServiceHelpers.GenerateJwtToken(Configuration, user);
-            var refreshToken = AccountServiceHelpers.GenerateRefreshToken(ipAddress);
-            user.RefreshTokens = new List<RefreshToken> { refreshToken };
-            AccountServiceHelpers.RemoveOldRefreshTokens(Configuration, user);
+            var jwtToken = AccountServiceHelpers
+                .GenerateJwtToken(Configuration, user);
+            var refreshToken = AccountServiceHelpers
+                .GenerateRefreshToken(ipAddress);
+            user.RefreshTokens = new List<RefreshToken>
+            {
+                refreshToken
+            };
+            AccountServiceHelpers
+                .RemoveOldRefreshTokens(Configuration, user);
             CommandExecutor.Execute(new UpdateUser(user));
 
             var response = user.Map(new AuthenticateResponse());
@@ -64,20 +70,26 @@ namespace Ntk8.Services
 
         public AuthenticateResponse RefreshToken(string token, string ipAddress)
         {
-            var (refreshToken, user) = AccountServiceHelpers.GetRefreshToken(QueryExecutor, token);
-            var newRefreshToken = AccountServiceHelpers.GenerateRefreshToken(ipAddress);
+            var (refreshToken, user) = AccountServiceHelpers
+                .GetRefreshToken(QueryExecutor, token);
+            var newRefreshToken = AccountServiceHelpers
+                .GenerateRefreshToken(ipAddress);
+            
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
             user.RefreshTokens.Add(newRefreshToken);
 
-            AccountServiceHelpers.RemoveOldRefreshTokens(AppSettings, user);
+            AccountServiceHelpers
+                .RemoveOldRefreshTokens(Configuration, user);
 
             CommandExecutor.Execute(new UpdateUser(user));
             
-            var jwtToken = AccountServiceHelpers.GenerateJwtToken(AppSettings, user);
+            var jwtToken = AccountServiceHelpers
+                .GenerateJwtToken(Configuration, user);
 
-            var response = Mapper.Map<AuthenticateResponse>(user);
+            var response = user.Map(new AuthenticateResponse());
+            
             response.JwtToken = jwtToken;
             response.RefreshToken = newRefreshToken.Token;
             return response;
@@ -101,26 +113,22 @@ namespace Ntk8.Services
             {
                 if (dbUserModel.IsVerified)
                 {
-                    EmailHelpers.SendEmailAlreadyExistsEmail(EmailService, model.Email, AppSettings.Origin);
-                    return;
+                    throw new UserAlreadyExistsException();
                 }
 
                 dbUserModel.VerificationToken = AccountServiceHelpers.RandomTokenString();
-                EmailHelpers.SendVerificationEmail(EmailService, dbUserModel, AppSettings.Origin);
                 dbUserModel.DateUpdated = DateTime.Now;
                 CommandExecutor.Execute(new UpdateUser(dbUserModel));
                 return;
             }
 
-            var user = Mapper.Map<UserModel>(model);
+            var user = model.Map(new User());
             var role = AssignInitialUserRole();
             user.VerificationToken = AccountServiceHelpers.RandomTokenString();
             user.PasswordHash = BC.HashPassword(model.Password);
             
             CommandExecutor
                 .Execute(new InsertUserAndRole(user, role));
-            
-            EmailHelpers.SendVerificationEmail(EmailService, user, AppSettings.Origin);
         }
 
         public void AutoVerifyUser(RegisterRequest model)
