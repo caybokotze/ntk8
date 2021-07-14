@@ -149,7 +149,7 @@ namespace Ntk8.Services
 
         private UserRole AssignInitialUserRole()
         {
-            var isFirstAccount = !QueryExecutor.Execute(new DoUsersExist()).Any();
+            var isFirstAccount = !QueryExecutor.Execute(new DoUsersExist());
             var role = isFirstAccount 
                 ? UserRoles.GlobalAdmin
                 : UserRoles.Unassigned;
