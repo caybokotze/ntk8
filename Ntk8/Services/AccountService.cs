@@ -117,7 +117,7 @@ namespace Ntk8.Services
                 }
 
                 dbUserModel.VerificationToken = AccountServiceHelpers.RandomTokenString();
-                dbUserModel.DateUpdated = DateTime.Now;
+                dbUserModel.DateModified = DateTime.Now;
                 CommandExecutor.Execute(new UpdateUser(dbUserModel));
                 return;
             }
@@ -143,14 +143,13 @@ namespace Ntk8.Services
             
             user.VerificationDate = DateTime.UtcNow;
             user.VerificationToken = null;
-            user.IsLive = true;
 
             CommandExecutor.Execute(new UpdateUser(user));
         }
 
         private UserRole AssignInitialUserRole()
         {
-            var isFirstAccount = !QueryExecutor.Execute(new FetchAllUsers()).Any();
+            var isFirstAccount = !QueryExecutor.Execute(new DoUsersExist()).Any();
             var role = isFirstAccount 
                 ? UserRoles.GlobalAdmin
                 : UserRoles.Unassigned;
@@ -236,7 +235,7 @@ namespace Ntk8.Services
 
         public IEnumerable<AccountResponse> GetAll()
         {
-            var users = QueryExecutor.Execute(new FetchAllUsers());
+            var users = QueryExecutor.Execute(new DoUsersExist());
             return Mapper.Map<IList<AccountResponse>>(users);
         }
 

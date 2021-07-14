@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dapper.CQRS;
 using DapperDoodle;
 using Dispatch.BLL.Data.Queries.UserRelated;
 using Microsoft.AspNetCore.Http;
@@ -10,21 +11,23 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Dispatch.Shared.Configuration;
 using Dispatch.Shared.Exceptions;
+using Ntk8.Data.Queries;
+using Ntk8.Models;
 
 namespace Dispatch.K8.Middleware
 {
     public class JwtMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly AppSettings _appSettings;
+        private readonly AuthenticationConfiguration _authenticationConfiguration;
 
         public JwtMiddleware(
             RequestDelegate next,
-            IOptions<AppSettings> appSettings,
+            AuthenticationConfiguration authenticationConfiguration,
             IQueryExecutor queryExecutor)
         {
             _next = next;
-            _appSettings = appSettings.Value;
+            _authenticationConfiguration = authenticationConfiguration;
         }
 
         public async Task Invoke(
@@ -51,7 +54,8 @@ namespace Dispatch.K8.Middleware
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                var key = Encoding.ASCII
+                    .GetBytes(_authenticationConfiguration.RefreshTokenSecret);
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
