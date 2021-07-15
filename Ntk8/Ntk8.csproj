@@ -3,6 +3,16 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>latest</LangVersion>
+        <Title>Ntk8</Title>
+        <Authors>Caybo Kotze</Authors>
+        <Description>AuthNtk8 is a basic authentication package that could assist you to setup auth within your project a lot quicker. Supports session-based and JWT authentication.</Description>
+        <Copyright></Copyright>
+        <RespositoryUrl>https://github.com/caybokotze/Dapper.CQRS.git</RespositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <Authors>Caybo Kotze</Authors>
+        <PackageReleaseNotes>Initial Release, Not well tested yet.</PackageReleaseNotes>
+        <PackageLicenseFile>license.txt</PackageLicenseFile>
+        <PackageVersion>1.0.0</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +24,12 @@
       <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.11.1" />
       <PackageReference Include="System.Text.Json" Version="5.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="license.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
