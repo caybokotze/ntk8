@@ -26,6 +26,8 @@ AuthNTk8 (auth-en-ti-cate) is a standalone .NET auth service for stateless authe
 
 
 ## Migration Scripts to create valid tables
+**These migrations are for mysql, some minor tweaking would be required for other databases.**
+> As long as the properties match you will be able to use the package.
 ```sql
 
 CREATE TABLE users
