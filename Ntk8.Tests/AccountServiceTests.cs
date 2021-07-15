@@ -7,14 +7,13 @@ namespace Ntk8.Tests
     public class AccountServiceTests
     {
         [TestFixture]
-        public class DatabaseTests
+        public class DatabaseTests : TestBase
         {
             [Test]
             public void RegisterDoesRegisterUser()
             {
                 // assign
-
-                var accountService = new AccountService();
+                var accountService = Resolve<IAccountService>();
                 // act
                 // assert
             }

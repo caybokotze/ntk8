@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MySql.Data.MySqlClient;
 using Ntk8.Models;
 using Ntk8.Services;
 using NUnit.Framework;
@@ -43,6 +45,8 @@ namespace Ntk8.Tests
                         RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
                         RefreshTokenTTL = 3600
                     });
+                    config.AddTransient<IDbConnection, MySqlConnection>(p => 
+                        new MySqlConnection(AppSettingProvider.CreateAppSettings().ConnectionStrings.DefaultConnection));
                 });
             });
 
