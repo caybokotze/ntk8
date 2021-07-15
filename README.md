@@ -23,3 +23,39 @@ AuthNTk8 (auth-en-ti-cate) is a standalone .NET auth service for stateless authe
         void AutoVerifyUser(RegisterRequest model);
     }
 ```
+
+
+## Migration Scripts to create valid tables
+```sql
+
+CREATE TABLE users
+(
+    id                  int PRIMARY KEY AUTO_INCREMENT,
+    reference_id        char(36),
+    title               varchar(100),
+    email               varchar(60),
+    name                varchar(100),
+    surname             varchar(100),
+    tel_number          varchar(15),
+    username            varchar(20),
+    access_failed_count int,
+    lockout_enabled     tinyint(1),
+    password_hash       varchar(50),
+    concurrency_stamp   varchar(50),
+    security_stamp      varchar(50),
+    password_salt       varchar(50),
+    accept_terms        tinyint(1),
+    reset_token         varchar(100),
+    verification_token  varchar(100),
+    verification_date   datetime,
+    password_reset      datetime,
+    reset_token_expires datetime,
+    date_created        datetime,
+    date_updated        datetime,
+    is_live             tinyint(1),
+    address_id          int,
+    business_branch_id  int
+);
+```
+
+## Grab on nuget
