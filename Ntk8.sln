@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ntk8", "Ntk8\Ntk8.csproj", "{27387851-1990-4213-84F5-00A9B2903B23}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ntk8.Tests", "Ntk8.Tests\Ntk8.Tests.csproj", "{B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{27387851-1990-4213-84F5-00A9B2903B23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27387851-1990-4213-84F5-00A9B2903B23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27387851-1990-4213-84F5-00A9B2903B23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

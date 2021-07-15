@@ -5,7 +5,20 @@ using Ntk8.Models;
 
 namespace Ntk8.Services
 {
-    public class AuthenticationContextService
+    public interface IAuthenticationContextService
+    {
+        HttpContext HttpContext { get; }
+        User User { get; }
+        string GetRefreshToken();
+        string GetOriginRequestHeader();
+        IHeaderDictionary GetRequestHeaders();
+        string GetRemoteIpAddress();
+        string GetLocalIpAddress();
+        string GetIpAddress();
+        void SetTokenCookie(string token);
+    }
+
+    public class AuthenticationContextService : IAuthenticationContextService
     {
         public HttpContext HttpContext { get; }
 
