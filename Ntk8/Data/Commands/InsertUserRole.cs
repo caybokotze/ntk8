@@ -1,4 +1,5 @@
 ﻿using Dapper.CQRS;
+using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
@@ -7,10 +8,10 @@ namespace Ntk8.Data.Commands
         public int RoleId { get; }
         public int UserId { get; }
 
-        public InsertUserRole(int roleId, int userId)
+        public InsertUserRole(UserRole userRole)
         {
-            RoleId = roleId;
-            UserId = userId;
+            RoleId = userRole.RoleId;
+            UserId = userRole.UserId;
         }
         
         public override void Execute()

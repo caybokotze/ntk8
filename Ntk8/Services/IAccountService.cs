@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Dispatch.K8.Dto;
 using Ntk8.Dto;
 
 namespace Ntk8.Services
@@ -14,7 +13,6 @@ namespace Ntk8.Services
         void ForgotPassword(ForgotPasswordRequest model, string origin);
         void ValidateResetToken(ValidateResetTokenRequest model);
         void ResetPassword(ResetPasswordRequest model);
-        IEnumerable<AccountResponse> GetAll();
         AccountResponse GetById(int id);
         AccountResponse Create(CreateRequest model);
         AccountResponse Update(int id, UpdateRequest model);

@@ -4,17 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper.CQRS;
-using DapperDoodle;
-using Dispatch.BLL.Data.Queries.UserRelated;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Dispatch.Shared.Configuration;
-using Dispatch.Shared.Exceptions;
+using Ntk8.Constants;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
 
-namespace Dispatch.K8.Middleware
+namespace Ntk8.Middleware
 {
     public class JwtMiddleware
     {
@@ -73,7 +69,7 @@ namespace Dispatch.K8.Middleware
             }
             catch
             {
-                throw new ContextNotBoundException();
+                throw new Exception("Context not bound");
             }
         }
     }

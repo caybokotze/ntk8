@@ -5,8 +5,10 @@ using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Ntk8.Constants;
+using Ntk8.Models;
 
-namespace Dispatch.K8.Helpers
+namespace Ntk8.Helpers
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter
@@ -25,12 +27,12 @@ namespace Dispatch.K8.Helpers
         
         private readonly IList<string> _roles;
 
-        public AuthorizeAttribute(params UserRoles[] roles)
+        public AuthorizeAttribute(params UserRole[] roles)
         {
             _roles = GetRolesAsStrings(roles);
         }
 
-        public string[] GetRolesAsStrings(UserRoles[] roles)
+        public string[] GetRolesAsStrings(UserRole[] roles)
         {
             var length = roles.Length;
             var userRoles = new string[length];
@@ -49,7 +51,7 @@ namespace Dispatch.K8.Helpers
         
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (UserModel)context.HttpContext.Items[AuthenticationConstants.ContextAccount];
+            var user = (User) context.HttpContext.Items[AuthenticationConstants.ContextAccount];
             
             // todo: needs to check against all of the roles that the user has in the db.
             

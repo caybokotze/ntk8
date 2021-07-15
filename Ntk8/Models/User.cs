@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using Dapper.CQRS;
 using Newtonsoft.Json;
 using Ntk8.Data.Queries;
-using Ntk8.Model;
 
 namespace Ntk8.Models
 {

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Dispatch.K8.Dto;
+using Ntk8.Interfaces;
 
 namespace Ntk8.Dto
 {

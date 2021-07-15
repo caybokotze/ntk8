@@ -1,4 +1,4 @@
-namespace Dispatch.K8
+namespace Ntk8.Constants
 {
     public static class ControllerConstants
     {

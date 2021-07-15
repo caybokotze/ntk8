@@ -2,11 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="BCrypt.Net" Version="0.1.0" />
-      <PackageReference Include="Dapper.CQRS" Version="1.0.0" />
+      <PackageReference Include="Dapper.CQRS" Version="1.1.0" />
       <PackageReference Include="HigLabo.Mapper" Version="3.0.1" />
       <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />

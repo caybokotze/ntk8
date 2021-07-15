@@ -25,8 +25,7 @@ namespace Ntk8.Data.Commands
 
         private int InsertUser()
         {
-            return CommandExecutor
-                .Execute(new InsertUser(User));
+            return CommandExecutor.Execute(new InsertUser(User));
         }
 
         private int InsertUserRole(int userId)

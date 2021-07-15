@@ -1,4 +1,4 @@
-﻿namespace Dispatch.K8.Dto
+﻿namespace Ntk8.Interfaces
 {
     public interface IRequiredUserAttributes
     {

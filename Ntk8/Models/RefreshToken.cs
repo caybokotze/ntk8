@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Ntk8.Models;
 
-namespace Ntk8.Model
+namespace Ntk8.Models
 {
     public class RefreshToken
     {

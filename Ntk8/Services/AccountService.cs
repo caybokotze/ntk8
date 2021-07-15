@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dapper.CQRS;
-using Dispatch.K8;
 using HigLabo.Core;
+using Ntk8.Constants;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Helpers;
-using Ntk8.Model;
 using Ntk8.Models;
+using PeanutButter.Utils;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
@@ -123,12 +123,11 @@ namespace Ntk8.Services
             }
 
             var user = model.Map(new User());
-            var role = AssignInitialUserRole();
             user.VerificationToken = AccountServiceHelpers.RandomTokenString();
             user.PasswordHash = BC.HashPassword(model.Password);
             
             CommandExecutor
-                .Execute(new InsertUserAndRole(user, role));
+                .Execute(new InsertUser(user));
         }
 
         public void AutoVerifyUser(RegisterRequest model)
@@ -146,19 +145,7 @@ namespace Ntk8.Services
 
             CommandExecutor.Execute(new UpdateUser(user));
         }
-
-        private UserRole AssignInitialUserRole()
-        {
-            var isFirstAccount = !QueryExecutor.Execute(new DoUsersExist());
-            var role = isFirstAccount 
-                ? UserRoles.GlobalAdmin
-                : UserRoles.Unassigned;
-            
-            return new UserRole
-            {
-                RoleId = (int) role
-            };
-        }
+        
 
         public void VerifyEmail(string token)
         {
@@ -180,7 +167,7 @@ namespace Ntk8.Services
 
             user.VerificationDate = DateTime.UtcNow;
             user.VerificationToken = null;
-            user.IsLive = true;
+            user.IsActive = true;
 
             CommandExecutor.Execute(new UpdateUser(user));
         }
@@ -197,34 +184,29 @@ namespace Ntk8.Services
             user.ResetTokenExpires = DateTime.UtcNow.AddDays(1);
 
             CommandExecutor.Execute(new UpdateUser(user));
-            
-            EmailHelpers.SendPasswordResetEmail(
-                EmailService, 
-                user,
-                origin);
         }
 
         public void ValidateResetToken(ValidateResetTokenRequest model)
         {
-            var user = QueryExecutor.Execute(new FetchUserByResetToken(model.Token));
+            var user = QueryExecutor
+                .Execute(new FetchUserByResetToken(model.Token));
 
-            // todo: return positive condition
             if (user == null)
             {
-                throw new AppException(AuthenticationConstants.InvalidAuthenticationMessage);
+                throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
             }
         }
 
         public void ResetPassword(ResetPasswordRequest model)
         {
-            var user = QueryExecutor.Execute(new FetchUserByResetToken(model.Token));
+            var user = QueryExecutor
+                .Execute(new FetchUserByResetToken(model.Token));
 
             if (user is null)
             {
-                throw new AppException(AuthenticationConstants.InvalidAuthenticationMessage);
+                throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
             }
-
-            // update password and remove reset token
+            
             user.PasswordHash = BC.HashPassword(model.Password);
             user.PasswordResetDate = DateTime.UtcNow;
             user.ResetToken = null;
@@ -233,26 +215,26 @@ namespace Ntk8.Services
             CommandExecutor.Execute(new UpdateUser(user));
         }
 
-        public IEnumerable<AccountResponse> GetAll()
-        {
-            var users = QueryExecutor.Execute(new DoUsersExist());
-            return Mapper.Map<IList<AccountResponse>>(users);
-        }
-
         public AccountResponse GetById(int id)
         {
-            var user = QueryExecutor.Execute(new FetchUserById(id));
-            return Mapper.Map<AccountResponse>(user);
+            var user = QueryExecutor
+                .Execute(new FetchUserById(id));
+            
+            if (user is null)
+            {
+                throw new NoUserFoundException();
+            }
+            return user.Map(new AccountResponse());
         }
 
         public AccountResponse Create(CreateRequest model)
         {
             if (QueryExecutor.Execute(new FetchUserByEmailAddress(model.Email)).Email is not null)
             {
-                throw new AppException($"Email: {model.Email} is already registered");
+                throw new UserAlreadyExistsException();
             }
-            
-            var user = Mapper.Map<UserModel>(model);
+
+            var user = model.Map(new User());
             user.DateCreated = DateTime.UtcNow;
             user.VerificationDate = DateTime.UtcNow;
 
@@ -260,37 +242,36 @@ namespace Ntk8.Services
 
             CommandExecutor.Execute(new InsertUser(user));
 
-            return Mapper.Map<AccountResponse>(user);
+            return user.Map(new AccountResponse());
         }
 
         public AccountResponse Update(int id, UpdateRequest model)
         {
-            var user = AccountServiceHelpers.GetAccount(QueryExecutor, id);
-            var userByEmail = QueryExecutor.Execute(new FetchUserByEmailAddress(model.Email));
+            var user = AccountServiceHelpers
+                .GetAccount(QueryExecutor, id);
+            var userByEmail = QueryExecutor
+                .Execute(new FetchUserByEmailAddress(model.Email));
 
             if (user.Email != model.Email && userByEmail.Email == model.Email)
             {
-                throw new AppException($"Email '{model.Email}' is already taken");
+                throw new UserAlreadyExistsException();
             }
-
-            // hash password if it was entered
+            
             if (!string.IsNullOrEmpty(model.Password))
             {
                 user.PasswordHash = BC.HashPassword(model.Password);
             }
-
-            // copy model to account and save
-            Mapper.Map(model, user);
-            user.DateUpdated = DateTime.UtcNow;
+            
+            model.CopyPropertiesTo(user);
+            user.DateModified = DateTime.UtcNow;
 
             CommandExecutor.Execute(new UpdateUser(user));
 
-            return Mapper.Map<AccountResponse>(user);
+            return user.Map(new AccountResponse());
         }
 
         public void Delete(int id)
         {
-            var user = AccountServiceHelpers.GetAccount(QueryExecutor, id);
             CommandExecutor.Execute(new DeleteUserById(id));
         }
     }
