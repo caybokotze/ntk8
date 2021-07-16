@@ -38,7 +38,7 @@ CREATE TABLE users
     email               varchar(60),
     name                varchar(100),
     surname             varchar(100),
-    tel_number          varchar(15),
+    tel_number          varchar(20),
     username            varchar(20),
     access_failed_count int,
     lockout_enabled     tinyint(1),
