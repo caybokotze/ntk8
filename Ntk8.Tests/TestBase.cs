@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Configuration;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper.CQRS;
+using Dapper.CQRS.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using Ntk8.Models;
@@ -39,14 +43,22 @@ namespace Ntk8.Tests
                     config.AddSingleton<IMemoryCache, MemoryCache>();
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
-                    config.AddTransient<IAuthenticationContextService, AuthenticationContextService>();
+                    config.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+                    config.AddTransient<AuthenticationContextService>();
                     config.AddTransient(_ => new AuthenticationConfiguration
                     {
                         RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
                         RefreshTokenTTL = 3600
                     });
-                    config.AddTransient<IDbConnection, MySqlConnection>(p => 
-                        new MySqlConnection(AppSettingProvider.CreateAppSettings().ConnectionStrings.DefaultConnection));
+                    config.AddTransient<IDbConnection>(p =>
+                        new MySqlConnection(AppSettingProvider.CreateAppSettings().DefaultConnection));
+                    config.AddTransient<IBaseSqlExecutorOptions>(_ => new BaseSqlExecutorOptions
+                    {
+                        Connection = Resolve<IDbConnection>(),
+                        Dbms = DBMS.MySQL,
+                        ServiceProvider = ServiceProvider
+                    });
+                    config.AddTransient<IAccountService, AccountService>();
                 });
             });
 
@@ -58,7 +70,7 @@ namespace Ntk8.Tests
         
         public T Resolve<T>()
         {
-            return (T) ServiceProvider.GetService(typeof(T));
+            return ServiceProvider.GetRequiredService<T>();
         }
     }
 }

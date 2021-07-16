@@ -1,8 +1,13 @@
 ﻿namespace Ntk8.Tests
 {
-    public class AppSettings
+    public interface IAppSettings
     {
-        public ConnectionStrings ConnectionStrings { get; set; }
+        string DefaultConnection { get; set; }
+    }
+
+    public class AppSettings : IAppSettings
+    {
+        public string DefaultConnection { get; set; }
     }
 
     public class ConnectionStrings

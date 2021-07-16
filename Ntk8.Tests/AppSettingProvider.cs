@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using NExpect.Interfaces;
 using PeanutButter.DuckTyping.Exceptions;
 using PeanutButter.DuckTyping.Extensions;
 using PeanutButter.Utils;
@@ -13,7 +14,7 @@ namespace Ntk8.Tests
 {
     public static class AppSettingProvider
     {
-        public static AppSettings CreateAppSettings()
+        public static IAppSettings CreateAppSettings()
         {
             return GetSettingsFrom(
                 CreateConfig()
@@ -26,7 +27,10 @@ namespace Ntk8.Tests
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json");
             const string deployConfig = "appsettings.deploy.json";
-            if (CanLoad(deployConfig)) builder.AddJsonFile(deployConfig);
+            if (CanLoad(deployConfig))
+            {
+                builder.AddJsonFile(deployConfig);
+            }
 
             return builder.Build();
         }
@@ -40,17 +44,17 @@ namespace Ntk8.Tests
             return lines.All(l => !re.Match(l).Success);
         }
 
-        private static AppSettings GetSettingsFrom(
+        private static IAppSettings GetSettingsFrom(
             IConfigurationRoot config)
         {
-            var defaultConfig = new Dictionary<string, string>();
-            var providedConfig = config.GetSection("Settings")
+            var providedConfig = config
+                ?.GetSection("Settings")
+                ?.GetSection("ConnectionStrings")
                 ?.GetChildren()
-                .ToDictionary(s => s.Key, s => s.Value) ?? new Dictionary<string, string>();
-            var merged = new MergeDictionary<string, string>(providedConfig, defaultConfig);
+                ?.ToDictionary(s => s.Key, s => s.Value);
             try
             {
-                return merged.FuzzyDuckAs<AppSettings>(true);
+                return providedConfig.FuzzyDuckAs<IAppSettings>(true);
             }
             catch (UnDuckableException ex)
             {
