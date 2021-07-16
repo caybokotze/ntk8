@@ -46,7 +46,7 @@ CREATE TABLE users
     concurrency_stamp   varchar(50),
     security_stamp      varchar(50),
     password_salt       varchar(50),
-    accept_terms        tinyint(1),
+    accepted_terms        tinyint(1),
     reset_token         varchar(100),
     verification_token  varchar(100),
     verification_date   datetime,
