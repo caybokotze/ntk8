@@ -40,6 +40,7 @@ namespace Ntk8.Tests
 
                 webHost.ConfigureServices(config =>
                 {
+                    Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
                     config.AddSingleton<IMemoryCache, MemoryCache>();
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();

@@ -123,6 +123,7 @@ namespace Ntk8.Services
             }
 
             var user = model.Map(new User());
+            user.IsActive = true;
             user.VerificationToken = AccountServiceHelpers.RandomTokenString();
             user.PasswordHash = BC.HashPassword(model.Password);
             

@@ -14,14 +14,14 @@ namespace Ntk8.Data.Commands
         
         public override void Execute()
         {
-            Result = Execute(@"INSERT INTO users (
+            Result = QueryFirst<int>(@"INSERT INTO users (
             name, 
             surname, 
             reference_id, 
             title, 
             email, 
             tel_number, 
-            user_name, 
+            username, 
             access_failed_count, 
             lockout_enabled, 
             password_hash, 
@@ -33,7 +33,8 @@ namespace Ntk8.Data.Commands
             password_reset_date, 
             reset_token_expires,
                    date_modified,
-                   date_created) 
+                   date_created,
+                   is_active) 
             VALUES (@Name,
                     @Surname,
                     @ReferenceId,
@@ -52,7 +53,8 @@ namespace Ntk8.Data.Commands
                     @PasswordResetDate,
                     @ResetTokenExpires,
                     @DateModified,
-                    @DateCreated)", User);
+                    @DateCreated,
+                    @IsActive); SELECT last_insert_id();", User);
         }
     }
 }
