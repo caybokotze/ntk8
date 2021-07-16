@@ -50,11 +50,11 @@ CREATE TABLE users
     reset_token         varchar(100),
     verification_token  varchar(100),
     verification_date   datetime,
-    password_reset      datetime,
+    password_reset_date      datetime,
     reset_token_expires datetime,
     date_created        datetime,
-    date_updated        datetime,
-    is_live             tinyint(1),
+    date_modified        datetime,
+    is_active             tinyint(1),
     address_id          int,
     business_branch_id  int
 );
