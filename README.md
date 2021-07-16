@@ -54,9 +54,7 @@ CREATE TABLE users
     reset_token_expires datetime,
     date_created        datetime,
     date_modified       datetime,
-    is_active           tinyint(1),
-    address_id          int,
-    business_branch_id  int
+    is_active           tinyint(1)
 );
 ```
 
