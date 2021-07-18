@@ -2,6 +2,7 @@
 using Dapper.CQRS;
 using HigLabo.Core;
 using NExpect;
+using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
@@ -81,30 +82,27 @@ namespace Ntk8.Tests
             {
                 // arrange
                 var accountService = Create();
-                var origin = GetRandomIPv4Address();
-                var updateUser = GetRandom<UpdateRequest>();
+                var updatedUser = GetRandom<UpdateRequest>();
                 var queryExecutor = Resolve<IQueryExecutor>();
                 var commandExecutor = Resolve<ICommandExecutor>();
                 // act
                 using (Transactions.RepeatableRead())
                 {
                     var userId = commandExecutor.Execute(new InsertUser(GetRandom<User>()));
-                    accountService.Update(userId, updateUser);
+                    accountService.Update(userId, updatedUser);
                     var user = queryExecutor.Execute(new FetchUserById(userId));
+                    var userToMatch = user.Map(new UpdateRequest());
                     // assert
-                    Expect(user.IsActive).To.Be.True();
+                    Expect(userToMatch).To.Deep.Equal(updatedUser);
                 }
             }
         }
 
         public IAccountService Create(bool mocked = false)
         {
-            if (mocked)
-            {
-                    
-            }
-            
-            return Resolve<IAccountService>();
+            return mocked 
+                ? Substitute.For<IAccountService>() 
+                : Resolve<IAccountService>();
         }
     }
 }

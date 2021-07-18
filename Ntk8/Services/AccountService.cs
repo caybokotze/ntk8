@@ -250,14 +250,7 @@ namespace Ntk8.Services
         {
             var user = AccountServiceHelpers
                 .GetAccount(QueryExecutor, id);
-            var userByEmail = QueryExecutor
-                .Execute(new FetchUserByEmailAddress(model.Email));
 
-            if (user.Email != model.Email && userByEmail.Email == model.Email)
-            {
-                throw new UserAlreadyExistsException();
-            }
-            
             if (!string.IsNullOrEmpty(model.Password))
             {
                 user.PasswordHash = BC.HashPassword(model.Password);
@@ -268,7 +261,8 @@ namespace Ntk8.Services
 
             CommandExecutor.Execute(new UpdateUser(user));
 
-            return user.Map(new AccountResponse());
+            var response = user.Map(new AccountResponse());
+            return response;
         }
 
         public void Delete(int id)

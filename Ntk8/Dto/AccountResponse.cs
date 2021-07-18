@@ -2,7 +2,7 @@ using System;
 
 namespace Ntk8.Dto
 {
-    public class AccountResponse
+    public class AccountResponse : IUserPrimaryProperties
     {
         public int Id { get; set; }
         public string Title { get; set; }
