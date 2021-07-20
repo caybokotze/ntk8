@@ -1,4 +1,5 @@
-﻿using Dapper.CQRS;
+﻿using System;
+using Dapper.CQRS;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
@@ -10,13 +11,14 @@ namespace Ntk8.Data.Commands
         public UpdateUser(User userModel)
         {
             User = userModel;
+            User.DateModified = DateTime.UtcNow;
         }
 
         public override void Execute()
         {
             Result = Execute(@"UPDATE users SET 
-            name = @Name,
-            surname = @Surname,
+            first_name = @FirstName,
+            last_name = @LastName,
             reference_id = @ReferenceId,
             title = @Title,
             email = @Email,
@@ -32,8 +34,9 @@ namespace Ntk8.Data.Commands
             verification_date = @VerificationDate,
             password_reset_date = @PasswordResetDate,
             reset_token_expires = @ResetTokenExpires,
-                 date_modified = @DateModified,
-                 date_created = @DateCreated
+            date_modified = @DateModified,
+            date_created = @DateCreated,
+            is_active = @IsActive
             WHERE id = @Id;", User);
         }
     }

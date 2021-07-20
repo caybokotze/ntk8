@@ -32,10 +32,10 @@ namespace Ntk8.Models
 
         [StringLength(50)]
         [Required]
-        public string Name { get; set; }
+        public string FirstName { get; set; }
 
         [StringLength(50)]
-        public string Surname { get; set; }
+        public string LastName { get; set; }
 
         [StringLength(15)]
         [DataType(DataType.PhoneNumber)]

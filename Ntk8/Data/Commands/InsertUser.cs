@@ -1,4 +1,5 @@
-﻿using Dapper.CQRS;
+﻿using System;
+using Dapper.CQRS;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
@@ -10,13 +11,15 @@ namespace Ntk8.Data.Commands
         public InsertUser(User user)
         {
             User = user;
+            User.DateModified = DateTime.UtcNow;
+            User.DateCreated = DateTime.UtcNow;
         }
         
         public override void Execute()
         {
             Result = QueryFirst<int>(@"INSERT INTO users (
-            name, 
-            surname, 
+            first_name, 
+            last_name, 
             reference_id, 
             title, 
             email, 
@@ -35,8 +38,8 @@ namespace Ntk8.Data.Commands
                    date_modified,
                    date_created,
                    is_active) 
-            VALUES (@Name,
-                    @Surname,
+            VALUES (@FirstName,
+                    @LastName,
                     @ReferenceId,
                     @Title,
                     @Email,
