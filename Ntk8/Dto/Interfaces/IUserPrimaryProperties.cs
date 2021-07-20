@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
+using Ntk8.Models;
 
-namespace Ntk8.Dto
+namespace Ntk8.Dto.Interfaces
 {
     public interface IUserPrimaryProperties
     {
@@ -8,9 +10,6 @@ namespace Ntk8.Dto
         string FirstName { get; set; }
         string LastName { get; set; }
         string Email { get; set; }
-        string Role { get; set; }
-        DateTime Created { get; set; }
-        DateTime? Updated { get; set; }
-        bool IsVerified { get; set; }
+        List<UserRole> UserRoles { get; set; }
     }
 }
