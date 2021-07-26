@@ -45,7 +45,7 @@ namespace Ntk8.Tests.Commands
         }
 
         [Test]
-        public void ShouldReturnExpectedDates()
+        public void ShouldReturnExpectedDatesAndNotBeNull()
         {
             // arrange
             var user = RandomValueGen.GetRandom<User>();
@@ -82,6 +82,10 @@ namespace Ntk8.Tests.Commands
                     Expect(expectedUser.ResetTokenExpires)
                         .To.Approximately.Equal((DateTime) user.ResetTokenExpires);
                 }
+
+                Expect(user.VerificationDate).To.Not.Be.Null();
+                Expect(user.PasswordResetDate).To.Not.Be.Null();
+                Expect(user.ResetTokenExpires).To.Not.Be.Null();
             }
         }
     }
