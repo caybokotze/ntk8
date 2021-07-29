@@ -7,7 +7,37 @@ using Ntk8.Data.Queries;
 
 namespace Ntk8.Models
 {
-    public class User
+    public interface IUser
+    {
+        DateTime DateCreated { get; set; }
+        DateTime DateModified { get; set; }
+        bool IsActive { get; set; }
+        int Id { get; set; }
+        Guid ReferenceId { get; set; }
+        string Title { get; set; }
+        string Email { get; set; }
+        string FirstName { get; set; }
+        string LastName { get; set; }
+        string TelNumber { get; set; }
+        string Username { get; set; }
+        int AccessFailedCount { get; set; }
+        bool LockoutEnabled { get; set; }
+        string PasswordHash { get; set; }
+        string PasswordSalt { get; set; }
+        bool AcceptedTerms { get; set; }
+        string ResetToken { get; set; }
+        string VerificationToken { get; set; }
+        DateTime? VerificationDate { get; set; }
+        DateTime? PasswordResetDate { get; set; }
+        DateTime? ResetTokenExpires { get; set; }
+        List<RefreshToken> RefreshTokens { get; set; }
+        ICollection<UserRole> UserRoles { get; set; }
+        bool IsVerified { get; }
+        bool OwnsToken(string token);
+        IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor);
+    }
+
+    public class User : IUser
     {
         public User()
         {
