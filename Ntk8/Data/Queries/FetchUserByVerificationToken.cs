@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserByVerificationToken : Query<User>
+    public class FetchUserByVerificationToken : Query<BaseBaseUser>
     {
         public string Token { get; }
 
@@ -14,7 +14,7 @@ namespace Ntk8.Data.Queries
         
         public override void Execute()
         {
-            Result = QueryFirst<User>(@"SELECT * FROM users 
+            Result = QueryFirst<BaseBaseUser>(@"SELECT * FROM users 
             WHERE verification_token = @VerificationToken");
         }
     }

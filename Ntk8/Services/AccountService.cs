@@ -122,7 +122,7 @@ namespace Ntk8.Services
                 return;
             }
 
-            var user = model.Map(new User());
+            var user = model.Map(new BaseBaseUser());
             user.IsActive = true;
             user.VerificationToken = AccountServiceHelpers.RandomTokenString();
             user.PasswordHash = BC.HashPassword(model.Password);
@@ -235,7 +235,7 @@ namespace Ntk8.Services
                 throw new UserAlreadyExistsException();
             }
 
-            var user = model.Map(new User());
+            var user = model.Map(new BaseBaseUser());
             user.DateCreated = DateTime.UtcNow;
             user.VerificationDate = DateTime.UtcNow;
 

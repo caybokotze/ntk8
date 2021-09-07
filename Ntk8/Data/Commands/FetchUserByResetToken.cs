@@ -5,7 +5,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class FetchUserByResetToken : Query<User>
+    public class FetchUserByResetToken : Query<BaseBaseUser>
     {
         public string Token { get; }
 
@@ -16,7 +16,7 @@ namespace Ntk8.Data.Commands
 
         public override void Execute()
         {
-            Result = QueryFirst<User>(@"SELECT * FROM users 
+            Result = QueryFirst<BaseBaseUser>(@"SELECT * FROM users 
             WHERE reset_token = @ResetToken 
               AND reset_token_expires > " + $"{DateTime.Now.ToString(CultureInfo.InvariantCulture)}", new
             {

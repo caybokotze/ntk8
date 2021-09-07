@@ -14,7 +14,7 @@ namespace Ntk8.Dto
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        [EnumDataType(typeof(User))]
+        [EnumDataType(typeof(BaseBaseUser))]
         public string Role
         {
             get => _role;

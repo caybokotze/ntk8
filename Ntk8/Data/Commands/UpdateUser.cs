@@ -6,12 +6,12 @@ namespace Ntk8.Data.Commands
 {
     public class UpdateUser : Command<int>
     {
-        private User User { get; }
+        private BaseBaseUser BaseBaseUser { get; }
 
-        public UpdateUser(User userModel)
+        public UpdateUser(BaseBaseUser baseBaseUserModel)
         {
-            User = userModel;
-            User.DateModified = DateTime.UtcNow;
+            BaseBaseUser = baseBaseUserModel;
+            BaseBaseUser.DateModified = DateTime.UtcNow;
         }
 
         public override void Execute()
@@ -37,7 +37,7 @@ namespace Ntk8.Data.Commands
             date_modified = @DateModified,
             date_created = @DateCreated,
             is_active = @IsActive
-            WHERE id = @Id;", User);
+            WHERE id = @Id;", BaseBaseUser);
         }
     }
 }

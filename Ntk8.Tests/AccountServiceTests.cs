@@ -88,7 +88,7 @@ namespace Ntk8.Tests
                 // act
                 using (Transactions.RepeatableRead())
                 {
-                    var userId = commandExecutor.Execute(new InsertUser(GetRandom<User>()));
+                    var userId = commandExecutor.Execute(new InsertUser(GetRandom<BaseBaseUser>()));
                     accountService.Update(userId, updatedUser);
                     var user = queryExecutor.Execute(new FetchUserById(userId));
                     var userToMatch = user.Map(new UpdateRequest());

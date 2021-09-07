@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserById : Query<User>
+    public class FetchUserById : Query<BaseBaseUser>
     {
         public int Id { get; }
 
@@ -14,7 +14,7 @@ namespace Ntk8.Data.Queries
         
         public override void Execute()
         {
-            Result = QueryFirst<User>("SELECT * FROM users WHERE id = @Id", 
+            Result = QueryFirst<BaseBaseUser>("SELECT * FROM users WHERE id = @Id", 
                 new { Id = Id });
         }
         

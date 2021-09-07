@@ -7,7 +7,7 @@ using Ntk8.Data.Queries;
 
 namespace Ntk8.Models
 {
-    public interface IUser
+    public interface IBaseUser
     {
         DateTime DateCreated { get; set; }
         DateTime DateModified { get; set; }
@@ -37,9 +37,9 @@ namespace Ntk8.Models
         IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor);
     }
 
-    public class User : IUser
+    public class BaseBaseUser : IBaseUser
     {
-        public User()
+        public BaseBaseUser()
         {
             ReferenceId = Guid.NewGuid();
             DateCreated = DateTime.Now;

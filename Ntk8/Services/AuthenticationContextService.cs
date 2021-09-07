@@ -8,7 +8,7 @@ namespace Ntk8.Services
     public interface IAuthenticationContextService
     {
         HttpContext HttpContext { get; }
-        User User { get; }
+        BaseBaseUser BaseBaseUser { get; }
         string GetRefreshToken();
         string GetOriginRequestHeader();
         IHeaderDictionary GetRequestHeaders();
@@ -27,7 +27,7 @@ namespace Ntk8.Services
             HttpContext = httpContextAccessor.HttpContext;
         }
 
-        public User User => (User) HttpContext.Items[AuthenticationConstants.ContextAccount];
+        public BaseBaseUser BaseBaseUser => (BaseBaseUser) HttpContext.Items[AuthenticationConstants.ContextAccount];
         
         public string GetRefreshToken()
         {
