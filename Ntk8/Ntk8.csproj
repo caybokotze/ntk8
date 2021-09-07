@@ -5,14 +5,14 @@
         <LangVersion>latest</LangVersion>
         <Title>Ntk8</Title>
         <Authors>Caybo Kotze</Authors>
-        <Description>AuthNtk8 is a basic authentication package that could assist you to setup auth within your project a lot quicker. Supports session-based and JWT authentication.</Description>
+        <Description>Auth-Ntk8 (authenticate) is a basic authentication package that could assist you to setup auth within your project a lot quicker. Use the provided base classes and services to quickly setup authentication within your project.</Description>
         <Copyright></Copyright>
-        <RespositoryUrl>https://github.com/caybokotze/Dapper.CQRS.git</RespositoryUrl>
+        <RespositoryUrl>https://github.com/caybokotze/ntk8.git</RespositoryUrl>
         <RepositoryType>github</RepositoryType>
         <Authors>Caybo Kotze</Authors>
         <PackageReleaseNotes>Initial Release, Not well tested yet.</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>1.0.0</PackageVersion>
+        <PackageVersion>1.0.1</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
