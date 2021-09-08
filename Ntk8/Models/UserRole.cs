@@ -6,11 +6,11 @@ namespace Ntk8.Models
     public class UserRole
     {
         public int Id { get; set; }
-        [ForeignKey(nameof(BaseBaseUser))]
+        [ForeignKey(nameof(BaseUser))]
         public int UserId { get; set; }
         
         [JsonIgnore]
-        public virtual BaseBaseUser BaseBaseUser { get; set; }
+        public virtual BaseUser BaseUser { get; set; }
         
         [ForeignKey(nameof(Role))]
         public int RoleId { get; set; }

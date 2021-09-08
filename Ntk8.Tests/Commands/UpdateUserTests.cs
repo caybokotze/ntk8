@@ -17,14 +17,14 @@ namespace Ntk8.Tests.Commands
         public void UpdateUserShouldUpdateUser()
         {
             // arrange
-            var user = GetRandom<BaseBaseUser>();
+            var user = GetRandom<BaseUser>();
             var commandExecutor = Resolve<ICommandExecutor>();
             var queryExecutor = Resolve<IQueryExecutor>();
             // act
             using (Transactions.UncommittedRead())
             {
                 var id = commandExecutor.Execute(new InsertUser(user));
-                var updatedUser = GetRandom<BaseBaseUser>();
+                var updatedUser = GetRandom<BaseUser>();
                 updatedUser.Id = id;
                 commandExecutor.Execute(new UpdateUser(updatedUser));
                 var expected = queryExecutor.Execute(new FetchUserById(id));

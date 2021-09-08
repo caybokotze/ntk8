@@ -6,13 +6,13 @@ namespace Ntk8.Data.Commands
 {
     public class InsertUser : Command<int>
     {
-        public BaseBaseUser BaseBaseUser { get; }
+        public BaseUser BaseUser { get; }
 
-        public InsertUser(BaseBaseUser baseBaseUser)
+        public InsertUser(BaseUser baseUser)
         {
-            BaseBaseUser = baseBaseUser;
-            BaseBaseUser.DateModified = DateTime.UtcNow;
-            BaseBaseUser.DateCreated = DateTime.UtcNow;
+            BaseUser = baseUser;
+            BaseUser.DateModified = DateTime.UtcNow;
+            BaseUser.DateCreated = DateTime.UtcNow;
         }
         
         public override void Execute()
@@ -57,7 +57,7 @@ namespace Ntk8.Data.Commands
                     @ResetTokenExpires,
                     @DateModified,
                     @DateCreated,
-                    @IsActive); SELECT last_insert_id();", BaseBaseUser);
+                    @IsActive); SELECT last_insert_id();", BaseUser);
         }
     }
 }

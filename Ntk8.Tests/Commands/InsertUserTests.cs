@@ -18,7 +18,7 @@ namespace Ntk8.Tests.Commands
         public void InsertShouldInsert()
         {
             // arrange
-            var user = RandomValueGen.GetRandom<BaseBaseUser>();
+            var user = RandomValueGen.GetRandom<BaseUser>();
             var commandExecutor = Resolve<ICommandExecutor>();
             var queryExecutor = Resolve<IQueryExecutor>();
             // act
@@ -48,7 +48,7 @@ namespace Ntk8.Tests.Commands
         public void ShouldReturnExpectedDatesAndNotBeNull()
         {
             // arrange
-            var user = RandomValueGen.GetRandom<BaseBaseUser>();
+            var user = RandomValueGen.GetRandom<BaseUser>();
             var commandExecutor = Resolve<ICommandExecutor>();
             var queryExecutor = Resolve<IQueryExecutor>();
             // act

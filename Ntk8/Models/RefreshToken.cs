@@ -19,6 +19,6 @@ namespace Ntk8.Models
         
         public bool IsActive => Revoked == null && !IsExpired;
         
-        public BaseBaseUser BaseBaseUser { get; set; }
+        public BaseUser BaseUser { get; set; }
     }
 }

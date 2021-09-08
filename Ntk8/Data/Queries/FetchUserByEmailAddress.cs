@@ -4,22 +4,22 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserByEmailAddress : Query<BaseBaseUser>
+    public class FetchUserByEmailAddress : Query<BaseUser>
     {
         private string EmailAddress { get; }
-        private BaseBaseUser BaseBaseUserModel { get; }
+        private BaseUser BaseUserModel { get; }
 
         public FetchUserByEmailAddress(string emailAddress)
         {
             EmailAddress = emailAddress.ToLowerInvariant();
-            BaseBaseUserModel = new BaseBaseUser();
+            BaseUserModel = new BaseUser();
         }
 
         public override void Execute()
         {
             try
             {
-                Result = QueryFirst<BaseBaseUser>(@"SELECT * FROM users 
+                Result = QueryFirst<BaseUser>(@"SELECT * FROM users 
                 WHERE email = @EmailAddress", new
                 {
                     EmailAddress

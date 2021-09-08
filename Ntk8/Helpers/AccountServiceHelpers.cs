@@ -17,7 +17,7 @@ namespace Ntk8.Helpers
 {
     public class AccountServiceHelpers
     {
-        public static BaseBaseUser GetAccount(
+        public static BaseUser GetAccount(
             IQueryExecutor queryExecutor,
             int id)
         {
@@ -32,7 +32,7 @@ namespace Ntk8.Helpers
 
         public static string GenerateJwtToken(
             AuthenticationConfiguration configuration,
-            BaseBaseUser baseBaseUserModel)
+            BaseUser baseUserModel)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(configuration.RefreshTokenSecret);
@@ -41,7 +41,7 @@ namespace Ntk8.Helpers
                 Subject = new ClaimsIdentity(new []
                 {
                     new Claim(AuthenticationConstants
-                        .PrimaryKeyValue, baseBaseUserModel.Id.ToString())
+                        .PrimaryKeyValue, baseUserModel.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), 
@@ -51,7 +51,7 @@ namespace Ntk8.Helpers
             return tokenHandler.WriteToken(token);
         }
 
-        public static (RefreshToken, BaseBaseUser) GetRefreshToken(IQueryExecutor queryExecutor, string token)
+        public static (RefreshToken, BaseUser) GetRefreshToken(IQueryExecutor queryExecutor, string token)
         {
             // todo: This only looks for the refresh token attached to the user currently.
             
@@ -73,9 +73,9 @@ namespace Ntk8.Helpers
 
         public static void RemoveOldRefreshTokens(
             AuthenticationConfiguration configuration,
-            BaseBaseUser baseBaseUserModel)
+            BaseUser baseUserModel)
         {
-            baseBaseUserModel.RefreshTokens.RemoveAll(x => !x.IsActive &&
+            baseUserModel.RefreshTokens.RemoveAll(x => !x.IsActive &&
                                                    x.Created.AddDays(configuration.RefreshTokenTTL)
                                                    <= DateTime.UtcNow);
         }

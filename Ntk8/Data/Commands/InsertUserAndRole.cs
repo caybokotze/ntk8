@@ -5,14 +5,14 @@ namespace Ntk8.Data.Commands
 {
     public class InsertUserAndRole : Command<int>
     {
-        private BaseBaseUser BaseBaseUser { get; }
+        private BaseUser BaseUser { get; }
         private UserRole UserRole { get; }
 
         public InsertUserAndRole(
-             BaseBaseUser baseBaseUser,
+             BaseUser baseUser,
              UserRole userRole)
         {
-            BaseBaseUser = baseBaseUser;
+            BaseUser = baseUser;
             UserRole = userRole;
         }
         
@@ -25,7 +25,7 @@ namespace Ntk8.Data.Commands
 
         private int InsertUser()
         {
-            return CommandExecutor.Execute(new InsertUser(BaseBaseUser));
+            return CommandExecutor.Execute(new InsertUser(BaseUser));
         }
 
         private int InsertUserRole(int userId)

@@ -18,7 +18,7 @@ namespace Ntk8.Data.Queries
         public override void Execute()
         {
             Result = GetIDbConnection()
-                .Query<UserRole, BaseBaseUser, Role, UserRole>(
+                .Query<UserRole, BaseUser, Role, UserRole>(
                     $"SELECT u.*, ur.*, r.* FROM user_roles ur" +
                     $"LEFT JOIN roles r" +
                     $"ON ur.role_id = r.id" +
@@ -26,7 +26,7 @@ namespace Ntk8.Data.Queries
                     $"ON ur.user_id = u.id" +
                     $"WHERE ur.user_id = @Id", (userRole, user, role) =>
                     {
-                        userRole.BaseBaseUser = user;
+                        userRole.BaseUser = user;
                         userRole.Role = role;
                         return userRole;
                     }, new

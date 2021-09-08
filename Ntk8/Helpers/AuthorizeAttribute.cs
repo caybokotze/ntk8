@@ -51,7 +51,7 @@ namespace Ntk8.Helpers
         
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (BaseBaseUser) context.HttpContext.Items[AuthenticationConstants.ContextAccount];
+            var user = (BaseUser) context.HttpContext.Items[AuthenticationConstants.ContextAccount];
             
             // todo: needs to check against all of the roles that the user has in the db.
             

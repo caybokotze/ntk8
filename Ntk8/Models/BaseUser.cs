@@ -37,9 +37,9 @@ namespace Ntk8.Models
         IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor);
     }
 
-    public class BaseBaseUser : IBaseUser
+    public class BaseUser : IBaseUser
     {
-        public BaseBaseUser()
+        public BaseUser()
         {
             ReferenceId = Guid.NewGuid();
             DateCreated = DateTime.Now;
