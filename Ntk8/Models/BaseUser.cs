@@ -49,7 +49,6 @@ namespace Ntk8.Models
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
         public bool IsActive { get; set; }
-        
         public int Id { get; set; }
         public Guid ReferenceId { get; set; }
 

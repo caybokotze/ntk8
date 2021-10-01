@@ -12,7 +12,7 @@
         <Authors>Caybo Kotze</Authors>
         <PackageReleaseNotes>Initial Release, Not well tested yet.</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>1.0.1</PackageVersion>
+        <PackageVersion>1.0.2</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

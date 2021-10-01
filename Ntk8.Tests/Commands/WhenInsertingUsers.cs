@@ -1,7 +1,6 @@
 ﻿using System;
 using Dapper.CQRS;
 using NExpect;
-using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
@@ -12,10 +11,10 @@ using static NExpect.Expectations;
 namespace Ntk8.Tests.Commands
 {
     [TestFixture]
-    public class InsertUserTests : TestBase
+    public class WhenInsertingUsers : TestBase
     {
         [Test]
-        public void InsertShouldInsert()
+        public void ShouldInsertUser()
         {
             // arrange
             var user = RandomValueGen.GetRandom<BaseUser>();

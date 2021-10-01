@@ -12,23 +12,21 @@ using Ntk8.Models;
 
 namespace Ntk8.Middleware
 {
-    public class JwtMiddleware
+    public class JwtMiddleware : IMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly AuthenticationConfiguration _authenticationConfiguration;
+        private readonly IQueryExecutor _queryExecutor;
 
         public JwtMiddleware(
-            RequestDelegate next,
             AuthenticationConfiguration authenticationConfiguration,
             IQueryExecutor queryExecutor)
         {
-            _next = next;
             _authenticationConfiguration = authenticationConfiguration;
+            _queryExecutor = queryExecutor;
         }
 
-        public async Task Invoke(
-            HttpContext context,
-            IQueryExecutor queryExecutor)
+        public async Task InvokeAsync(
+            HttpContext context, RequestDelegate next)
         {
             var token = context.Request.Headers[AuthenticationConstants.DefaultJwtHeader]
                 .FirstOrDefault()
@@ -37,40 +35,43 @@ namespace Ntk8.Middleware
 
             if (token != null)
             {
-                MountAccountToContext(context, queryExecutor, token);
+                MountAccountToContext(context, token);
             }
-            await _next(context);
+
+            try
+            {
+                await next.Invoke(context);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                var bytes = Encoding.UTF8.GetBytes(ex.Message);
+                await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+            }
         }
 
         public void MountAccountToContext(
             HttpContext context,
-            IQueryExecutor queryExecutor,
             string token)
         {
-            try
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII
+                .GetBytes(_authenticationConfiguration.RefreshTokenSecret);
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII
-                    .GetBytes(_authenticationConfiguration.RefreshTokenSecret);
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-                var jwtToken = (JwtSecurityToken) validatedToken;
-                var accountId = int.Parse(jwtToken.Claims
-                    .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
-                    .Value);
-                context.Items[AuthenticationConstants.ContextAccount] = 
-                    queryExecutor.Execute(new FetchUserById(accountId));
-            }
-            catch
-            {
-                throw new Exception("Context not bound");
-            }
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+            var jwtToken = (JwtSecurityToken) validatedToken;
+            var accountId = int.Parse(jwtToken.Claims
+                .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
+                .Value);
+            context.Items[AuthenticationConstants.ContextAccount] = 
+                _queryExecutor.Execute(new FetchUserById(accountId));
         }
     }
 }

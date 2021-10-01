@@ -53,11 +53,11 @@ namespace Ntk8.Tests
                     });
                     config.AddTransient<IDbConnection>(p =>
                         new MySqlConnection(AppSettingProvider.CreateAppSettings().DefaultConnection));
-                    config.AddTransient<IBaseSqlExecutorOptions>(_ => new BaseSqlExecutorOptions
+                    config.AddTransient<IBaseSqlExecutorOptions>(provider => new BaseSqlExecutorOptions
                     {
                         Connection = Resolve<IDbConnection>(),
                         Dbms = DBMS.MySQL,
-                        ServiceProvider = ServiceProvider
+                        ServiceProvider = provider
                     });
                     config.AddTransient<IAccountService, AccountService>();
                 });
