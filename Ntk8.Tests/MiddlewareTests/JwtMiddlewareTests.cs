@@ -110,7 +110,12 @@ namespace Ntk8.Tests.MiddlewareTests
             {
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
-                var middleware = Create(null, queryExecutor);
+                var secret = GetRandomString(40);
+                var middleware = Create(new AuthSettings
+                {
+                    RefreshTokenSecret = secret
+                },
+                    queryExecutor);
                 var user = GetRandom<BaseUser>();
                 queryExecutor
                     .Execute(Arg.Is<FetchUserById>(f => f.Id == user.Id))
@@ -118,8 +123,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 var httpContext = new HttpContextBuilder()
                     .WithItems(new Dictionary<object, object>())
                     .Build();
-                var userId = GetRandomInt();
-                var token = CreateValidJwtToken(null, userId);
+                var token = CreateValidJwtToken(secret, user.Id);
                 // act
                 httpContext = middleware
                     .MountUserToContext(httpContext, token);
