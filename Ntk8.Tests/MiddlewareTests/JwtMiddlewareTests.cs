@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using Microsoft.IdentityModel.Tokens;
 using NExpect;
 using NSubstitute;
 using Ntk8.Constants;
@@ -54,14 +50,17 @@ namespace Ntk8.Tests.MiddlewareTests
                 var httpContext = new HttpContextBuilder()
                     .Build();
                 
-                var requestDelegate = Substitute.For<RequestDelegate>();
+                var requestDelegate = Substitute
+                    .For<RequestDelegate>();
                 // act
                 // assert
                 Expect(() => middleware
                         .InvokeAsync(httpContext, requestDelegate))
                     .To
                     .Throw<NullReferenceException>()
-                    .With.Message.Containing("Object reference not set");
+                    .With
+                    .Message
+                    .Containing("Object reference not set");
             }
 
             [Test]
@@ -88,7 +87,8 @@ namespace Ntk8.Tests.MiddlewareTests
                                 .Create<string, StringValues>(
                                     AuthenticationConstants.DefaultJwtHeader,
                                     validToken)
-                        }).Build())
+                        })
+                        .Build())
                     .WithItems(new Dictionary<object, object>())
                     .Build();
                 var requestDelegate = Substitute.For<RequestDelegate>();
@@ -139,7 +139,7 @@ namespace Ntk8.Tests.MiddlewareTests
             AuthSettings authSettings = null, 
             IQueryExecutor queryExecutor = null)
         {
-            authSettings ??= new AuthSettings()
+            authSettings ??= new AuthSettings
             {
                 RefreshTokenSecret = GetRandomString(40),
                 RefreshTokenTTL = 3600

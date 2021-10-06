@@ -48,8 +48,10 @@ namespace Ntk8.Tests
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
-                    config.AddTransient<AuthenticationContextService>();
-                    config.AddTransient(_ => new AuthSettings
+                    config.AddTransient<IAuthenticationContextService, AuthenticationContextService>();
+                    config.AddTransient<IAuthSettings, AuthSettings>();
+                    config.AddTransient(
+                        _ => new AuthSettings
                     {
                         RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
                         RefreshTokenTTL = 3600
