@@ -12,6 +12,7 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using Renci.SshNet.Security;
 
 namespace Ntk8.Helpers
 {
@@ -31,9 +32,14 @@ namespace Ntk8.Helpers
         }
 
         public static string GenerateJwtToken(
-            AuthenticationConfiguration configuration,
+            AuthSettings configuration,
             BaseUser baseUserModel)
         {
+            if (configuration.RefreshTokenSecret.Length < 32)
+            {
+                throw new InvalidTokenLengthException();
+            }
+            
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(configuration.RefreshTokenSecret);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -72,7 +78,7 @@ namespace Ntk8.Helpers
         }
 
         public static void RemoveOldRefreshTokens(
-            AuthenticationConfiguration configuration,
+            AuthSettings configuration,
             BaseUser baseUserModel)
         {
             baseUserModel.RefreshTokens.RemoveAll(x => !x.IsActive &&

@@ -16,21 +16,21 @@ namespace Ntk8.Services
 {
     public class AccountService : IAccountService
     {
+        private readonly AuthSettings _authSettings;
         public IQueryExecutor QueryExecutor { get; }
         public ICommandExecutor CommandExecutor { get; }
-        public AuthenticationConfiguration Configuration { get; }
-        public AuthenticationContextService AuthenticationContextService { get; }
+        public IAuthenticationContextService AuthenticationContextService { get; }
 
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            AuthenticationContextService contextService,
-            AuthenticationConfiguration configuration)
+            IAuthenticationContextService contextService,
+            IAuthSettings authSettings)
         {
+            _authSettings = (AuthSettings) authSettings;
             QueryExecutor = queryExecutor;
             CommandExecutor = commandExecutor;
             AuthenticationContextService = contextService;
-            Configuration = configuration;
         }
         
         public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
@@ -50,7 +50,7 @@ namespace Ntk8.Services
             }
             
             var jwtToken = AccountServiceHelpers
-                .GenerateJwtToken(Configuration, user);
+                .GenerateJwtToken(_authSettings, user);
             var refreshToken = AccountServiceHelpers
                 .GenerateRefreshToken(ipAddress);
             user.RefreshTokens = new List<RefreshToken>
@@ -58,7 +58,7 @@ namespace Ntk8.Services
                 refreshToken
             };
             AccountServiceHelpers
-                .RemoveOldRefreshTokens(Configuration, user);
+                .RemoveOldRefreshTokens(_authSettings, user);
             CommandExecutor.Execute(new UpdateUser(user));
 
             var response = user.Map(new AuthenticateResponse());
@@ -81,12 +81,12 @@ namespace Ntk8.Services
             user.RefreshTokens.Add(newRefreshToken);
 
             AccountServiceHelpers
-                .RemoveOldRefreshTokens(Configuration, user);
+                .RemoveOldRefreshTokens(_authSettings, user);
 
             CommandExecutor.Execute(new UpdateUser(user));
             
             var jwtToken = AccountServiceHelpers
-                .GenerateJwtToken(Configuration, user);
+                .GenerateJwtToken(_authSettings, user);
 
             var response = user.Map(new AuthenticateResponse());
             

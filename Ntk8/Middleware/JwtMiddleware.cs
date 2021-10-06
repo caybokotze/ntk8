@@ -8,20 +8,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Middleware
 {
     public class JwtMiddleware : IMiddleware
     {
-        private readonly AuthenticationConfiguration _authenticationConfiguration;
+        private readonly AuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
 
         public JwtMiddleware(
-            AuthenticationConfiguration authenticationConfiguration,
+            AuthSettings authSettings,
             IQueryExecutor queryExecutor)
         {
-            _authenticationConfiguration = authenticationConfiguration;
+            _authSettings = authSettings;
             _queryExecutor = queryExecutor;
         }
 
@@ -35,7 +36,7 @@ namespace Ntk8.Middleware
 
             if (token != null)
             {
-                MountAccountToContext(context, token);
+                context = MountUserToContext(context, token);
             }
 
             try
@@ -50,28 +51,52 @@ namespace Ntk8.Middleware
             }
         }
 
-        public void MountAccountToContext(
+        public HttpContext MountUserToContext(
             HttpContext context,
             string token)
         {
+            if (_authSettings.RefreshTokenSecret.Length < 32)
+            {
+                throw new InvalidTokenLengthException();
+            }
+
+            if (token is null)
+            {
+                throw new NullReferenceException("The jwt token is null and cannot be mounted to the context");
+            }
             
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII
-                .GetBytes(_authenticationConfiguration.RefreshTokenSecret);
-            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            
+            var key = Encoding
+                .ASCII
+                .GetBytes(_authSettings.RefreshTokenSecret);
+
+            SecurityToken validatedToken;
+            try
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out validatedToken);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidTokenException(e.Message);
+            }
+
             var jwtToken = (JwtSecurityToken) validatedToken;
             var accountId = int.Parse(jwtToken.Claims
                 .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                 .Value);
-            context.Items[AuthenticationConstants.ContextAccount] = 
+
+            context.Items[AuthenticationConstants.ContextAccount] =
                 _queryExecutor.Execute(new FetchUserById(accountId));
+            
+            return context;
         }
     }
 }

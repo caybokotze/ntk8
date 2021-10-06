@@ -1,8 +1,35 @@
-# ntk8
+# Ntk8
 AuthNTk8 (auth-en-ti-cate) is a standalone .NET auth service for stateless authentication.
 
 # Main Features
-**Allows you to auth a user, whether via session or JWT is up to you.**
+Allows you to quickly throw together some authentication for a greenfield project.
+
+## Registration
+```csharp
+webHost.ConfigureServices(config =>
+    {
+        config.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+        config.AddTransient<AuthenticationContextService>();
+        config.AddTransient<IBaseSqlExecutorOptions>(provider => new BaseSqlExecutorOptions
+        {
+            Connection = Resolve<IDbConnection>(),
+            Dbms = DBMS.MySQL,
+            ServiceProvider = provider
+        });
+        config.AddTransient<IAccountService, AccountService>();
+        config.Configure<IAuthSettings>(options => appSettings.GetSection("AuthSettings").Bind(options));
+    });
+```
+
+## Usage
+```csharp
+[ApiController]
+[Route("")]
+public class MainController
+{
+    
+}
+```
 
 ## Account Service Interface
 ```csharp
@@ -23,6 +50,7 @@ AuthNTk8 (auth-en-ti-cate) is a standalone .NET auth service for stateless authe
         void AutoVerifyUser(RegisterRequest model);
     }
 ```
+
 
 
 ## Migration Scripts to create valid tables

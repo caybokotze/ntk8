@@ -20,14 +20,19 @@ namespace Ntk8.Services
 
     public class AuthenticationContextService : IAuthenticationContextService
     {
+        private readonly AuthSettings _authSettings;
         public HttpContext HttpContext { get; }
 
-        public AuthenticationContextService(IHttpContextAccessor httpContextAccessor)
+        public AuthenticationContextService(
+            IHttpContextAccessor httpContextAccessor,
+            AuthSettings authSettings)
         {
+            _authSettings = authSettings;
             HttpContext = httpContextAccessor.HttpContext;
         }
 
         public BaseUser BaseUser => (BaseUser) HttpContext.Items[AuthenticationConstants.ContextAccount];
+        
         
         public string GetRefreshToken()
         {

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -28,6 +29,8 @@ namespace Ntk8.Tests
         [SetUp]
         public async Task SetupHostEnvironment()
         {
+            var appSettings = AppSettingProvider.CreateConfig();
+            
             var hostBuilder = new HostBuilder().ConfigureWebHost(webHost =>
             {
                 webHost.UseTestServer();
@@ -46,7 +49,7 @@ namespace Ntk8.Tests
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
                     config.AddTransient<AuthenticationContextService>();
-                    config.AddTransient(_ => new AuthenticationConfiguration
+                    config.AddTransient(_ => new AuthSettings
                     {
                         RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
                         RefreshTokenTTL = 3600
@@ -60,6 +63,7 @@ namespace Ntk8.Tests
                         ServiceProvider = provider
                     });
                     config.AddTransient<IAccountService, AccountService>();
+                    config.Configure<IAuthSettings>(options => appSettings.GetSection("AuthSettings").Bind(options));
                 });
             });
 

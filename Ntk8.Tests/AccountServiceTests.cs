@@ -1,5 +1,4 @@
-﻿using System.Transactions;
-using Dapper.CQRS;
+﻿using Dapper.CQRS;
 using HigLabo.Core;
 using NExpect;
 using NSubstitute;
@@ -32,7 +31,7 @@ namespace Ntk8.Tests
         }
         
         [TestFixture]
-        public class DatabaseTests : AccountServiceTests
+        public class DatabaseTests : TestBase
         {
             [Test]
             public void RegisterShouldRegisterUser()
@@ -98,11 +97,17 @@ namespace Ntk8.Tests
             }
         }
 
-        public IAccountService Create(bool mocked = false)
+        public static IAccountService Create(
+            IQueryExecutor queryExecutor = null,
+            ICommandExecutor commandExecutor = null,
+            IAuthenticationContextService authenticationContextService = null,
+            AuthSettings authSettings = null)
         {
-            return mocked 
-                ? Substitute.For<IAccountService>() 
-                : Resolve<IAccountService>();
+            return new AccountService(
+                queryExecutor ?? Substitute.For<IQueryExecutor>(),
+                commandExecutor ?? Substitute.For<ICommandExecutor>(),
+                authenticationContextService ?? Substitute.For<IAuthenticationContextService>(),
+                authSettings ?? GetRandom<AuthSettings>());
         }
     }
 }
