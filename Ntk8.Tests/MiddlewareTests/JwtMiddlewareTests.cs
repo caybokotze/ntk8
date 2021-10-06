@@ -15,6 +15,7 @@ using Ntk8.Data.Queries;
 using Ntk8.Middleware;
 using Ntk8.Models;
 using Ntk8.Tests.ContextBuilders;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using PeanutButter.Utils;
 using static NExpect.Expectations;
@@ -78,7 +79,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 var middleware = Substitute.For<JwtMiddleware>(
                     authSettings,
                     GetRandom<IQueryExecutor>());
-                var validToken = CreateValidJwtToken(secret, user.Id);
+                var validToken = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var httpContext = new HttpContextBuilder()
                     .WithRequest(new HttpRequestBuilder()
                         .WithHeaders(new HeaderDictionary
@@ -123,7 +124,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 var httpContext = new HttpContextBuilder()
                     .WithItems(new Dictionary<object, object>())
                     .Build();
-                var token = CreateValidJwtToken(secret, user.Id);
+                var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 // act
                 httpContext = middleware
                     .MountUserToContext(httpContext, token);
@@ -132,27 +133,6 @@ namespace Ntk8.Tests.MiddlewareTests
                     .To
                     .Equal(user);
             }
-        }
-
-        public static string CreateValidJwtToken(string secret = null, int? userId = null)
-        {
-            userId ??= GetRandomInt();
-            secret ??= GetRandomString(50);
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(
-                new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new[]
-                    {
-                        new Claim(AuthenticationConstants.PrimaryKeyValue, userId.ToString())
-                    }),
-                    Expires = DateTime.UtcNow.AddMinutes(15),
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret)),
-                        SecurityAlgorithms.HmacSha256Signature)
-                });
-            return tokenHandler.WriteToken(token);
         }
 
         public static JwtMiddleware Create(
