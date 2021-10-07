@@ -115,6 +115,26 @@ ALTER TABLE user_roles
             REFERENCES roles (id);
 ```
 
+```sql
+create table if not exists refresh_tokens
+(
+	id bigint auto_increment
+		primary key,
+	user_id int null,
+	token varchar(100) null,
+	expires datetime null,
+	is_expired tinyint(1) null,
+	date_created datetime null,
+	created_by_ip varchar(30) null,
+	date_revoked datetime null,
+	revoked_by_ip varchar(30) null,
+	replaced_by_token varchar(100) null,
+	is_active tinyint(1) null,
+	constraint refresh_tokens_user_id
+		foreign key (user_id) references users (id)
+);
+```
+
 
 ## Grab on nuget
 
