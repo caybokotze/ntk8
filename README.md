@@ -116,7 +116,7 @@ ALTER TABLE user_roles
 ```
 
 ```sql
-create table if not exists refresh_tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens
 (
 	id bigint auto_increment
 		primary key,
@@ -130,8 +130,8 @@ create table if not exists refresh_tokens
 	revoked_by_ip varchar(30) null,
 	replaced_by_token varchar(100) null,
 	is_active tinyint(1) null,
-	constraint refresh_tokens_user_id
-		foreign key (user_id) references users (id)
+	CONSTRAINT refresh_tokens_user_id
+		FOREIGN KEY (user_id) REFERENCES users (id)
 );
 ```
 
