@@ -5,8 +5,8 @@ namespace Ntk8.Services
 {
     public interface IAccountService
     {
-        AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
-        AuthenticateResponse RefreshToken(string token, string ipAddress);
+        AuthenticatedResponse Authenticate(AuthenticateRequest model, string ipAddress);
+        AuthenticatedResponse RevokeAndRefreshToken(string token, string ipAddress);
         void RevokeToken(string token, string ipAddress);
         void Register(RegisterRequest model, string origin);
         void VerifyEmail(string token);

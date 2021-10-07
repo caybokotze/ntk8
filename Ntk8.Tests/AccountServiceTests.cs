@@ -7,6 +7,7 @@ using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Models;
 using Ntk8.Services;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -31,7 +32,7 @@ namespace Ntk8.Tests
         }
         
         [TestFixture]
-        public class DatabaseTests : TestBase
+        public class IntegrationTests : TestBase
         {
             [Test]
             public void RegisterShouldRegisterUser()
@@ -47,8 +48,10 @@ namespace Ntk8.Tests
                 {
                     accountService.Register(registerRequest, origin);
                     // assert
-                    var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
-                    var result = user.Map(new RegisterRequest());
+                    var user = queryExecutor
+                        .Execute(new FetchUserByEmailAddress(registerRequest.Email));
+                    var result = user
+                        .Map(new RegisterRequest());
                     result.Password = registerRequest.Password;
                     Expect(result).Not.To.Be.Null();
                     Expect(result).To.Deep.Equal(registerRequest);
@@ -93,6 +96,27 @@ namespace Ntk8.Tests
                     var userToMatch = user.Map(new UpdateRequest());
                     // assert
                     Expect(userToMatch).To.Deep.Equal(updatedUser);
+                }
+            }
+        }
+
+        [TestFixture]
+        public class Behaviour
+        {
+            [TestFixture]
+            public class GenerateRefreshToken
+            {
+                [Test]
+                public void ShouldGenerateNewRefreshToken()
+                {
+                    // arrange
+                    var accountService = Create();
+                    var token = TokenHelpers.CreateValidJwtToken();
+                    var ipAddress = GetRandomIPv4Address();
+                    // act
+                    var authenticatedResponse = accountService.RevokeAndRefreshToken(token, ipAddress);
+                    // assert
+                    
                 }
             }
         }

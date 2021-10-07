@@ -3,7 +3,7 @@ using System.Globalization;
 using Dapper.CQRS;
 using Ntk8.Models;
 
-namespace Ntk8.Data.Commands
+namespace Ntk8.Data.Queries
 {
     public class FetchUserByResetToken : Query<BaseUser>
     {

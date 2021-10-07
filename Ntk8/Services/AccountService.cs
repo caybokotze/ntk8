@@ -17,9 +17,9 @@ namespace Ntk8.Services
     public class AccountService : IAccountService
     {
         private readonly AuthSettings _authSettings;
-        public IQueryExecutor QueryExecutor { get; }
-        public ICommandExecutor CommandExecutor { get; }
-        public IAuthenticationContextService AuthenticationContextService { get; }
+        private readonly IQueryExecutor _queryExecutor;
+        private readonly ICommandExecutor _commandExecutor;
+        private IAuthenticationContextService _authenticationContextService;
 
         public AccountService(
             IQueryExecutor queryExecutor,
@@ -28,14 +28,23 @@ namespace Ntk8.Services
             IAuthSettings authSettings)
         {
             _authSettings = (AuthSettings) authSettings;
-            QueryExecutor = queryExecutor;
-            CommandExecutor = commandExecutor;
-            AuthenticationContextService = contextService;
+            _queryExecutor = queryExecutor;
+            _commandExecutor = commandExecutor;
+            _authenticationContextService = contextService;
         }
         
-        public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
+        /// <summary>
+        /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.
+        /// A refresh and JWT token is also generated for the user and send back to the caller.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="ipAddress"></param>
+        /// <returns></returns>
+        /// <exception cref="UserNotFoundException"></exception>
+        /// <exception cref="InvalidPasswordException"></exception>
+        public AuthenticatedResponse Authenticate(AuthenticateRequest model, string ipAddress)
         {
-            var user = QueryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
 
             if (user is null)
@@ -51,27 +60,39 @@ namespace Ntk8.Services
             
             var jwtToken = AccountServiceHelpers
                 .GenerateJwtToken(_authSettings, user);
+            
             var refreshToken = AccountServiceHelpers
                 .GenerateRefreshToken(ipAddress);
+            
             user.RefreshTokens = new List<RefreshToken>
             {
                 refreshToken
             };
+            
             AccountServiceHelpers
                 .RemoveOldRefreshTokens(_authSettings, user);
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.Map(new AuthenticateResponse());
+            var response = user.Map(new AuthenticatedResponse());
 
             response.JwtToken = jwtToken;
             response.RefreshToken = refreshToken.Token;
             return response;
         }
 
-        public AuthenticateResponse RefreshToken(string token, string ipAddress)
+        /// <summary>
+        /// GenerateRefreshToken is responsible for generating a new refresh token for a user and making sure that all the old refresh tokens for that user is deleted.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="ipAddress"></param>
+        /// <returns>A new instance of AuthenticatedResponse, which includes some basic user information</returns>
+        public AuthenticatedResponse RevokeAndRefreshToken(
+            string token,
+            string ipAddress)
         {
             var (refreshToken, user) = AccountServiceHelpers
-                .GetRefreshToken(QueryExecutor, token);
+                .FetchRefreshTokenForUser(_queryExecutor, token);
+            
             var newRefreshToken = AccountServiceHelpers
                 .GenerateRefreshToken(ipAddress);
             
@@ -83,30 +104,35 @@ namespace Ntk8.Services
             AccountServiceHelpers
                 .RemoveOldRefreshTokens(_authSettings, user);
 
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
             
             var jwtToken = AccountServiceHelpers
                 .GenerateJwtToken(_authSettings, user);
 
-            var response = user.Map(new AuthenticateResponse());
+            var response = user.Map(new AuthenticatedResponse());
             
             response.JwtToken = jwtToken;
             response.RefreshToken = newRefreshToken.Token;
             return response;
         }
 
+        /// <summary>
+        /// Revoke token will make sure that a token is set to invalid.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="ipAddress"></param>
         public void RevokeToken(string token, string ipAddress)
         {
             var (refreshToken, user) = AccountServiceHelpers
-                .GetRefreshToken(QueryExecutor, token);
+                .FetchRefreshTokenForUser(_queryExecutor, token);
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
         }
 
         public void Register(RegisterRequest model, string origin)
         {
-            var dbUserModel = QueryExecutor
+            var dbUserModel = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
             
             if (dbUserModel != null)
@@ -118,22 +144,22 @@ namespace Ntk8.Services
 
                 dbUserModel.VerificationToken = AccountServiceHelpers.RandomTokenString();
                 dbUserModel.DateModified = DateTime.Now;
-                CommandExecutor.Execute(new UpdateUser(dbUserModel));
+                _commandExecutor.Execute(new UpdateUser(dbUserModel));
                 return;
             }
 
-            var user = model.Map(new BaseUser());
+            var user = model.Map((BaseUser) new object());
             user.IsActive = true;
             user.VerificationToken = AccountServiceHelpers.RandomTokenString();
             user.PasswordHash = BC.HashPassword(model.Password);
             
-            CommandExecutor
+            _commandExecutor
                 .Execute(new InsertUser(user));
         }
 
         public void AutoVerifyUser(RegisterRequest model)
         {
-            var user = QueryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
 
             if (user.IsVerified)
@@ -144,7 +170,7 @@ namespace Ntk8.Services
             user.VerificationDate = DateTime.UtcNow;
             user.VerificationToken = null;
 
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
         }
         
 
@@ -152,7 +178,7 @@ namespace Ntk8.Services
         {
             //todo: Make sure that the verification token hasn't' expired...
             
-            var user = QueryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserByVerificationToken(token));
 
             if (user.IsVerified)
@@ -170,12 +196,12 @@ namespace Ntk8.Services
             user.VerificationToken = null;
             user.IsActive = true;
 
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
         }
 
         public void ForgotPassword(ForgotPasswordRequest model, string origin)
         {
-            var user = QueryExecutor.Execute(new FetchUserByEmailAddress(model.Email));
+            var user = _queryExecutor.Execute(new FetchUserByEmailAddress(model.Email));
 
             // always return ok response to prevent email enumeration
             if (user == null) return;
@@ -184,12 +210,12 @@ namespace Ntk8.Services
             user.ResetToken = AccountServiceHelpers.RandomTokenString();
             user.ResetTokenExpires = DateTime.UtcNow.AddDays(1);
 
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
         }
 
         public void ValidateResetToken(ValidateResetTokenRequest model)
         {
-            var user = QueryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserByResetToken(model.Token));
 
             if (user == null)
@@ -200,7 +226,7 @@ namespace Ntk8.Services
 
         public void ResetPassword(ResetPasswordRequest model)
         {
-            var user = QueryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserByResetToken(model.Token));
 
             if (user is null)
@@ -213,12 +239,12 @@ namespace Ntk8.Services
             user.ResetToken = null;
             user.ResetTokenExpires = null;
 
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
         }
 
         public AccountResponse GetById(int id)
         {
-            var user = QueryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserById(id));
             
             if (user is null)
@@ -230,18 +256,18 @@ namespace Ntk8.Services
 
         public AccountResponse Create(CreateRequest model)
         {
-            if (QueryExecutor.Execute(new FetchUserByEmailAddress(model.Email)).Email is not null)
+            if (_queryExecutor.Execute(new FetchUserByEmailAddress(model.Email)).Email is not null)
             {
                 throw new UserAlreadyExistsException();
             }
 
-            var user = model.Map(new BaseUser());
+            var user = model.Map((BaseUser) new object());
             user.DateCreated = DateTime.UtcNow;
             user.VerificationDate = DateTime.UtcNow;
 
             user.PasswordHash = BC.HashPassword(model.Password);
 
-            CommandExecutor.Execute(new InsertUser(user));
+            _commandExecutor.Execute(new InsertUser(user));
 
             return user.Map(new AccountResponse());
         }
@@ -249,7 +275,7 @@ namespace Ntk8.Services
         public AccountResponse Update(int id, UpdateRequest model)
         {
             var user = AccountServiceHelpers
-                .GetAccount(QueryExecutor, id);
+                .GetAccount(_queryExecutor, id);
 
             if (!string.IsNullOrEmpty(model.Password))
             {
@@ -259,7 +285,7 @@ namespace Ntk8.Services
             model.CopyPropertiesTo(user);
             user.DateModified = DateTime.UtcNow;
 
-            CommandExecutor.Execute(new UpdateUser(user));
+            _commandExecutor.Execute(new UpdateUser(user));
 
             var response = user.Map(new AccountResponse());
             return response;
@@ -267,7 +293,7 @@ namespace Ntk8.Services
 
         public void Delete(int id)
         {
-            CommandExecutor.Execute(new DeleteUserById(id));
+            _commandExecutor.Execute(new DeleteUserById(id));
         }
     }
 }

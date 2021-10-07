@@ -12,7 +12,6 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
-using Renci.SshNet.Security;
 
 namespace Ntk8.Helpers
 {
@@ -57,11 +56,14 @@ namespace Ntk8.Helpers
             return tokenHandler.WriteToken(token);
         }
 
-        public static (RefreshToken, BaseUser) GetRefreshToken(IQueryExecutor queryExecutor, string token)
+        public static (RefreshToken, BaseUser) FetchRefreshTokenForUser(
+            IQueryExecutor queryExecutor, 
+            string token)
         {
             // todo: This only looks for the refresh token attached to the user currently.
             
-            var account = queryExecutor.Execute(new FetchUserByResetToken(token));
+            var account = queryExecutor
+                .Execute(new FetchUserByRefreshToken(token));
             if (account == null)
             {
                 throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
@@ -88,7 +90,7 @@ namespace Ntk8.Helpers
 
         public static RefreshToken GenerateRefreshToken(string ipAddress)
         {
-            return new RefreshToken
+            return new()
             {
                 Token = RandomTokenString(),
                 Expires = DateTime.UtcNow.AddDays(7),

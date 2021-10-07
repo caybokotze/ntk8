@@ -37,7 +37,7 @@ namespace Ntk8.Models
         IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor);
     }
 
-    public class BaseUser : IBaseUser
+    public abstract class BaseUser : IBaseUser
     {
         public BaseUser()
         {
