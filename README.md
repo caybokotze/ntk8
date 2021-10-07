@@ -117,3 +117,13 @@ ALTER TABLE user_roles
 
 
 ## Grab on nuget
+
+**CLI**
+```shell
+dotnet add package Ntk8 --version 1.0.2
+```
+
+**Nuget Package Manager**
+```shell
+Install-Package Ntk8 -Version 1.0.2
+``
