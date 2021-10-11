@@ -7,15 +7,15 @@ using System.Security.Cryptography;
 using System.Text;
 using Dapper.CQRS;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Ntk8.Constants;
-using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Helpers
 {
-    public class AccountServiceHelpers
+    public static class AccountServiceHelpers
     {
         public static BaseUser GetAccount(
             IQueryExecutor queryExecutor,
@@ -38,17 +38,21 @@ namespace Ntk8.Helpers
             {
                 throw new InvalidTokenLengthException();
             }
-            
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(configuration.RefreshTokenSecret);
+            var key = Encoding.UTF8.GetBytes(configuration.RefreshTokenSecret);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new []
                 {
                     new Claim(AuthenticationConstants
-                        .PrimaryKeyValue, baseUserModel.Id.ToString())
+                        .PrimaryKeyValue, baseUserModel.Id.ToString()),
+                    new Claim("roles", JsonConvert.SerializeObject(baseUserModel.Roles))
                 }),
+                IssuedAt = DateTime.UtcNow,
                 Expires = DateTime.UtcNow.AddMinutes(15),
+                Issuer = "NTK8",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), 
                     SecurityAlgorithms.HmacSha256Signature)
             };
@@ -56,36 +60,39 @@ namespace Ntk8.Helpers
             return tokenHandler.WriteToken(token);
         }
 
-        public static (RefreshToken, BaseUser) FetchRefreshTokenForUser(
+        public static BaseUser FetchUserAndCheckIfRefreshTokenIsActive(
             IQueryExecutor queryExecutor, 
             string token)
         {
-            // todo: This only looks for the refresh token attached to the user currently.
-            
             var account = queryExecutor
                 .Execute(new FetchUserByRefreshToken(token));
+            
             if (account == null)
             {
                 throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
             }
 
-            var refreshToken = account.RefreshTokens.Single(x => x.Token == token);
+            var refreshToken = account
+                .RefreshTokens
+                .Single(x => x.Token == token);
 
             if (!refreshToken.IsActive)
             {
                 throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
             }
 
-            return (refreshToken, account);
+            return account;
         }
 
         public static void RemoveOldRefreshTokens(
             AuthSettings configuration,
             BaseUser baseUserModel)
         {
-            baseUserModel.RefreshTokens.RemoveAll(x => !x.IsActive &&
-                                                   x.Created.AddDays(configuration.RefreshTokenTTL)
-                                                   <= DateTime.UtcNow);
+            baseUserModel
+                .RefreshTokens
+                .RemoveAll(x => !x.IsActive &&
+                                x.DateCreated.AddDays(configuration.RefreshTokenTTL)
+                                <= DateTime.UtcNow);
         }
 
         public static RefreshToken GenerateRefreshToken(string ipAddress)
@@ -94,7 +101,7 @@ namespace Ntk8.Helpers
             {
                 Token = RandomTokenString(),
                 Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow,
                 CreatedByIp = ipAddress
             };
         }

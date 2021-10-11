@@ -30,9 +30,9 @@ namespace Ntk8.Tests.Commands
                 var expected = queryExecutor.Execute(new FetchUserById(id));
                 updatedUser.DateModified = expected.DateModified;
                 updatedUser.DateCreated = expected.DateCreated;
-                updatedUser.VerificationDate = expected.VerificationDate;
-                updatedUser.PasswordResetDate = expected.PasswordResetDate;
-                updatedUser.ResetTokenExpires = expected.ResetTokenExpires;
+                updatedUser.DateVerified = expected.DateVerified;
+                updatedUser.DateOfPasswordReset = expected.DateOfPasswordReset;
+                updatedUser.DateResetTokenExpires = expected.DateResetTokenExpires;
                 updatedUser.RefreshTokens = null;
                 updatedUser.UserRoles = null;
                 // assert

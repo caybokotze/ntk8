@@ -1,0 +1,20 @@
+{
+  "name": "sql-migration-runner",
+  "repository": {
+    "url": "https://github.com/caybokotze/sql-migrator"
+  },
+  "version": "1.0.0",
+  "description": "This is the package.json file for the migration runner executable to maintain variables and make them easily editable",
+  "scripts": {
+    "sql-up": "mysql-migrator.exe sql-up",
+    "sql-new": "mysql-migrator.exe sql-new"
+  },
+  "sql-migrator-config": {
+    "sqlUser": "sqltracking",
+    "sqlPassword": "sqltracking",
+    "sqlHost": "localhost",
+    "sqlPort": "3306",
+    "sqlDatabase": "demodb",
+    "migrationTableName": "__migrations"
+  }
+}

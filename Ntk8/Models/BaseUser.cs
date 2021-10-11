@@ -13,7 +13,7 @@ namespace Ntk8.Models
         DateTime DateModified { get; set; }
         bool IsActive { get; set; }
         int Id { get; set; }
-        Guid ReferenceId { get; set; }
+        Guid Guid { get; set; }
         string Title { get; set; }
         string Email { get; set; }
         string FirstName { get; set; }
@@ -27,9 +27,9 @@ namespace Ntk8.Models
         bool AcceptedTerms { get; set; }
         string ResetToken { get; set; }
         string VerificationToken { get; set; }
-        DateTime? VerificationDate { get; set; }
-        DateTime? PasswordResetDate { get; set; }
-        DateTime? ResetTokenExpires { get; set; }
+        DateTime? DateVerified { get; set; }
+        DateTime? DateOfPasswordReset { get; set; }
+        DateTime? DateResetTokenExpires { get; set; }
         List<RefreshToken> RefreshTokens { get; set; }
         ICollection<UserRole> UserRoles { get; set; }
         bool IsVerified { get; }
@@ -39,18 +39,44 @@ namespace Ntk8.Models
 
     public abstract class BaseUser : IBaseUser
     {
-        public BaseUser()
+        protected BaseUser()
         {
-            ReferenceId = Guid.NewGuid();
+            Guid = Guid.NewGuid();
             DateCreated = DateTime.Now;
             DateModified = DateTime.Now;
+        }
+
+        protected BaseUser(IBaseUser user)
+        {
+            DateCreated = user.DateCreated;
+            DateModified = user.DateModified;
+            IsActive = user.IsActive;
+            Id = user.Id;
+            Guid = user.Guid;
+            Title = user.Title;
+            Email = user.Email;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            TelNumber = user.TelNumber;
+            Username = user.Username;
+            AccessFailedCount = user.AccessFailedCount;
+            LockoutEnabled = user.LockoutEnabled;
+            PasswordHash = user.PasswordHash;
+            PasswordSalt = user.PasswordSalt;
+            DateOfPasswordReset = user.DateOfPasswordReset;
+            AcceptedTerms = user.AcceptedTerms;
+            ResetToken = user.ResetToken;
+            VerificationToken = user.VerificationToken;
+            DateVerified = user.DateVerified;
+            DateOfPasswordReset = user.DateOfPasswordReset;
+            DateResetTokenExpires = user.DateResetTokenExpires;
         }
 
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
         public bool IsActive { get; set; }
         public int Id { get; set; }
-        public Guid ReferenceId { get; set; }
+        public Guid Guid { get; set; }
 
         [StringLength(100)]
         public string Title { get; set; }
@@ -79,13 +105,18 @@ namespace Ntk8.Models
         public bool AcceptedTerms { get; set; }
         public string ResetToken { get; set; }
         public string VerificationToken { get; set; }
-        public DateTime? VerificationDate { get; set; }
-        public DateTime? PasswordResetDate { get; set; }
-        public DateTime? ResetTokenExpires { get; set; }
+        public DateTime? DateVerified { get; set; }
+        public DateTime? DateOfPasswordReset { get; set; }
+        public DateTime? DateResetTokenExpires { get; set; }
+        
         [JsonIgnore]
-        public List<RefreshToken> RefreshTokens { get; set; }
+        public virtual List<RefreshToken> RefreshTokens { get; set; }
+        
         [JsonIgnore]
-        public ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<UserRole> UserRoles { get; set; }
+        
+        [JsonIgnore]
+        public virtual ICollection<Role> Roles { get; set; }
         
         public bool OwnsToken(string token)
         {
@@ -93,7 +124,7 @@ namespace Ntk8.Models
                 .Find(x => x.Token == token) != null;
         }
         
-        public bool IsVerified => VerificationDate.HasValue || PasswordResetDate.HasValue;
+        public bool IsVerified => DateVerified.HasValue || DateOfPasswordReset.HasValue;
         
         public IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor)
         {

@@ -17,7 +17,7 @@ namespace Ntk8.Data.Queries
 
         public override void Execute()
         {
-            Result = GetIDbConnection()
+            Result = Raw()
                 .Query<UserRole, BaseUser, Role, UserRole>(
                     $"SELECT u.*, ur.*, r.* FROM user_roles ur" +
                     $"LEFT JOIN roles r" +

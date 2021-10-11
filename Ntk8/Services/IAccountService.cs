@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using Ntk8.Dto;
+using Ntk8.Models;
 
 namespace Ntk8.Services
 {
     public interface IAccountService
     {
         AuthenticatedResponse Authenticate(AuthenticateRequest model, string ipAddress);
-        AuthenticatedResponse RevokeAndRefreshToken(string token, string ipAddress);
-        void RevokeToken(string token, string ipAddress);
+        AuthenticatedResponse RevokeAndGenerateRefreshToken(string token, string ipAddress);
+        BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress);
         void Register(RegisterRequest model, string origin);
         void VerifyEmail(string token);
         void ForgotPassword(ForgotPasswordRequest model, string origin);

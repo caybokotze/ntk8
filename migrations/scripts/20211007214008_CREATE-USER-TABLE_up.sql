@@ -1,0 +1,26 @@
+CREATE TABLE users
+(
+    id                  int PRIMARY KEY AUTO_INCREMENT,
+    guid        char(36),
+    title               varchar(20),
+    email               varchar(60),
+    first_name          varchar(100),
+    last_name           varchar(100),
+    tel_number          varchar(20),
+    username            varchar(20),
+    access_failed_count int,
+    lockout_enabled     tinyint(1),
+    password_hash       varchar(255),
+    concurrency_stamp   varchar(255),
+    security_stamp      varchar(255),
+    password_salt       varchar(255),
+    accepted_terms      tinyint(1),
+    reset_token         varchar(100),
+    verification_token  varchar(100),
+    date_verified   datetime,
+    date_of_password_reset datetime,
+    date_reset_token_expires datetime,
+    date_created        datetime,
+    date_modified       datetime,
+    is_active           tinyint(1)
+);

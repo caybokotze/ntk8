@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
-using NExpect.Interfaces;
 using PeanutButter.DuckTyping.Exceptions;
 using PeanutButter.DuckTyping.Extensions;
 using PeanutButter.Utils;
-using PeanutButter.Utils.Dictionaries;
 
 namespace Ntk8.Tests
 {
@@ -17,11 +14,11 @@ namespace Ntk8.Tests
         public static IAppSettings CreateAppSettings()
         {
             return GetSettingsFrom(
-                CreateConfig()
+                CreateConfigurationRoot()
             );
         }
 
-        public static IConfigurationRoot CreateConfig()
+        public static IConfigurationRoot CreateConfigurationRoot()
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

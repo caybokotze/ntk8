@@ -9,6 +9,6 @@ namespace Ntk8.Models
         public string RoleName { get; set; }
         
         [JsonIgnore]
-        public ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<UserRole> UserRoles { get; set; }
     }
 }

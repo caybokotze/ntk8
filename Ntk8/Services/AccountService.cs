@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dapper.CQRS;
 using HigLabo.Core;
 using Ntk8.Constants;
@@ -86,26 +87,20 @@ namespace Ntk8.Services
         /// <param name="token"></param>
         /// <param name="ipAddress"></param>
         /// <returns>A new instance of AuthenticatedResponse, which includes some basic user information</returns>
-        public AuthenticatedResponse RevokeAndRefreshToken(
+        public AuthenticatedResponse RevokeAndGenerateRefreshToken(
             string token,
             string ipAddress)
         {
-            var (refreshToken, user) = AccountServiceHelpers
-                .FetchRefreshTokenForUser(_queryExecutor, token);
-            
             var newRefreshToken = AccountServiceHelpers
                 .GenerateRefreshToken(ipAddress);
             
-            refreshToken.Revoked = DateTime.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
-            refreshToken.ReplacedByToken = newRefreshToken.Token;
+            var user = RevokeRefreshTokenAndReturnUser(token, ipAddress);
+            
             user.RefreshTokens.Add(newRefreshToken);
 
             AccountServiceHelpers
                 .RemoveOldRefreshTokens(_authSettings, user);
 
-            _commandExecutor.Execute(new UpdateUser(user));
-            
             var jwtToken = AccountServiceHelpers
                 .GenerateJwtToken(_authSettings, user);
 
@@ -117,17 +112,25 @@ namespace Ntk8.Services
         }
 
         /// <summary>
-        /// Revoke token will make sure that a token is set to invalid.
+        /// Revoke token will make sure that a token is set to invalid. It will also return the user for the associated refresh token.
         /// </summary>
         /// <param name="token"></param>
         /// <param name="ipAddress"></param>
-        public void RevokeToken(string token, string ipAddress)
+        public BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress)
         {
-            var (refreshToken, user) = AccountServiceHelpers
-                .FetchRefreshTokenForUser(_queryExecutor, token);
-            refreshToken.Revoked = DateTime.UtcNow;
+            var user = AccountServiceHelpers
+                .FetchUserAndCheckIfRefreshTokenIsActive(_queryExecutor, token);
+            
+            var refreshToken = user
+                .RefreshTokens
+                .First();
+
+            refreshToken.DateRevoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
-            _commandExecutor.Execute(new UpdateUser(user));
+
+            _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
+
+            return user;
         }
 
         public void Register(RegisterRequest model, string origin)
@@ -167,7 +170,7 @@ namespace Ntk8.Services
                 return;
             }
             
-            user.VerificationDate = DateTime.UtcNow;
+            user.DateVerified = DateTime.UtcNow;
             user.VerificationToken = null;
 
             _commandExecutor.Execute(new UpdateUser(user));
@@ -192,7 +195,7 @@ namespace Ntk8.Services
                                                  "This record either no longer exists or the account has already been verified.");
             }
 
-            user.VerificationDate = DateTime.UtcNow;
+            user.DateVerified = DateTime.UtcNow;
             user.VerificationToken = null;
             user.IsActive = true;
 
@@ -208,7 +211,7 @@ namespace Ntk8.Services
 
             // create reset token that expires after 1 day
             user.ResetToken = AccountServiceHelpers.RandomTokenString();
-            user.ResetTokenExpires = DateTime.UtcNow.AddDays(1);
+            user.DateResetTokenExpires = DateTime.UtcNow.AddDays(1);
 
             _commandExecutor.Execute(new UpdateUser(user));
         }
@@ -235,9 +238,9 @@ namespace Ntk8.Services
             }
             
             user.PasswordHash = BC.HashPassword(model.Password);
-            user.PasswordResetDate = DateTime.UtcNow;
+            user.DateOfPasswordReset = DateTime.UtcNow;
             user.ResetToken = null;
-            user.ResetTokenExpires = null;
+            user.DateResetTokenExpires = null;
 
             _commandExecutor.Execute(new UpdateUser(user));
         }
@@ -263,7 +266,7 @@ namespace Ntk8.Services
 
             var user = model.Map((BaseUser) new object());
             user.DateCreated = DateTime.UtcNow;
-            user.VerificationDate = DateTime.UtcNow;
+            user.DateVerified = DateTime.UtcNow;
 
             user.PasswordHash = BC.HashPassword(model.Password);
 

@@ -32,9 +32,9 @@ namespace Ntk8.Tests.Commands
                     .To.Be.Greater.Than(1);
                 expectedUser.DateCreated = user.DateCreated;
                 expectedUser.DateModified = user.DateModified;
-                expectedUser.VerificationDate = user.VerificationDate;
-                expectedUser.PasswordResetDate = user.PasswordResetDate;
-                expectedUser.ResetTokenExpires = user.ResetTokenExpires;
+                expectedUser.DateVerified = user.DateVerified;
+                expectedUser.DateOfPasswordReset = user.DateOfPasswordReset;
+                expectedUser.DateResetTokenExpires = user.DateResetTokenExpires;
                 user.RefreshTokens = null;
                 user.UserRoles = null;
                 user.Id = id;
@@ -64,27 +64,27 @@ namespace Ntk8.Tests.Commands
                 Expect(expectedUser.DateModified)
                     .To.Approximately.Equal(user.DateModified);
                 
-                if (user.VerificationDate is not null)
+                if (user.DateVerified is not null)
                 {
-                    Expect(expectedUser.VerificationDate)
-                        .To.Approximately.Equal((DateTime) user.VerificationDate);
+                    Expect(expectedUser.DateVerified)
+                        .To.Approximately.Equal((DateTime) user.DateVerified);
                 }
 
-                if (user.PasswordResetDate is not null)
+                if (user.DateOfPasswordReset is not null)
                 {
-                    Expect(expectedUser.PasswordResetDate)
-                        .To.Approximately.Equal((DateTime) user.PasswordResetDate);
+                    Expect(expectedUser.DateOfPasswordReset)
+                        .To.Approximately.Equal((DateTime) user.DateOfPasswordReset);
                 }
 
-                if (user.ResetTokenExpires is not null)
+                if (user.DateResetTokenExpires is not null)
                 {
-                    Expect(expectedUser.ResetTokenExpires)
-                        .To.Approximately.Equal((DateTime) user.ResetTokenExpires);
+                    Expect(expectedUser.DateResetTokenExpires)
+                        .To.Approximately.Equal((DateTime) user.DateResetTokenExpires);
                 }
 
-                Expect(user.VerificationDate).To.Not.Be.Null();
-                Expect(user.PasswordResetDate).To.Not.Be.Null();
-                Expect(user.ResetTokenExpires).To.Not.Be.Null();
+                Expect(user.DateVerified).To.Not.Be.Null();
+                Expect(user.DateOfPasswordReset).To.Not.Be.Null();
+                Expect(user.DateResetTokenExpires).To.Not.Be.Null();
             }
         }
     }

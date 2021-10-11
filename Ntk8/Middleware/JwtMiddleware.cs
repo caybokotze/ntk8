@@ -64,13 +64,29 @@ namespace Ntk8.Middleware
             {
                 throw new NullReferenceException("The jwt token is null and cannot be mounted to the context");
             }
+
+            var validatedToken = ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
+
+            var jwtToken = (JwtSecurityToken) validatedToken;
+
+            var accountId = int.Parse(jwtToken.Claims
+                .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
+                .Value);
+
+            context.Items[AuthenticationConstants.ContextAccount] =
+                _queryExecutor.Execute(new FetchUserById(accountId));
+            
+            return context;
+        }
+
+        private SecurityToken ValidateJwtSecurityToken(string token, string refreshTokenSecret)
+        {
+            var key = Encoding
+                .ASCII
+                .GetBytes(refreshTokenSecret);
             
             var tokenHandler = new JwtSecurityTokenHandler();
             
-            var key = Encoding
-                .ASCII
-                .GetBytes(_authSettings.RefreshTokenSecret);
-
             SecurityToken validatedToken;
             try
             {
@@ -88,15 +104,7 @@ namespace Ntk8.Middleware
                 throw new InvalidTokenException(e.Message);
             }
 
-            var jwtToken = (JwtSecurityToken) validatedToken;
-            var accountId = int.Parse(jwtToken.Claims
-                .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
-                .Value);
-
-            context.Items[AuthenticationConstants.ContextAccount] =
-                _queryExecutor.Execute(new FetchUserById(accountId));
-            
-            return context;
+            return validatedToken;
         }
     }
 }

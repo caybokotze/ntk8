@@ -104,8 +104,43 @@ namespace Ntk8.Tests
         public class Behaviour
         {
             [TestFixture]
-            public class GenerateRefreshToken
+            public class RevokeAndGenerateRefreshToken
             {
+                [TestFixture]
+                public class WhenUserHasExistingRefreshTokens
+                {
+                    [Test]
+                    public void ShouldGenerateNewRefreshToken()
+                    {
+                        // arrange
+                        
+                        // act
+                        // assert
+                    }
+
+                    [Test]
+                    public void ShouldCallRevokeTokenAndReturnUserToBeCalled()
+                    {
+                        // arrange
+                        
+                        // act
+                        // assert
+                    }
+                }
+
+                [TestFixture]
+                public class WhenUserDoesNotHaveExistingRefreshTokens
+                {
+                    [Test]
+                    public void ShouldGenerateNewRefreshToken()
+                    {
+                        // arrange
+                        
+                        // act
+                        // assert
+                    }
+                }
+
                 [Test]
                 public void ShouldGenerateNewRefreshToken()
                 {
@@ -114,7 +149,8 @@ namespace Ntk8.Tests
                     var token = TokenHelpers.CreateValidJwtToken();
                     var ipAddress = GetRandomIPv4Address();
                     // act
-                    var authenticatedResponse = accountService.RevokeAndRefreshToken(token, ipAddress);
+                    var authenticatedResponse = accountService
+                        .RevokeAndGenerateRefreshToken(token, ipAddress);
                     // assert
                     
                 }

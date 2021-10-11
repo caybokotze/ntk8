@@ -25,10 +25,39 @@ namespace Ntk8.Tests.Helpers
                             }),
                             Expires = DateTime.UtcNow.AddMinutes(15),
                             SigningCredentials = new SigningCredentials(
-                                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret)),
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
                                 SecurityAlgorithms.HmacSha256Signature)
                         });
                     return tokenHandler.WriteToken(token);
                 }
+
+        public static bool IsJwtTokenValid(string token, string refreshTokenSecret)
+        {
+            bool isValid;
+            var key = Encoding
+                .UTF8
+                .GetBytes(refreshTokenSecret);
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out _);
+                isValid = true;
+            }
+            catch (Exception)
+            {
+                isValid = false;
+            }
+
+            return isValid;
+        }
     }
 }
