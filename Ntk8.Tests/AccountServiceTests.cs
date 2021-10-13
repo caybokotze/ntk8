@@ -1,10 +1,12 @@
-﻿using Dapper.CQRS;
+﻿using System;
+using Dapper.CQRS;
 using HigLabo.Core;
 using NExpect;
 using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
+using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.Helpers;
@@ -141,6 +143,43 @@ namespace Ntk8.Tests
                     }
                 }
 
+                [TestFixture]
+                public class RevokeRefreshTokenAndReturnUser
+                {
+                    [Test]
+                    public void ShouldRevokeRefreshTokenAndReturnTheUser()
+                    {
+                        // arrange
+                        var commandExecutor = Substitute.For<ICommandExecutor>();
+                        var queryExecutor = Substitute.For<IQueryExecutor>();
+                        var testUser = TestUser.Create();
+                        testUser.RefreshTokens.Add(CreateRefreshToken());
+                        
+                        commandExecutor
+                            .Execute(Arg.Any<UpdateRefreshToken>())
+                            .Returns(1);
+                        
+                        queryExecutor
+                            .Execute(Arg.Any<FetchUserByRefreshToken>())
+                            .Returns(testUser);
+
+                        var refreshToken = CreateRefreshToken();
+                        var ipAddress = GetRandomIPv4Address();
+
+                        // act
+                        var accountService = Create(queryExecutor, commandExecutor);
+                        
+                        var user = accountService
+                            .RevokeRefreshTokenAndReturnUser(refreshToken.Token, GetRandomIPv4Address());
+                        // assert
+                        Expect(user.RefreshTokens[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
+                        Expect(user.RefreshTokens[0].RevokedByIp).To.Equal(ipAddress);
+                        Expect(commandExecutor)
+                            .To.Have.Received(1)
+                            .Execute(Arg.Any<UpdateRefreshToken>());
+                    }
+                }
+
                 [Test]
                 public void ShouldGenerateNewRefreshToken()
                 {
@@ -150,7 +189,7 @@ namespace Ntk8.Tests
                     var ipAddress = GetRandomIPv4Address();
                     // act
                     var authenticatedResponse = accountService
-                        .RevokeAndGenerateRefreshToken(token, ipAddress);
+                        .RevokeRefreshTokenAndGenerateNewRefreshToken(token, ipAddress);
                     // assert
                     
                 }
@@ -168,6 +207,23 @@ namespace Ntk8.Tests
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 authenticationContextService ?? Substitute.For<IAuthenticationContextService>(),
                 authSettings ?? GetRandom<AuthSettings>());
+        }
+        
+        private static RefreshToken CreateRefreshToken()
+        {
+            return AccountServiceHelpers.GenerateRefreshToken(
+                CreateAuthSettings(),
+                GetRandomIPv4Address()
+            );
+        }
+        
+        private static AuthSettings CreateAuthSettings()
+        {
+            return new()
+            {
+                RefreshTokenSecret = GetRandomAlphaString(40),
+                RefreshTokenTTL = 604800
+            };
         }
     }
 }

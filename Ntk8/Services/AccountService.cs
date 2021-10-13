@@ -63,7 +63,7 @@ namespace Ntk8.Services
                 .GenerateJwtToken(_authSettings, user);
             
             var refreshToken = AccountServiceHelpers
-                .GenerateRefreshToken(ipAddress);
+                .GenerateRefreshToken(_authSettings, ipAddress);
             
             user.RefreshTokens = new List<RefreshToken>
             {
@@ -87,12 +87,12 @@ namespace Ntk8.Services
         /// <param name="token"></param>
         /// <param name="ipAddress"></param>
         /// <returns>A new instance of AuthenticatedResponse, which includes some basic user information</returns>
-        public AuthenticatedResponse RevokeAndGenerateRefreshToken(
+        public AuthenticatedResponse RevokeRefreshTokenAndGenerateNewRefreshToken(
             string token,
             string ipAddress)
         {
             var newRefreshToken = AccountServiceHelpers
-                .GenerateRefreshToken(ipAddress);
+                .GenerateRefreshToken(_authSettings, ipAddress);
             
             var user = RevokeRefreshTokenAndReturnUser(token, ipAddress);
             

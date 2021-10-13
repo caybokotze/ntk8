@@ -14,7 +14,11 @@ namespace Ntk8.Data.Commands
         
         public override void Execute()
         {
-            Result = Execute("UPDATE refresh_tokens SET (re)");
+            Result = Execute("UPDATE refresh_tokens SET refresh_tokens = @RefreshToken",
+                new
+                {
+                    RefreshToken = _refreshToken.Token
+                });
         }
     }
 }

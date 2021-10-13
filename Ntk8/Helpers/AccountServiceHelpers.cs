@@ -7,11 +7,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Dapper.CQRS;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using static System.Text.Json.JsonSerializer;
 
 namespace Ntk8.Helpers
 {
@@ -24,7 +24,7 @@ namespace Ntk8.Helpers
             var account = queryExecutor.Execute(new FetchUserById(id));
             if (account == null)
             {
-                throw new KeyNotFoundException("Account Not Found");
+                throw new UserNotFoundException("The user can not be found.");
             }
 
             return account;
@@ -48,7 +48,7 @@ namespace Ntk8.Helpers
                 {
                     new Claim(AuthenticationConstants
                         .PrimaryKeyValue, baseUserModel.Id.ToString()),
-                    new Claim("roles", JsonConvert.SerializeObject(baseUserModel.Roles))
+                    new Claim("roles", Serialize(baseUserModel.Roles))
                 }),
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime.UtcNow.AddMinutes(15),
@@ -67,14 +67,17 @@ namespace Ntk8.Helpers
             var account = queryExecutor
                 .Execute(new FetchUserByRefreshToken(token));
             
-            if (account == null)
+            if (account is null)
             {
                 throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
             }
 
-            var refreshToken = account
+            RefreshToken refreshToken;
+            
+            refreshToken = account
                 .RefreshTokens
                 .Single(x => x.Token == token);
+
 
             if (!refreshToken.IsActive)
             {
@@ -84,23 +87,25 @@ namespace Ntk8.Helpers
             return account;
         }
 
-        public static void RemoveOldRefreshTokens(
+        public static BaseUser RemoveOldRefreshTokens(
             AuthSettings configuration,
             BaseUser baseUserModel)
         {
             baseUserModel
                 .RefreshTokens
                 .RemoveAll(x => !x.IsActive &&
-                                x.DateCreated.AddDays(configuration.RefreshTokenTTL)
+                                x.DateCreated.AddSeconds(configuration.RefreshTokenTTL)
                                 <= DateTime.UtcNow);
+
+            return baseUserModel;
         }
 
-        public static RefreshToken GenerateRefreshToken(string ipAddress)
+        public static RefreshToken GenerateRefreshToken(AuthSettings authSettings, string ipAddress)
         {
             return new()
             {
                 Token = RandomTokenString(),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddSeconds(authSettings.RefreshTokenTTL),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = ipAddress
             };
