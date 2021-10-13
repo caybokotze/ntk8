@@ -164,7 +164,6 @@ namespace Ntk8.Tests
                             .Execute(Arg.Any<FetchUserByRefreshToken>())
                             .Returns(testUser);
 
-                        
                         var ipAddress = GetRandomIPv4Address();
 
                         // act
@@ -178,6 +177,7 @@ namespace Ntk8.Tests
                         Expect(commandExecutor)
                             .To.Have.Received(1)
                             .Execute(Arg.Any<UpdateRefreshToken>());
+                        Expect(user).To.Equal(testUser);
                     }
                 }
 
@@ -192,7 +192,6 @@ namespace Ntk8.Tests
                     var authenticatedResponse = accountService
                         .RevokeRefreshTokenAndGenerateNewRefreshToken(token, ipAddress);
                     // assert
-                    
                 }
             }
         }
