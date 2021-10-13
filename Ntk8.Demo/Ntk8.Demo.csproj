@@ -4,4 +4,12 @@
         <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Ntk8\Ntk8.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ScopeFunction.Utils" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>

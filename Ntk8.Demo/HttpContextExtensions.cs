@@ -1,5 +1,11 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using PeanutButter.Utils;
 
 namespace Ntk8.Demo
 {
@@ -15,5 +21,20 @@ namespace Ntk8.Demo
             var serializedObject = System.Text.Json.JsonSerializer.Serialize(value);
             httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(serializedObject));
         }
+
+        public static async Task<T> DeserializeRequestBody<T>(this HttpContext httpContext)
+        {
+            return JsonConvert
+                .DeserializeObject<T>(await new StreamReader(httpContext.Request.Body)
+                    .ReadToEndAsync());
+        }
+        
+        public static async Task SerialiseResponseBody(this HttpContext httpContext, object response)
+        {
+            var payload = JsonConvert.SerializeObject(response);
+            await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(payload));
+        }
+
+ 
     }
 }
