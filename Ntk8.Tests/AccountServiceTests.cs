@@ -153,7 +153,8 @@ namespace Ntk8.Tests
                         var commandExecutor = Substitute.For<ICommandExecutor>();
                         var queryExecutor = Substitute.For<IQueryExecutor>();
                         var testUser = TestUser.Create();
-                        testUser.RefreshTokens.Add(CreateRefreshToken());
+                        var refreshToken = CreateRefreshToken();
+                        testUser.RefreshTokens.Add(refreshToken);
                         
                         commandExecutor
                             .Execute(Arg.Any<UpdateRefreshToken>())
@@ -163,14 +164,14 @@ namespace Ntk8.Tests
                             .Execute(Arg.Any<FetchUserByRefreshToken>())
                             .Returns(testUser);
 
-                        var refreshToken = CreateRefreshToken();
+                        
                         var ipAddress = GetRandomIPv4Address();
 
                         // act
                         var accountService = Create(queryExecutor, commandExecutor);
                         
                         var user = accountService
-                            .RevokeRefreshTokenAndReturnUser(refreshToken.Token, GetRandomIPv4Address());
+                            .RevokeRefreshTokenAndReturnUser(refreshToken.Token, ipAddress);
                         // assert
                         Expect(user.RefreshTokens[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
                         Expect(user.RefreshTokens[0].RevokedByIp).To.Equal(ipAddress);
