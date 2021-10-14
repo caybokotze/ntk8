@@ -7,7 +7,6 @@ namespace Ntk8.Services
 {
     public interface IAuthenticationContextService
     {
-        HttpContext HttpContext { get; }
         BaseUser BaseUser { get; }
         string GetRefreshToken();
         string GetOriginRequestHeader();
@@ -20,43 +19,66 @@ namespace Ntk8.Services
 
     public class AuthenticationContextService : IAuthenticationContextService
     {
-        private readonly AuthSettings _authSettings;
-        public HttpContext HttpContext { get; }
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAuthSettings _authSettings;
+        
 
         public AuthenticationContextService(
             IHttpContextAccessor httpContextAccessor,
-            AuthSettings authSettings)
+            IAuthSettings authSettings)
         {
+            _httpContextAccessor = httpContextAccessor;
             _authSettings = authSettings;
-            HttpContext = httpContextAccessor.HttpContext;
         }
 
-        public BaseUser BaseUser => (BaseUser) HttpContext.Items[AuthenticationConstants.ContextAccount];
+        public BaseUser BaseUser =>
+            (BaseUser) _httpContextAccessor
+                .HttpContext
+                .Items[AuthenticationConstants.ContextAccount];
         
         
         public string GetRefreshToken()
         {
-            return HttpContext.Request.Cookies[AuthenticationConstants.RefreshToken];
+            return _httpContextAccessor
+                .HttpContext
+                .Request
+                .Cookies[AuthenticationConstants.RefreshToken];
         }
         
         public string GetOriginRequestHeader()
         {
-            return HttpContext.Request.Headers["origin"];
+            return _httpContextAccessor
+                .HttpContext
+                .Request
+                .Headers["origin"];
         }
         
         public IHeaderDictionary GetRequestHeaders()
         {
-            return HttpContext.Request.Headers;
+            return _httpContextAccessor
+                .HttpContext
+                .Request
+                .Headers;
         }
         
         public string GetRemoteIpAddress()
         {
-            return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+            return _httpContextAccessor
+                .HttpContext
+                .Connection
+                .RemoteIpAddress
+                ?.MapToIPv4()
+                .ToString();
         }
         
         public string GetLocalIpAddress()
         {
-            return HttpContext.Connection.LocalIpAddress?.MapToIPv4().ToString();
+            return _httpContextAccessor
+                .HttpContext
+                .Connection
+                .LocalIpAddress
+                ?.MapToIPv4()
+                .ToString();
         }
         
         public string GetIpAddress()
@@ -76,7 +98,7 @@ namespace Ntk8.Services
                 HttpOnly = true,
                 Expires = DateTime.UtcNow.AddDays(7)
             };
-            HttpContext.Response.Cookies.Append(
+            _httpContextAccessor.HttpContext.Response.Cookies.Append(
                 AuthenticationConstants.RefreshToken, 
                 token,
                 cookieOptions);

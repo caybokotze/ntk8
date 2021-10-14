@@ -32,7 +32,8 @@ namespace Ntk8.Demo
         public static async Task SerialiseResponseBody(this HttpContext httpContext, object response)
         {
             var payload = JsonConvert.SerializeObject(response);
-            await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(payload));
+            var bytesToWrite = Encoding.UTF8.GetBytes(payload);
+            await httpContext.Response.Body.WriteAsync(bytesToWrite, 0, bytesToWrite.Length);
         }
 
  

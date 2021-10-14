@@ -20,18 +20,15 @@ namespace Ntk8.Services
         private readonly AuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
-        private IAuthenticationContextService _authenticationContextService;
 
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            IAuthenticationContextService contextService,
             IAuthSettings authSettings)
         {
             _authSettings = (AuthSettings) authSettings;
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
-            _authenticationContextService = contextService;
         }
         
         /// <summary>
