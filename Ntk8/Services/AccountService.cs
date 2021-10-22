@@ -8,6 +8,7 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
+using Ntk8.Helpers;
 using Ntk8.Models;
 using BC = BCrypt.Net.BCrypt;
 
@@ -23,10 +24,8 @@ namespace Ntk8.Services
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            IAuthSettings authSettings,
             ITokenService tokenService)
         {
-            // _authSettings = (AuthSettings) authSettings;
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
@@ -69,7 +68,7 @@ namespace Ntk8.Services
             _tokenService.RemoveOldRefreshTokens(user);
             _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.Map(new AuthenticatedResponse());
+            var response = user.MapTo<AuthenticatedResponse>();
 
             response.JwtToken = jwtToken;
             response.RefreshToken = refreshToken.Token;
@@ -96,7 +95,7 @@ namespace Ntk8.Services
 
             var jwtToken = _tokenService.GenerateJwtToken(user);
 
-            var response = user.Map(new AuthenticatedResponse());
+            var response = user.MapTo<AuthenticatedResponse>();
             
             response.JwtToken = jwtToken;
             response.RefreshToken = newRefreshToken.Token;
@@ -245,7 +244,8 @@ namespace Ntk8.Services
             {
                 throw new NoUserFoundException();
             }
-            return user.Map(new AccountResponse());
+
+            return user.MapTo<AccountResponse>();
         }
 
         public AccountResponse Create(CreateRequest model)
@@ -263,7 +263,7 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new InsertUser(user));
 
-            return user.Map(new AccountResponse());
+            return user.MapTo<AccountResponse>();
         }
 
         public AccountResponse Update(int id, UpdateRequest model)
@@ -280,7 +280,7 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.Map(new AccountResponse());
+            var response = user.MapTo<AccountResponse>();
             return response;
         }
 
