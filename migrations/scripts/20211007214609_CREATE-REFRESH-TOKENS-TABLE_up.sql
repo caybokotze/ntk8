@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS refresh_tokens
 	user_id int null,
 	token varchar(100) null,
 	expires datetime null,
-	is_expired tinyint(1) null,
 	date_created datetime null,
 	created_by_ip varchar(30) null,
 	date_revoked datetime null,

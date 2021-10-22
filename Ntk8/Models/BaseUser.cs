@@ -39,6 +39,10 @@ namespace Ntk8.Models
         IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor);
     }
 
+    /// <summary>
+    /// Do not use this class directly. Create a derived class like 'User' and inherit from 'BaseUser'.
+    /// This class can not be made abstract due to Dapper constraints on QueryRow<T>.
+    /// </summary>
     public class BaseUser : IBaseUser
     {
         protected BaseUser()

@@ -57,14 +57,10 @@ namespace Ntk8.Services
             }
             
             var jwtToken = _tokenService.GenerateJwtToken(user);
-            
             var refreshToken = _tokenService.GenerateRefreshToken(ipAddress);
-            
-            user.RefreshTokens = new List<RefreshToken>
-            {
-                refreshToken
-            };
-            
+
+            _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
+
             _tokenService.RemoveOldRefreshTokens(user);
             _commandExecutor.Execute(new UpdateUser(user));
 
@@ -85,11 +81,10 @@ namespace Ntk8.Services
             string token,
             string ipAddress)
         {
-            var user = RevokeRefreshTokenAndReturnUser(token, ipAddress);
-            
             var newRefreshToken = _tokenService.GenerateRefreshToken(ipAddress);
+            var user = RevokeRefreshTokenAndReturnUser(token, ipAddress, newRefreshToken.Token);
 
-            user.RefreshTokens.Add(newRefreshToken);
+            // todo: insert refresh token;
 
             _tokenService.RemoveOldRefreshTokens(user);
 
@@ -107,7 +102,8 @@ namespace Ntk8.Services
         /// </summary>
         /// <param name="token"></param>
         /// <param name="ipAddress"></param>
-        public BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress)
+        /// <param name="newToken"></param>
+        public BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress, string newToken = null)
         {
             var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
             
@@ -117,6 +113,10 @@ namespace Ntk8.Services
 
             refreshToken.DateRevoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
+            if (newToken is not null)
+            {
+                refreshToken.ReplacedByToken = newToken;
+            }
 
             _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
 

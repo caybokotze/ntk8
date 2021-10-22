@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ntk8.Models
 {
@@ -11,6 +12,7 @@ namespace Ntk8.Models
         public string Token { get; set; }
         public DateTime Expires { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;
+        // [Column(TypeName = "dim")]
         public DateTime DateCreated { get; set; }
         public string CreatedByIp { get; set; }
         public DateTime? DateRevoked { get; set; }

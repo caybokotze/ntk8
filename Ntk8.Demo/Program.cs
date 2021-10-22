@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySql.Data.MySqlClient;
+using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
@@ -19,6 +20,7 @@ namespace Ntk8.Demo
         {
             var builder = WebApplication.CreateBuilder(args);
             builder = ConfigureDependencies(builder);
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
             var _ = new AuthHandler(app, 
                 app.Resolve<IAccountService>(),
