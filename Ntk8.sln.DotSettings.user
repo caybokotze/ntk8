@@ -6,59 +6,21 @@
 &lt;/SessionState&gt;</s:String>
 	
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=243bcfaa_002Df221_002D4700_002Daef7_002D503ec13b299a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="UpdateShouldUpdateUser" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+DatabaseTests.UpdateShouldUpdateUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+DatabaseTests.RegisteredUserShouldBeActive&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.UserPrimaryPropertiesTests.ShouldContainAllRequiredProperties&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Commands.InsertUserTests.InsertShouldInsert&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Commands.UpdateUserTests.UpdateUserShouldUpdateUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Commands.UpdateUserTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Commands.InsertUserTests.ShouldReturnExpectedDates&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests.ShouldBeMiddleware&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMiddlewareIsInvoked.ShouldAddAuthenticationRequestHeader&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
+	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=4f815305_002De740_002D4092_002D8463_002Dbe955d65b2da/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateNewRefreshToken #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeRefreshTokenAndGenerateNewRefreshToken+WhenUserHasExistingRefreshTokens.ShouldGenerateNewRefreshToken&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d56d7fa9_002Ddd9a_002D414c_002Db2b2_002D58df3406e70b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TokenServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.TokenServiceTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=967c7be7_002Dbf50_002D43a9_002Db905_002D6755aea72a50/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateValidJwtToken" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+GenerateJwtToken.ShouldGenerateValidJwtToken&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+FetchUserAndCheckIfRefreshTokenIsActive.ShouldGetSingleRefreshTokenAndUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+FetchUserAndCheckIfRefreshTokenIsActive.ShouldThrowWhenNoTokensAreFound&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+GetAccount+WhenUserCanNotBeFound.ShouldThrow&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+GetAccount+WhenUserCanBeFound.ShouldReturnUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+RemoveOldRefreshTokens.ShouldRemoveOldRefreshTokens&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+RemoveOldRefreshTokens.ShouldNotRemoveValidRefreshTokens&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeAndGenerateRefreshToken+RevokeRefreshTokenAndReturnUser.ShouldRevokeRefreshTokenAndReturnTheUser&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b80111d2_002Db92e_002D4b69_002Dbdae_002D0e654dd9773f/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldThrowForNullAuthenticationToken" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMiddlewareIsInvoked.ShouldThrowForNullAuthenticationToken&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+GenerateJwtToken.ShouldGenerateValidJwtToken&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+GenerateJwtToken+WhenAuthSettingSecretIsTooShort.ShouldThrow&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeRefreshTokenAndGenerateNewRefreshToken+WhenUserHasExistingRefreshTokens.ShouldGenerateNewRefreshToken&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=cb1e9d9d_002Ddaad_002D4673_002Dbd2b_002D0b4b0566960b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="RegisterDoesRegisterUser" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Commands.UpdateUserTests.UpdateUserShouldUpdateUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Commands.InsertUserTests.InsertShouldInsert&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests.ShouldBeMiddleware&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMiddlewareIsInvoked.ShouldAddAuthenticationRequestHeader&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMiddlewareIsInvoked.ShouldThrowForNullAuthenticationToken&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMountingUserToContext.ShouldAttachAccountToHttpContext&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests+GenerateJwtToken.ShouldGenerateValidJwtToken&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Helpers.AccountServiceHelperTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
+	
+	
+	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e599877a_002Dee94_002D4e60_002D8e8d_002D2e71dda0f937/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateNewRefreshToken #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeRefreshTokenAndGenerateNewRefreshToken+WhenUserHasExistingRefreshTokens.ShouldGenerateNewRefreshToken&lt;/TestId&gt;&#xD;

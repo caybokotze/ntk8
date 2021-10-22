@@ -11,6 +11,7 @@ using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using static System.Text.Json.JsonSerializer;
+using static Newtonsoft.Json.JsonConvert;
 
 namespace Ntk8.Services
 {
@@ -66,7 +67,7 @@ namespace Ntk8.Services
                 {
                     new Claim(AuthenticationConstants
                         .PrimaryKeyValue, baseUserModel.Id.ToString()),
-                    new Claim("roles", Serialize(baseUserModel.Roles))
+                    new Claim("roles", SerializeObject(baseUserModel.Roles))
                 }),
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime

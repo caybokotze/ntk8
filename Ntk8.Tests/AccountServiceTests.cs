@@ -172,9 +172,9 @@ namespace Ntk8.Tests
                         user.RefreshTokens = CreateRefreshTokens(2, token);
                         var queryExecutor = Substitute.For<IQueryExecutor>();
                         var commandExecutor = Substitute.For<ICommandExecutor>();
-                        TokenService
-                            .GenerateRefreshToken(CreateAuthSettings(), token.CreatedByIp)
-                            .Returns(token);
+                        // TokenService
+                        //     .GenerateRefreshToken(CreateAuthSettings(), token.CreatedByIp)
+                        //     .Returns(token);
                         queryExecutor
                             .Execute(Arg.Is<FetchUserByRefreshToken>(f => f.Token == token.Token))
                             .Returns(user);
@@ -270,12 +270,12 @@ namespace Ntk8.Tests
         private static IAccountService Create(
             IQueryExecutor queryExecutor = null,
             ICommandExecutor commandExecutor = null,
-            AuthSettings authSettings = null)
+            ITokenService tokenService = null)
         {
             return new AccountService(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
-                authSettings ?? CreateAuthSettings());
+                tokenService ?? Substitute.For<ITokenService>());
         }
 
         private static List<RefreshToken> CreateRefreshTokens(int amount = 3, RefreshToken addTokenToList = null)
@@ -289,10 +289,11 @@ namespace Ntk8.Tests
             return list;
         }
         
-        private static RefreshToken CreateRefreshToken()
+        private static RefreshToken CreateRefreshToken(ITokenService tokenService = null)
         {
-            return TokenService.GenerateRefreshToken(
-                CreateAuthSettings(),
+            tokenService  ??= Substitute.For<ITokenService>();
+            
+            return tokenService.GenerateRefreshToken(
                 GetRandomIPv4Address()
             );
         }
