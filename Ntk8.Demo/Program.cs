@@ -1,21 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 using Dapper.CQRS;
-using HigLabo.Core;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
 using Ntk8.Models;
 using Ntk8.Services;
-using PeanutButter.Utils.Dictionaries;
 using static ScopeFunction.Utils.AppSettingsBuilder;
 
 namespace Ntk8.Demo

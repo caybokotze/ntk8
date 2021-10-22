@@ -1,7 +1,4 @@
-using System;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Ntk8.Models;
-using PeanutButter.DuckTyping;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
 namespace Ntk8.Tests.Helpers

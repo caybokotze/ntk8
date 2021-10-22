@@ -1,5 +1,4 @@
 using System.Linq;
-using Dapper;
 using Dapper.CQRS;
 using Ntk8.Models;
 

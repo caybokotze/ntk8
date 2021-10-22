@@ -4,6 +4,7 @@ using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using static NExpect.Expectations;
@@ -11,13 +12,13 @@ using static NExpect.Expectations;
 namespace Ntk8.Tests.Commands
 {
     [TestFixture]
-    public class WhenInsertingUsers : TestFixtureWithServiceProvider
+    public class InsertUserTests : TestFixtureWithServiceProvider
     {
         [Test]
         public void ShouldInsertUser()
         {
             // arrange
-            var user = RandomValueGen.GetRandom<BaseUser>();
+            var user = TestUser.Create();
             var commandExecutor = Resolve<ICommandExecutor>();
             var queryExecutor = Resolve<IQueryExecutor>();
             // act
@@ -37,6 +38,7 @@ namespace Ntk8.Tests.Commands
                 expectedUser.DateResetTokenExpires = user.DateResetTokenExpires;
                 user.RefreshTokens = null;
                 user.UserRoles = null;
+                user.Roles = null;
                 user.Id = id;
                 Expect(expectedUser)
                     .To.Deep.Equal(user);

@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Ntk8.Models;
 using PeanutButter.DuckTyping.Exceptions;
 using PeanutButter.DuckTyping.Extensions;
 using PeanutButter.Utils;

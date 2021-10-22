@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Ntk8.Dto;
+﻿using Ntk8.Dto;
 using Ntk8.Models;
 
 namespace Ntk8.Services

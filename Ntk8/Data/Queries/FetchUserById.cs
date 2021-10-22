@@ -1,4 +1,5 @@
 ﻿using Dapper.CQRS;
+using Ntk8.Helpers;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries

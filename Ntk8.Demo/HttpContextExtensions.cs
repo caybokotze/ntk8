@@ -2,10 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using PeanutButter.Utils;
 
 namespace Ntk8.Demo
 {

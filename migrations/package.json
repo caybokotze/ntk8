@@ -14,7 +14,7 @@
     "sqlPassword": "sqltracking",
     "sqlHost": "localhost",
     "sqlPort": "3306",
-    "sqlDatabase": "demodb",
+    "sqlDatabase": "ntk8_tests",
     "migrationTableName": "__migrations"
   }
 }

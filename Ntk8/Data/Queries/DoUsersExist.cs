@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Dapper.CQRS;
-using Ntk8.Models;
+﻿using Dapper.CQRS;
 
 namespace Ntk8.Data.Queries
 {
