@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Configuration;
 using System.Data;
+using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper.CQRS;
-using Dapper.CQRS.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using Ntk8.Models;
@@ -22,7 +20,7 @@ using PeanutButter.RandomGenerators;
 namespace Ntk8.Tests
 {
     [TestFixture]
-    public class TestBase
+    public class TestFixtureWithServiceProvider
     {
         public IServiceProvider ServiceProvider { get; set; }
         
@@ -56,14 +54,10 @@ namespace Ntk8.Tests
                         RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
                         RefreshTokenTTL = 3600
                     });
-                    config.AddTransient<IDbConnection>(p =>
+                    config.AddTransient<IDbConnection, DbConnection>(p =>
                         new MySqlConnection(AppSettingProvider.CreateAppSettings().DefaultConnection));
-                    config.AddTransient<IBaseSqlExecutorOptions>(provider => new BaseSqlExecutorOptions
-                    {
-                        Connection = Resolve<IDbConnection>(),
-                        Dbms = DBMS.MySQL,
-                        ServiceProvider = provider
-                    });
+                    config.AddTransient<IQueryExecutor, QueryExecutor>();
+                    config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddTransient<IAccountService, AccountService>();
                     config.Configure<IAuthSettings>(options => appSettings.GetSection("AuthSettings").Bind(options));
                 });

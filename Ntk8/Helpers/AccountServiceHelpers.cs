@@ -31,16 +31,16 @@ namespace Ntk8.Helpers
         }
 
         public static string GenerateJwtToken(
-            AuthSettings configuration,
+            AuthSettings authSettings,
             BaseUser baseUserModel)
         {
-            if (configuration.RefreshTokenSecret.Length < 32)
+            if (authSettings.RefreshTokenSecret.Length < 32)
             {
                 throw new InvalidTokenLengthException();
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(configuration.RefreshTokenSecret);
+            var key = Encoding.UTF8.GetBytes(authSettings.RefreshTokenSecret);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -51,7 +51,7 @@ namespace Ntk8.Helpers
                     new Claim("roles", Serialize(baseUserModel.Roles))
                 }),
                 IssuedAt = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = DateTime.UtcNow.AddSeconds(authSettings.JwtTTL == 0 ? 900 : authSettings.JwtTTL),
                 Issuer = "NTK8",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), 
                     SecurityAlgorithms.HmacSha256Signature)

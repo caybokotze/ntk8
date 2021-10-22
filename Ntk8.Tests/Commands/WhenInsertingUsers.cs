@@ -11,7 +11,7 @@ using static NExpect.Expectations;
 namespace Ntk8.Tests.Commands
 {
     [TestFixture]
-    public class WhenInsertingUsers : TestBase
+    public class WhenInsertingUsers : TestFixtureWithServiceProvider
     {
         [Test]
         public void ShouldInsertUser()

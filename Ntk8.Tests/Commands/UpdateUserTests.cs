@@ -11,7 +11,7 @@ using static PeanutButter.RandomGenerators.RandomValueGen;
 namespace Ntk8.Tests.Commands
 {
     [TestFixture]
-    public class UpdateUserTests : TestBase
+    public class UpdateUserTests : TestFixtureWithServiceProvider
     {
         [Test]
         public void UpdateUserShouldUpdateUser()

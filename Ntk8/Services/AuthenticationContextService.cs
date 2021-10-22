@@ -35,8 +35,7 @@ namespace Ntk8.Services
             (BaseUser) _httpContextAccessor
                 .HttpContext
                 .Items[AuthenticationConstants.ContextAccount];
-        
-        
+
         public string GetRefreshToken()
         {
             return _httpContextAccessor
@@ -98,6 +97,7 @@ namespace Ntk8.Services
                 HttpOnly = true,
                 Expires = DateTime.UtcNow.AddDays(7)
             };
+            
             _httpContextAccessor.HttpContext.Response.Cookies.Append(
                 AuthenticationConstants.RefreshToken, 
                 token,

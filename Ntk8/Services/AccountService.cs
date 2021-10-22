@@ -10,7 +10,6 @@ using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Helpers;
 using Ntk8.Models;
-using PeanutButter.Utils;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
@@ -88,11 +87,11 @@ namespace Ntk8.Services
             string token,
             string ipAddress)
         {
-            var newRefreshToken = AccountServiceHelpers
-                .GenerateRefreshToken(_authSettings, ipAddress);
-            
             var user = RevokeRefreshTokenAndReturnUser(token, ipAddress);
             
+            var newRefreshToken = AccountServiceHelpers
+                .GenerateRefreshToken(_authSettings, ipAddress);
+
             user.RefreshTokens.Add(newRefreshToken);
 
             AccountServiceHelpers
@@ -282,7 +281,7 @@ namespace Ntk8.Services
                 user.PasswordHash = BC.HashPassword(model.Password);
             }
             
-            model.CopyPropertiesTo(user);
+            model.Map(user);
             user.DateModified = DateTime.UtcNow;
 
             _commandExecutor.Execute(new UpdateUser(user));

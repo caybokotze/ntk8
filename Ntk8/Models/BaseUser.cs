@@ -34,7 +34,7 @@ namespace Ntk8.Models
         ICollection<UserRole> UserRoles { get; set; }
         bool IsVerified { get; }
         bool OwnsToken(string token);
-        IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor);
+        IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor);
     }
 
     public abstract class BaseUser : IBaseUser
@@ -126,11 +126,11 @@ namespace Ntk8.Models
         
         public bool IsVerified => DateVerified.HasValue || DateOfPasswordReset.HasValue;
         
-        public IEnumerable<UserRole> GetUserRoles(IQueryExecutor queryExecutor)
+        public IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor)
         {
-            UserRoles = queryExecutor
+            Roles = queryExecutor
                 .Execute(new FetchUserRolesForUserId(Id));
-            return UserRoles;
+            return Roles;
         }
     }
 }

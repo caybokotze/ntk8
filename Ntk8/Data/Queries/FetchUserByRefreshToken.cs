@@ -10,19 +10,18 @@ namespace Ntk8.Data.Queries
     /// </summary>
     public class FetchUserByRefreshToken : Query<BaseUser>
     {
-        private readonly string _token;
+        public string Token { get; }
 
         public FetchUserByRefreshToken(string token)
         {
-            _token = token;
+            Token = token;
         }
 
         public override void Execute()
         {
             var sql = "SELECT * FROM users LEFT JOIN refresh_tokens ON users.id = refresh_tokens.user_id;";
 
-            Result = Raw()
-                .Query<BaseUser, RefreshToken, BaseUser>(
+            Result = Query<BaseUser, RefreshToken, BaseUser>(
                     sql, (user, refreshToken) =>
                     {
                         user.RefreshTokens.Add(refreshToken);
@@ -30,7 +29,7 @@ namespace Ntk8.Data.Queries
                     },
                     new
                     {
-                        Token = _token
+                        Token = Token
                     }).FirstOrDefault();
         }
     }
