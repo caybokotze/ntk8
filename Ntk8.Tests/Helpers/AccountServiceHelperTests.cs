@@ -11,6 +11,7 @@ using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Helpers;
 using Ntk8.Models;
+using Ntk8.Services;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -123,7 +124,7 @@ namespace Ntk8.Tests.Helpers
                     .Execute(Arg.Any<FetchUserByRefreshToken>())
                     .Returns(randomUser);
                 
-                var baseUser = AccountServiceHelpers
+                var baseUser = TokenService
                     .FetchUserAndCheckIfRefreshTokenIsActive(queryExecutor, refreshToken.Token);
                 // act
                 // assert
@@ -144,7 +145,7 @@ namespace Ntk8.Tests.Helpers
                     .Returns(randomUser);
                 // act
                 // assert
-                Expect(() => AccountServiceHelpers
+                Expect(() => TokenService
                         .FetchUserAndCheckIfRefreshTokenIsActive(queryExecutor, token))
                     .To.Throw<InvalidOperationException>();
             }
@@ -171,7 +172,7 @@ namespace Ntk8.Tests.Helpers
                     oldRefreshToken
                 };
                 // act
-                var expectedUser = AccountServiceHelpers
+                var expectedUser = TokenService
                     .RemoveOldRefreshTokens(authSettings, user);
                 // assert
                 Expect(expectedUser.RefreshTokens.Count).To.Equal(1);
@@ -191,7 +192,7 @@ namespace Ntk8.Tests.Helpers
                     newRefreshToken
                 };
                 // act
-                var expectedUser = AccountServiceHelpers
+                var expectedUser = TokenService
                     .RemoveOldRefreshTokens(authSettings, user);
                 // assert
                 Expect(expectedUser.RefreshTokens.Count).To.Equal(1);
@@ -216,7 +217,7 @@ namespace Ntk8.Tests.Helpers
                         .ReturnsNull();
                     // act
                     // assert
-                    Expect(() => AccountServiceHelpers.GetAccount(queryExecutor, user.Id))
+                    Expect(() => TokenService.GetAccount(queryExecutor, user.Id))
                         .To.Throw<UserNotFoundException>()
                         .With.Message.Containing("The user can not be found");
                 }
@@ -235,7 +236,7 @@ namespace Ntk8.Tests.Helpers
                         .Execute(Arg.Is<FetchUserById>(f => f.Id == user.Id))
                         .Returns(user);
                     // act
-                    var expectedUser = AccountServiceHelpers.GetAccount(queryExecutor, user.Id);
+                    var expectedUser = TokenService.GetAccount(queryExecutor, user.Id);
                     // assert
                     Expect(expectedUser).To.Equal(user);
                 }
@@ -246,7 +247,7 @@ namespace Ntk8.Tests.Helpers
             AuthSettings authSettings = null, 
             BaseUser baseUser = null)
         {
-            return AccountServiceHelpers.GenerateJwtToken(
+            return TokenService.GenerateJwtToken(
                 authSettings ?? new AuthSettings
                 {
                     RefreshTokenSecret = GetRandomString(35)
@@ -280,7 +281,7 @@ namespace Ntk8.Tests.Helpers
 
         private static RefreshToken CreateRefreshToken()
         {
-            return AccountServiceHelpers.GenerateRefreshToken(
+            return TokenService.GenerateRefreshToken(
                 CreateAuthSettings(),
                 GetRandomIPv4Address()
             );

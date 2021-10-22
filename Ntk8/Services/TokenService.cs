@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -13,15 +12,24 @@ using Ntk8.Exceptions;
 using Ntk8.Models;
 using static System.Text.Json.JsonSerializer;
 
-namespace Ntk8.Helpers
+namespace Ntk8.Services
 {
-    public static class AccountServiceHelpers
+    public class TokenService
     {
-        public static BaseUser GetAccount(
+        private readonly IQueryExecutor _queryExecutor;
+        private readonly AuthSettings _authSettings;
+
+        public TokenService(
             IQueryExecutor queryExecutor,
-            int id)
+            AuthSettings authSettings)
         {
-            var account = queryExecutor.Execute(new FetchUserById(id));
+            _queryExecutor = queryExecutor;
+            _authSettings = authSettings;
+        }
+        
+        public BaseUser GetAccount(int id)
+        {
+            var account = _queryExecutor.Execute(new FetchUserById(id));
             if (account == null)
             {
                 throw new UserNotFoundException("The user can not be found.");
@@ -30,17 +38,15 @@ namespace Ntk8.Helpers
             return account;
         }
 
-        public static string GenerateJwtToken(
-            AuthSettings authSettings,
-            BaseUser baseUserModel)
+        public string GenerateJwtToken(BaseUser baseUserModel)
         {
-            if (authSettings.RefreshTokenSecret.Length < 32)
+            if (_authSettings.RefreshTokenSecret.Length < 32)
             {
                 throw new InvalidTokenLengthException();
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(authSettings.RefreshTokenSecret);
+            var key = Encoding.UTF8.GetBytes(_authSettings.RefreshTokenSecret);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -51,7 +57,9 @@ namespace Ntk8.Helpers
                     new Claim("roles", Serialize(baseUserModel.Roles))
                 }),
                 IssuedAt = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddSeconds(authSettings.JwtTTL == 0 ? 900 : authSettings.JwtTTL),
+                Expires = DateTime
+                    .UtcNow
+                    .AddSeconds(_authSettings.JwtTTL == 0 ? 900 : _authSettings.JwtTTL),
                 Issuer = "NTK8",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), 
                     SecurityAlgorithms.HmacSha256Signature)
@@ -60,11 +68,9 @@ namespace Ntk8.Helpers
             return tokenHandler.WriteToken(token);
         }
 
-        public static BaseUser FetchUserAndCheckIfRefreshTokenIsActive(
-            IQueryExecutor queryExecutor, 
-            string token)
+        public BaseUser FetchUserAndCheckIfRefreshTokenIsActive(string token)
         {
-            var account = queryExecutor
+            var account = _queryExecutor
                 .Execute(new FetchUserByRefreshToken(token));
             
             if (account is null)
@@ -87,25 +93,24 @@ namespace Ntk8.Helpers
             return account;
         }
 
-        public static BaseUser RemoveOldRefreshTokens(
-            AuthSettings configuration,
+        public BaseUser RemoveOldRefreshTokens(
             BaseUser baseUserModel)
         {
             baseUserModel
                 .RefreshTokens
                 .RemoveAll(x => !x.IsActive &&
-                                x.DateCreated.AddSeconds(configuration.RefreshTokenTTL)
+                                x.DateCreated.AddSeconds(_authSettings.RefreshTokenTTL)
                                 <= DateTime.UtcNow);
 
             return baseUserModel;
         }
 
-        public static RefreshToken GenerateRefreshToken(AuthSettings authSettings, string ipAddress)
+        public RefreshToken GenerateRefreshToken(string ipAddress)
         {
             return new()
             {
                 Token = RandomTokenString(),
-                Expires = DateTime.UtcNow.AddSeconds(authSettings.RefreshTokenTTL),
+                Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = ipAddress
             };

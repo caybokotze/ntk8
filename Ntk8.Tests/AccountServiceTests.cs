@@ -172,6 +172,9 @@ namespace Ntk8.Tests
                         user.RefreshTokens = CreateRefreshTokens(2, token);
                         var queryExecutor = Substitute.For<IQueryExecutor>();
                         var commandExecutor = Substitute.For<ICommandExecutor>();
+                        TokenService
+                            .GenerateRefreshToken(CreateAuthSettings(), token.CreatedByIp)
+                            .Returns(token);
                         queryExecutor
                             .Execute(Arg.Is<FetchUserByRefreshToken>(f => f.Token == token.Token))
                             .Returns(user);
@@ -288,7 +291,7 @@ namespace Ntk8.Tests
         
         private static RefreshToken CreateRefreshToken()
         {
-            return AccountServiceHelpers.GenerateRefreshToken(
+            return TokenService.GenerateRefreshToken(
                 CreateAuthSettings(),
                 GetRandomIPv4Address()
             );

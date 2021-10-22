@@ -55,10 +55,10 @@ namespace Ntk8.Services
                 throw new InvalidPasswordException("User is not verified or password is incorrect");
             }
             
-            var jwtToken = AccountServiceHelpers
+            var jwtToken = TokenService
                 .GenerateJwtToken(_authSettings, user);
             
-            var refreshToken = AccountServiceHelpers
+            var refreshToken = TokenService
                 .GenerateRefreshToken(_authSettings, ipAddress);
             
             user.RefreshTokens = new List<RefreshToken>
@@ -66,7 +66,7 @@ namespace Ntk8.Services
                 refreshToken
             };
             
-            AccountServiceHelpers
+            TokenService
                 .RemoveOldRefreshTokens(_authSettings, user);
             _commandExecutor.Execute(new UpdateUser(user));
 
@@ -89,15 +89,15 @@ namespace Ntk8.Services
         {
             var user = RevokeRefreshTokenAndReturnUser(token, ipAddress);
             
-            var newRefreshToken = AccountServiceHelpers
+            var newRefreshToken = TokenService
                 .GenerateRefreshToken(_authSettings, ipAddress);
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            AccountServiceHelpers
+            TokenService
                 .RemoveOldRefreshTokens(_authSettings, user);
 
-            var jwtToken = AccountServiceHelpers
+            var jwtToken = TokenService
                 .GenerateJwtToken(_authSettings, user);
 
             var response = user.Map(new AuthenticatedResponse());
@@ -114,7 +114,7 @@ namespace Ntk8.Services
         /// <param name="ipAddress"></param>
         public BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress)
         {
-            var user = AccountServiceHelpers
+            var user = TokenService
                 .FetchUserAndCheckIfRefreshTokenIsActive(_queryExecutor, token);
             
             var refreshToken = user
@@ -141,7 +141,7 @@ namespace Ntk8.Services
                     throw new UserAlreadyExistsException();
                 }
 
-                dbUserModel.VerificationToken = AccountServiceHelpers.RandomTokenString();
+                dbUserModel.VerificationToken = TokenService.RandomTokenString();
                 dbUserModel.DateModified = DateTime.Now;
                 _commandExecutor.Execute(new UpdateUser(dbUserModel));
                 return;
@@ -149,7 +149,7 @@ namespace Ntk8.Services
 
             var user = model.Map((BaseUser) new object());
             user.IsActive = true;
-            user.VerificationToken = AccountServiceHelpers.RandomTokenString();
+            user.VerificationToken = TokenService.RandomTokenString();
             user.PasswordHash = BC.HashPassword(model.Password);
             
             _commandExecutor
@@ -206,7 +206,7 @@ namespace Ntk8.Services
             if (user == null) return;
 
             // create reset token that expires after 1 day
-            user.ResetToken = AccountServiceHelpers.RandomTokenString();
+            user.ResetToken = TokenService.RandomTokenString();
             user.DateResetTokenExpires = DateTime.UtcNow.AddDays(1);
 
             _commandExecutor.Execute(new UpdateUser(user));
@@ -273,7 +273,7 @@ namespace Ntk8.Services
 
         public AccountResponse Update(int id, UpdateRequest model)
         {
-            var user = AccountServiceHelpers
+            var user = TokenService
                 .GetAccount(_queryExecutor, id);
 
             if (!string.IsNullOrEmpty(model.Password))
