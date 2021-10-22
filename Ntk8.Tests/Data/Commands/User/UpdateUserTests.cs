@@ -7,7 +7,7 @@ using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
-namespace Ntk8.Tests.Commands
+namespace Ntk8.Tests.Data.Commands.User
 {
     [TestFixture]
     public class UpdateUserTests : TestFixtureWithServiceProvider

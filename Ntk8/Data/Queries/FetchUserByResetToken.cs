@@ -17,8 +17,7 @@ namespace Ntk8.Data.Queries
         public override void Execute()
         {
             Result = QueryFirst<BaseUser>(@"SELECT * FROM users 
-            WHERE reset_token = @ResetToken 
-              AND reset_token_expires > " + $"{DateTime.Now.ToString(CultureInfo.InvariantCulture)}", new
+            WHERE reset_token = @ResetToken;", new
             {
                 ResetToken = Token
             });

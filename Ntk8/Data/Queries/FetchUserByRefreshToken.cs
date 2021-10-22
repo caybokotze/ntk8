@@ -18,7 +18,7 @@ namespace Ntk8.Data.Queries
 
         public override void Execute()
         {
-            var sql = "SELECT * FROM users LEFT JOIN refresh_tokens ON users.id = refresh_tokens.user_id;";
+            var sql = "SELECT * FROM users LEFT JOIN refresh_tokens ON users.id = refresh_tokens.user_id WHERE refresh_tokens.id = @Token;";
 
             Result = Query<BaseUser, RefreshToken, BaseUser>(
                     sql, (user, refreshToken) =>

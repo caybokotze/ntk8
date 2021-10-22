@@ -1,5 +1,5 @@
-﻿using Dapper.CQRS;
-using Ntk8.Helpers;
+﻿using System.Linq;
+using Dapper.CQRS;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -15,10 +15,15 @@ namespace Ntk8.Data.Queries
         
         public override void Execute()
         {
-            Result = QueryFirst<BaseUser>("SELECT * FROM users WHERE id = @Id", 
-                new { Id = Id });
+            var sql = "SELECT * FROM users LEFT JOIN refresh_tokens ON users.id = refresh_tokens.user_id WHERE users.id = @Id;";
+            Result = Query<BaseUser, RefreshToken, BaseUser>(sql,
+                (user, token) =>
+                {
+                    user.RefreshTokens.Add(token);
+                    return user;
+                },
+                new { Id })
+                .First();
         }
-        
-        // todo: Eager load refresh tokens
     }
 }

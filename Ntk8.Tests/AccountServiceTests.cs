@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dapper.CQRS;
 using HigLabo.Core;
 using NExpect;
@@ -243,8 +244,8 @@ namespace Ntk8.Tests
                         var user = accountService
                             .RevokeRefreshTokenAndReturnUser(refreshToken.Token, ipAddress);
                         // assert
-                        Expect(user.RefreshTokens[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
-                        Expect(user.RefreshTokens[0].RevokedByIp).To.Equal(ipAddress);
+                        Expect(user.RefreshTokens.ToList()[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
+                        Expect(user.RefreshTokens.ToList()[0].RevokedByIp).To.Equal(ipAddress);
                         Expect(commandExecutor)
                             .To.Have.Received(1)
                             .Execute(Arg.Any<UpdateRefreshToken>());

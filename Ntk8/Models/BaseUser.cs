@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Dapper.CQRS;
 using Newtonsoft.Json;
 using Ntk8.Data.Queries;
@@ -30,8 +31,9 @@ namespace Ntk8.Models
         DateTime? DateVerified { get; set; }
         DateTime? DateOfPasswordReset { get; set; }
         DateTime? DateResetTokenExpires { get; set; }
-        List<RefreshToken> RefreshTokens { get; set; }
+        ICollection<RefreshToken> RefreshTokens { get; set; }
         ICollection<UserRole> UserRoles { get; set; }
+        ICollection<Role> Roles { get; set; }
         bool IsVerified { get; }
         bool OwnsToken(string token);
         IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor);
@@ -42,8 +44,11 @@ namespace Ntk8.Models
         protected BaseUser()
         {
             Guid = Guid.NewGuid();
-            DateCreated = DateTime.Now;
-            DateModified = DateTime.Now;
+            DateCreated = DateTime.UtcNow;
+            DateModified = DateTime.UtcNow;
+            Roles = new List<Role>();
+            UserRoles = new List<UserRole>();
+            RefreshTokens = new List<RefreshToken>();
         }
 
         protected BaseUser(IBaseUser user)
@@ -110,7 +115,7 @@ namespace Ntk8.Models
         public DateTime? DateResetTokenExpires { get; set; }
         
         [JsonIgnore]
-        public virtual List<RefreshToken> RefreshTokens { get; set; }
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         
         [JsonIgnore]
         public virtual ICollection<UserRole> UserRoles { get; set; }
@@ -120,7 +125,8 @@ namespace Ntk8.Models
         
         public bool OwnsToken(string token)
         {
-            return RefreshTokens?
+            return RefreshTokens
+                .ToList()?
                 .Find(x => x.Token == token) != null;
         }
         

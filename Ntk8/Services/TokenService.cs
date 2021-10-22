@@ -110,6 +110,7 @@ namespace Ntk8.Services
         {
             baseUserModel
                 .RefreshTokens
+                .ToList()
                 .RemoveAll(x => !x.IsActive &&
                                 x.DateCreated.AddSeconds(_authSettings.RefreshTokenTTL)
                                 <= DateTime.UtcNow);

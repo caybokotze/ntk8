@@ -142,7 +142,8 @@ namespace Ntk8.Tests.MiddlewareTests
             authSettings ??= new AuthSettings
             {
                 RefreshTokenSecret = GetRandomString(40),
-                RefreshTokenTTL = 3600
+                RefreshTokenTTL = 3600,
+                JwtTTL = 1000
             };
             
             return new JwtMiddleware(
