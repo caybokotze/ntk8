@@ -8,7 +8,6 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
-using Ntk8.Helpers;
 using Ntk8.Models;
 using BC = BCrypt.Net.BCrypt;
 
@@ -16,18 +15,21 @@ namespace Ntk8.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly AuthSettings _authSettings;
+        // private readonly AuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
+        private readonly ITokenService _tokenService;
 
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            IAuthSettings authSettings)
+            IAuthSettings authSettings,
+            ITokenService tokenService)
         {
-            _authSettings = (AuthSettings) authSettings;
+            // _authSettings = (AuthSettings) authSettings;
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
+            _tokenService = tokenService;
         }
         
         /// <summary>
@@ -55,19 +57,16 @@ namespace Ntk8.Services
                 throw new InvalidPasswordException("User is not verified or password is incorrect");
             }
             
-            var jwtToken = TokenService
-                .GenerateJwtToken(_authSettings, user);
+            var jwtToken = _tokenService.GenerateJwtToken(user);
             
-            var refreshToken = TokenService
-                .GenerateRefreshToken(_authSettings, ipAddress);
+            var refreshToken = _tokenService.GenerateRefreshToken(ipAddress);
             
             user.RefreshTokens = new List<RefreshToken>
             {
                 refreshToken
             };
             
-            TokenService
-                .RemoveOldRefreshTokens(_authSettings, user);
+            _tokenService.RemoveOldRefreshTokens(user);
             _commandExecutor.Execute(new UpdateUser(user));
 
             var response = user.Map(new AuthenticatedResponse());
@@ -89,16 +88,13 @@ namespace Ntk8.Services
         {
             var user = RevokeRefreshTokenAndReturnUser(token, ipAddress);
             
-            var newRefreshToken = TokenService
-                .GenerateRefreshToken(_authSettings, ipAddress);
+            var newRefreshToken = _tokenService.GenerateRefreshToken(ipAddress);
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            TokenService
-                .RemoveOldRefreshTokens(_authSettings, user);
+            _tokenService.RemoveOldRefreshTokens(user);
 
-            var jwtToken = TokenService
-                .GenerateJwtToken(_authSettings, user);
+            var jwtToken = _tokenService.GenerateJwtToken(user);
 
             var response = user.Map(new AuthenticatedResponse());
             
@@ -114,8 +110,7 @@ namespace Ntk8.Services
         /// <param name="ipAddress"></param>
         public BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress)
         {
-            var user = TokenService
-                .FetchUserAndCheckIfRefreshTokenIsActive(_queryExecutor, token);
+            var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
             
             var refreshToken = user
                 .RefreshTokens
@@ -273,8 +268,7 @@ namespace Ntk8.Services
 
         public AccountResponse Update(int id, UpdateRequest model)
         {
-            var user = TokenService
-                .GetAccount(_queryExecutor, id);
+            var user = _tokenService.GetAccount(id);
 
             if (!string.IsNullOrEmpty(model.Password))
             {

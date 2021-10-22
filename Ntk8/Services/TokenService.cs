@@ -14,7 +14,19 @@ using static System.Text.Json.JsonSerializer;
 
 namespace Ntk8.Services
 {
-    public class TokenService
+    public interface ITokenService
+    {
+        BaseUser GetAccount(int id);
+        string GenerateJwtToken(BaseUser baseUserModel);
+        BaseUser FetchUserAndCheckIfRefreshTokenIsActive(string token);
+
+        BaseUser RemoveOldRefreshTokens(
+            BaseUser baseUserModel);
+
+        RefreshToken GenerateRefreshToken(string ipAddress);
+    }
+
+    public class TokenService : ITokenService
     {
         private readonly IQueryExecutor _queryExecutor;
         private readonly AuthSettings _authSettings;

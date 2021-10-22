@@ -47,12 +47,14 @@ namespace Ntk8.Tests
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
                     config.AddTransient<IAuthenticationContextService, AuthenticationContextService>();
+                    config.AddTransient<ITokenService, TokenService>();
                     config.AddTransient<IAuthSettings, AuthSettings>();
                     config.AddTransient(
                         _ => new AuthSettings
                     {
                         RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
-                        RefreshTokenTTL = 3600
+                        RefreshTokenTTL = 3600,
+                        JwtTTL = 1000
                     });
                     config.AddTransient<IDbConnection, DbConnection>(p =>
                         new MySqlConnection(AppSettingProvider.CreateAppSettings().DefaultConnection));
