@@ -2,18 +2,15 @@
 using System.Collections.Generic;
 using Dapper.CQRS;
 using HigLabo.Core;
-using Microsoft.VisualStudio.TestPlatform.CrossPlatEngine;
 using NExpect;
 using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
-using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
-using PeanutButter.Utils;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
@@ -35,7 +32,7 @@ namespace Ntk8.Tests
             Expect(commandExecutor).Not.To.Be.Null();
             Expect(queryExecutor).Not.To.Be.Null();
         }
-        
+
         [TestFixture]
         public class IntegrationTests : TestFixtureWithServiceProvider
         {
@@ -115,7 +112,7 @@ namespace Ntk8.Tests
                 public void ShouldGenerateRefreshToken()
                 {
                     // arrange
-                    
+
                     // act
                     // assert
                 }
@@ -124,7 +121,7 @@ namespace Ntk8.Tests
                 public void ShouldGenerateJwtToken()
                 {
                     // arrange
-                    
+
                     // act
                     // assert
                 }
@@ -136,7 +133,7 @@ namespace Ntk8.Tests
                     public void ShouldThrowWhenUserNotFound()
                     {
                         // arrange
-                        
+
                         // act
                         // assert
                     }
@@ -149,13 +146,13 @@ namespace Ntk8.Tests
                     public void ShouldThrowWhenPasswordDoesntMatchHash()
                     {
                         // arrange
-                        
+
                         // act
                         // assert
                     }
                 }
             }
-            
+
             [TestFixture]
             public class RevokeRefreshTokenAndGenerateNewRefreshToken
             {
@@ -168,34 +165,37 @@ namespace Ntk8.Tests
                         // arrange
                         var token = CreateRefreshToken();
                         var user = TestUser.Create();
-
                         user.RefreshTokens = CreateRefreshTokens(2, token);
                         var queryExecutor = Substitute.For<IQueryExecutor>();
                         var commandExecutor = Substitute.For<ICommandExecutor>();
-                        // TokenService
-                        //     .GenerateRefreshToken(CreateAuthSettings(), token.CreatedByIp)
-                        //     .Returns(token);
+                        var tokenService = Substitute.For<ITokenService>();
+                        var newToken = CreateRefreshToken();
+                        tokenService
+                            .GenerateRefreshToken(Arg.Is<string>(s => s == token.CreatedByIp))
+                            .Returns(newToken);
+                        tokenService
+                            .FetchUserAndCheckIfRefreshTokenIsActive(token.Token)
+                            .Returns(user);
                         queryExecutor
                             .Execute(Arg.Is<FetchUserByRefreshToken>(f => f.Token == token.Token))
                             .Returns(user);
                         commandExecutor.Execute(Arg.Any<UpdateRefreshToken>())
                             .Returns(1);
-                        var accountService = Create(queryExecutor, commandExecutor);
-                        queryExecutor
-                            .Execute(Arg.Is<FetchUserByRefreshToken>(r => r.Token == token.Token))
-                            .Returns(user);
                         // act
+                        var accountService = Create(queryExecutor, commandExecutor, tokenService);
                         var authenticatedResponse = accountService
-                                .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
+                            .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
                         // assert
                         Expect(authenticatedResponse).Not.To.Be.Null();
+                        Expect(authenticatedResponse.RefreshToken)
+                            .To.Equal(newToken.Token);
                     }
 
                     [Test]
                     public void ShouldCallRevokeTokenAndReturnUserToBeCalled()
                     {
                         // arrange
-                        
+
                         // act
                         // assert
                     }
@@ -208,7 +208,7 @@ namespace Ntk8.Tests
                     public void ShouldGenerateNewRefreshToken()
                     {
                         // arrange
-                        
+
                         // act
                         // assert
                     }
@@ -226,11 +226,11 @@ namespace Ntk8.Tests
                         var testUser = TestUser.Create();
                         var refreshToken = CreateRefreshToken();
                         testUser.RefreshTokens.Add(refreshToken);
-                        
+
                         commandExecutor
                             .Execute(Arg.Any<UpdateRefreshToken>())
                             .Returns(1);
-                        
+
                         queryExecutor
                             .Execute(Arg.Any<FetchUserByRefreshToken>())
                             .Returns(testUser);
@@ -239,7 +239,7 @@ namespace Ntk8.Tests
 
                         // act
                         var accountService = Create(queryExecutor, commandExecutor);
-                        
+
                         var user = accountService
                             .RevokeRefreshTokenAndReturnUser(refreshToken.Token, ipAddress);
                         // assert
@@ -285,25 +285,29 @@ namespace Ntk8.Tests
             {
                 list.Add(addTokenToList);
             }
+
             amount.Times(() => list.Add(CreateRefreshToken()));
             return list;
         }
-        
+
         private static RefreshToken CreateRefreshToken(ITokenService tokenService = null)
         {
-            tokenService  ??= Substitute.For<ITokenService>();
-            
+            tokenService ??= Substitute
+                .For<TokenService>(Substitute.For<IQueryExecutor>(),
+                    CreateAuthSettings());
+
             return tokenService.GenerateRefreshToken(
                 GetRandomIPv4Address()
             );
         }
-        
+
         private static AuthSettings CreateAuthSettings()
         {
             return new()
             {
                 RefreshTokenSecret = GetRandomAlphaString(40),
-                RefreshTokenTTL = 604800
+                RefreshTokenTTL = 604800,
+                JwtTTL = 1000
             };
         }
     }
