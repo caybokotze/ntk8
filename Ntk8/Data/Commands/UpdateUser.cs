@@ -33,7 +33,7 @@ namespace Ntk8.Data.Commands
             verification_token = @VerificationToken,
             date_verified = @DateVerified,
             date_of_password_reset = @DateOfPasswordReset,
-            date_reset_token_expires = @ResetTokenExpires,
+            date_reset_token_expires = @DateResetTokenExpires,
             date_modified = @DateModified,
             date_created = @DateCreated,
             is_active = @IsActive
