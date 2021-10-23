@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 using Dapper.CQRS;
 using HigLabo.Core;
 using NExpect;
@@ -15,7 +16,7 @@ using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
-namespace Ntk8.Tests
+namespace Ntk8.Tests.Services
 {
     [TestFixture]
     public class AccountServiceTests : TestFixtureWithServiceProvider
@@ -23,15 +24,20 @@ namespace Ntk8.Tests
         [Test]
         public void PrimaryServicesShouldNotBeNull()
         {
-            // arrange
-            var accountService = Resolve<IAccountService>();
-            var commandExecutor = Resolve<ICommandExecutor>();
-            var queryExecutor = Resolve<IQueryExecutor>();
-            // act
-            // assert
-            Expect(accountService).Not.To.Be.Null();
-            Expect(commandExecutor).Not.To.Be.Null();
-            Expect(queryExecutor).Not.To.Be.Null();
+            using (new TransactionScope())
+            {
+                // arrange
+                var accountService = Resolve<IAccountService>();
+                var commandExecutor = Resolve<ICommandExecutor>();
+                var queryExecutor = Resolve<IQueryExecutor>();
+                var tokenService = Resolve<ITokenService>();
+                // act
+                // assert
+                Expect(accountService).Not.To.Be.Null();
+                Expect(commandExecutor).Not.To.Be.Null();
+                Expect(queryExecutor).Not.To.Be.Null();
+                Expect(tokenService).Not.To.Be.Null();
+            }
         }
 
         [TestFixture]
@@ -40,15 +46,15 @@ namespace Ntk8.Tests
             [Test]
             public void RegisterShouldRegisterUser()
             {
-                // arrange
-                var accountService = Create();
-                var origin = GetRandomIPv4Address();
-                var registerRequest = GetRandom<RegisterRequest>();
-                registerRequest.Email = GetRandomEmail();
-                var queryExecutor = Resolve<IQueryExecutor>();
-                // act
-                using (Transactions.RepeatableRead())
+                using (new TransactionScope())
                 {
+                    // arrange
+                    var accountService = Create();
+                    var origin = GetRandomIPv4Address();
+                    var registerRequest = GetRandom<RegisterRequest>();
+                    registerRequest.Email = GetRandomEmail();
+                    var queryExecutor = Resolve<IQueryExecutor>();
+                    // act
                     accountService.Register(registerRequest, origin);
                     // assert
                     var user = queryExecutor
@@ -64,15 +70,15 @@ namespace Ntk8.Tests
             [Test]
             public void RegisteredUserShouldBeActive()
             {
-                // arrange
-                var accountService = Create();
-                var origin = GetRandomIPv4Address();
-                var registerRequest = GetRandom<RegisterRequest>();
-                registerRequest.Email = GetRandomEmail();
-                var queryExecutor = Resolve<IQueryExecutor>();
-                // act
-                using (Transactions.UncommittedRead())
+                using (new TransactionScope())
                 {
+                    // arrange
+                    var accountService = Create();
+                    var origin = GetRandomIPv4Address();
+                    var registerRequest = GetRandom<RegisterRequest>();
+                    registerRequest.Email = GetRandomEmail();
+                    var queryExecutor = Resolve<IQueryExecutor>();
+                    // act
                     accountService.Register(registerRequest, origin);
                     var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
                     var result = user.Map(new RegisterRequest());
@@ -180,8 +186,6 @@ namespace Ntk8.Tests
                         queryExecutor
                             .Execute(Arg.Is<FetchUserByRefreshToken>(f => f.Token == token.Token))
                             .Returns(user);
-                        commandExecutor.Execute(Arg.Any<UpdateRefreshToken>())
-                            .Returns(1);
                         // act
                         var accountService = Create(queryExecutor, commandExecutor, tokenService);
                         var authenticatedResponse = accountService
@@ -216,40 +220,37 @@ namespace Ntk8.Tests
                 }
 
                 [TestFixture]
-                public class RevokeRefreshTokenAndReturnUser
+                public class WhenGeneratingNewRefreshToken
                 {
                     [Test]
-                    public void ShouldRevokeRefreshTokenAndReturnTheUser()
+                    public void ShouldInsertNewRefreshToken()
                     {
                         // arrange
-                        var commandExecutor = Substitute.For<ICommandExecutor>();
+                        var token = CreateRefreshToken();
+                        var user = TestUser.Create();
+                        user.RefreshTokens = CreateRefreshTokens(2, token);
                         var queryExecutor = Substitute.For<IQueryExecutor>();
-                        var testUser = TestUser.Create();
-                        var refreshToken = CreateRefreshToken();
-                        testUser.RefreshTokens.Add(refreshToken);
-
-                        commandExecutor
-                            .Execute(Arg.Any<UpdateRefreshToken>())
-                            .Returns(1);
-
+                        var commandExecutor = Substitute.For<ICommandExecutor>();
+                        var tokenService = Substitute.For<ITokenService>();
+                        var newToken = CreateRefreshToken();
+                        tokenService
+                            .GenerateRefreshToken(Arg.Is<string>(s => s == token.CreatedByIp))
+                            .Returns(newToken);
+                        tokenService
+                            .FetchUserAndCheckIfRefreshTokenIsActive(token.Token)
+                            .Returns(user);
                         queryExecutor
-                            .Execute(Arg.Any<FetchUserByRefreshToken>())
-                            .Returns(testUser);
-
-                        var ipAddress = GetRandomIPv4Address();
-
+                            .Execute(Arg.Is<FetchUserByRefreshToken>(f => f.Token == token.Token))
+                            .Returns(user);
                         // act
-                        var accountService = Create(queryExecutor, commandExecutor);
-
-                        var user = accountService
-                            .RevokeRefreshTokenAndReturnUser(refreshToken.Token, ipAddress);
+                        var accountService = Create(queryExecutor, commandExecutor, tokenService);
+                        accountService
+                            .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
                         // assert
-                        Expect(user.RefreshTokens.ToList()[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
-                        Expect(user.RefreshTokens.ToList()[0].RevokedByIp).To.Equal(ipAddress);
                         Expect(commandExecutor)
-                            .To.Have.Received(1)
-                            .Execute(Arg.Any<UpdateRefreshToken>());
-                        Expect(user).To.Equal(testUser);
+                            .To.Have
+                            .Received(1)
+                            .Execute(Arg.Is<InsertRefreshToken>(r => r.RefreshToken == newToken));
                     }
                 }
 
@@ -264,6 +265,44 @@ namespace Ntk8.Tests
                     var authenticatedResponse = accountService
                         .RevokeRefreshTokenAndGenerateNewRefreshToken(token, ipAddress);
                     // assert
+                }
+            }
+            
+            [TestFixture]
+            public class RevokeRefreshTokenAndReturnUser
+            {
+                [Test]
+                public void ShouldRevokeRefreshTokenAndReturnTheUser()
+                {
+                    // arrange
+                    var commandExecutor = Substitute.For<ICommandExecutor>();
+                    var queryExecutor = Substitute.For<IQueryExecutor>();
+                    var testUser = TestUser.Create();
+                    var refreshToken = CreateRefreshToken();
+                    testUser.RefreshTokens.Add(refreshToken);
+
+                    commandExecutor
+                        .Execute(Arg.Any<UpdateRefreshToken>())
+                        .Returns(1);
+
+                    queryExecutor
+                        .Execute(Arg.Any<FetchUserByRefreshToken>())
+                        .Returns(testUser);
+
+                    var ipAddress = GetRandomIPv4Address();
+
+                    // act
+                    var accountService = Create(queryExecutor, commandExecutor);
+
+                    var user = accountService
+                        .RevokeRefreshTokenAndReturnUser(refreshToken.Token, ipAddress);
+                    // assert
+                    Expect(user.RefreshTokens.ToList()[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
+                    Expect(user.RefreshTokens.ToList()[0].RevokedByIp).To.Equal(ipAddress);
+                    Expect(commandExecutor)
+                        .To.Have.Received(1)
+                        .Execute(Arg.Any<UpdateRefreshToken>());
+                    Expect(user).To.Equal(testUser);
                 }
             }
         }

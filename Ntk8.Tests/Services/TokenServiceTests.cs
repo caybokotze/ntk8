@@ -11,11 +11,12 @@ using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.Services
 {
     [TestFixture]
     public class TokenServiceTests
@@ -152,7 +153,6 @@ namespace Ntk8.Tests.Helpers
             {
                 // arrange
                 var user = TestUser.Create();
-                var authSettings = CreateAuthSettings();
                 var tokenService = Create();
                 var oldRefreshToken = tokenService.GenerateRefreshToken(GetRandomIPv4Address());
                 var newRefreshToken = tokenService.GenerateRefreshToken(GetRandomIPv4Address());

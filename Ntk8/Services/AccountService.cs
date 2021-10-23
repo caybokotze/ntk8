@@ -84,7 +84,7 @@ namespace Ntk8.Services
             var newRefreshToken = _tokenService.GenerateRefreshToken(ipAddress);
             var user = RevokeRefreshTokenAndReturnUser(token, ipAddress, newRefreshToken.Token);
 
-            // todo: insert refresh token;
+            _commandExecutor.Execute(new InsertRefreshToken(newRefreshToken));
 
             _tokenService.RemoveOldRefreshTokens(user);
 

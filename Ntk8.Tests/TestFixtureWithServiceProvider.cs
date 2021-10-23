@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
+using System.Transactions;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -73,6 +74,11 @@ namespace Ntk8.Tests
         
         public T Resolve<T>()
         {
+            if (Transaction.Current is null)
+            {
+                throw new TransactionException("Tests that resolve real dependencies should be created inside of a transaction.");
+            }
+            
             return ServiceProvider.GetRequiredService<T>();
         }
     }

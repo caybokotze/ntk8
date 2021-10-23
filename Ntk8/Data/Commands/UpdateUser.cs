@@ -19,7 +19,7 @@ namespace Ntk8.Data.Commands
             Result = Execute(@"UPDATE users SET 
             first_name = @FirstName,
             last_name = @LastName,
-            reference_id = @ReferenceId,
+            guid = @Guid,
             title = @Title,
             email = @Email,
             tel_number = @TelNumber,
@@ -31,9 +31,9 @@ namespace Ntk8.Data.Commands
             accepted_terms = @AcceptedTerms,
             reset_token = @ResetToken,
             verification_token = @VerificationToken,
-            verification_date = @VerificationDate,
-            password_reset_date = @PasswordResetDate,
-            reset_token_expires = @ResetTokenExpires,
+            date_verified = @DateVerified,
+            date_of_password_reset = @DateOfPasswordReset,
+            date_reset_token_expires = @ResetTokenExpires,
             date_modified = @DateModified,
             date_created = @DateCreated,
             is_active = @IsActive

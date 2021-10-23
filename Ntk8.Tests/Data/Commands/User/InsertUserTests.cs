@@ -17,13 +17,13 @@ namespace Ntk8.Tests.Data.Commands.User
         [Test]
         public void ShouldInsertUser()
         {
-            // arrange
-            var user = TestUser.Create();
-            var commandExecutor = Resolve<ICommandExecutor>();
-            var queryExecutor = Resolve<IQueryExecutor>();
-            // act
             using (Transactions.UncommittedRead())
             {
+                // arrange
+                var user = TestUser.Create();
+                var commandExecutor = Resolve<ICommandExecutor>();
+                var queryExecutor = Resolve<IQueryExecutor>();
+                // act
                 var id = commandExecutor
                     .Execute(new InsertUser(user));
                 var expectedUser = queryExecutor
@@ -48,13 +48,13 @@ namespace Ntk8.Tests.Data.Commands.User
         [Test]
         public void ShouldReturnExpectedDatesAndNotBeNull()
         {
-            // arrange
-            var user = RandomValueGen.GetRandom<BaseUser>();
-            var commandExecutor = Resolve<ICommandExecutor>();
-            var queryExecutor = Resolve<IQueryExecutor>();
-            // act
             using (Transactions.UncommittedRead())
             {
+                // arrange
+                var user = RandomValueGen.GetRandom<BaseUser>();
+                var commandExecutor = Resolve<ICommandExecutor>();
+                var queryExecutor = Resolve<IQueryExecutor>();
+                // act
                 var id = commandExecutor
                     .Execute(new InsertUser(user));
 
