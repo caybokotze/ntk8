@@ -5,7 +5,7 @@ namespace Ntk8.Data.Queries
 {
     public class FetchUserByEmailAddress : Query<BaseUser>
     {
-        private string EmailAddress { get; }
+        public string EmailAddress { get; }
 
         public FetchUserByEmailAddress(string emailAddress)
         {
@@ -17,7 +17,7 @@ namespace Ntk8.Data.Queries
             try
             {
                 Result = QueryFirst<BaseUser>(
-                    @"SELECT * FROM users WHERE email = @EmailAddress", new
+                    @"SELECT * FROM users WHERE email = @EmailAddress;", new
                 {
                     EmailAddress
                 });

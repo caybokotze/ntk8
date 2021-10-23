@@ -9,6 +9,7 @@ using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
+using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.Helpers;
@@ -44,48 +45,27 @@ namespace Ntk8.Tests.Services
         [TestFixture]
         public class IntegrationTests : TestFixtureWithServiceProvider
         {
-            [Test]
-            public void RegisterShouldRegisterUser()
+            [TestFixture]
+            public class WhenRegisteringUser : TestFixtureWithServiceProvider
             {
-                using (new TransactionScope())
+                [Test]
+                public void ShouldBeActiveUser()
                 {
-                    // arrange
-                    var accountService = Create();
-                    var origin = GetRandomIPv4Address();
-                    var registerRequest = GetRandom<RegisterRequest>();
-                    registerRequest.Email = GetRandomEmail();
-                    var queryExecutor = Resolve<IQueryExecutor>();
-                    // act
-                    accountService.Register(registerRequest, origin);
-                    // assert
-                    var user = queryExecutor
-                        .Execute(new FetchUserByEmailAddress(registerRequest.Email));
-                    var result = user
-                        .Map(new RegisterRequest());
-                    result.Password = registerRequest.Password;
-                    Expect(result).Not.To.Be.Null();
-                    Expect(result).To.Deep.Equal(registerRequest);
-                }
-            }
-
-            [Test]
-            public void RegisteredUserShouldBeActive()
-            {
-                using (new TransactionScope())
-                {
-                    // arrange
-                    var accountService = Create();
-                    var origin = GetRandomIPv4Address();
-                    var registerRequest = GetRandom<RegisterRequest>();
-                    registerRequest.Email = GetRandomEmail();
-                    var queryExecutor = Resolve<IQueryExecutor>();
-                    // act
-                    accountService.Register(registerRequest, origin);
-                    var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
-                    var result = user.Map(new RegisterRequest());
-                    result.Password = registerRequest.Password;
-                    // assert
-                    Expect(user.IsActive).To.Be.True();
+                    using (new TransactionScope())
+                    {
+                        // arrange
+                        var origin = GetRandomIPv4Address();
+                        var registerRequest = GetRandom<RegisterRequest>();
+                        registerRequest.Email = GetRandomEmail();
+                        var queryExecutor = Resolve<IQueryExecutor>();
+                        var commandExecutor = Resolve<ICommandExecutor>();
+                        var accountService = Create(queryExecutor, commandExecutor);
+                        // act
+                        accountService.Register(registerRequest, origin);
+                        var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
+                        // assert
+                        Expect(user.IsActive).To.Be.True();
+                    }
                 }
             }
 
@@ -108,6 +88,53 @@ namespace Ntk8.Tests.Services
                     Expect(userToMatch).To.Deep.Equal(updatedUser);
                 }
             }
+        }
+
+        [TestFixture]
+        public class WhenRegisteringUsers
+        {
+            [TestFixture]
+            public class WhenUserDoesExist
+            {
+                [Test]
+                public void ShouldThrowIfUserIsVerifiedAndExists()
+                {
+                    // arrange
+                    var queryExecutor = Substitute.For<IQueryExecutor>();
+                    var user = GetRandom<RegisterRequest>();
+                    queryExecutor.Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                        .Returns(user.MapTo<BaseUser>());
+                    var commandExecutor = Substitute.For<ICommandExecutor>();
+                    var ipAddress = GetRandomIPv4Address();
+                    var accountService = Create(queryExecutor, commandExecutor);
+                    // act
+                    accountService.Register(user, ipAddress);
+                    // assert
+                }
+
+                [Test]
+                public void ShouldUpdateVerificationToken()
+                {
+                    // arrange
+                
+                    // act
+                    // assert
+                }
+            }
+
+            [TestFixture]
+            public class WhenUserDoestExist
+            {
+                [Test]
+                public void ShouldSetVerificationToken()
+                {
+                    // arrange
+                    
+                    // act
+                    // assert
+                }
+            }
+           
         }
 
         [TestFixture]
@@ -313,8 +340,8 @@ namespace Ntk8.Tests.Services
 
                     accountService
                         .RevokeRefreshToken(
-                            refreshToken, 
-                            refreshToken.CreatedByIp, 
+                            refreshToken,
+                            refreshToken.CreatedByIp,
                             refreshToken.Token);
                     
                     // assert

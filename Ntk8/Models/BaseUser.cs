@@ -5,20 +5,17 @@ using System.Linq;
 using Dapper.CQRS;
 using Newtonsoft.Json;
 using Ntk8.Data.Queries;
+using Ntk8.Dto.Interfaces;
 
 namespace Ntk8.Models
 {
-    public interface IBaseUser
+    public interface IBaseUser : IUserPrimaryProperties
     {
         DateTime DateCreated { get; set; }
         DateTime DateModified { get; set; }
         bool IsActive { get; set; }
         int Id { get; set; }
         Guid Guid { get; set; }
-        string Title { get; set; }
-        string Email { get; set; }
-        string FirstName { get; set; }
-        string LastName { get; set; }
         string TelNumber { get; set; }
         string Username { get; set; }
         int AccessFailedCount { get; set; }
@@ -32,7 +29,6 @@ namespace Ntk8.Models
         DateTime? DateOfPasswordReset { get; set; }
         DateTime? DateResetTokenExpires { get; set; }
         ICollection<RefreshToken> RefreshTokens { get; set; }
-        ICollection<UserRole> UserRoles { get; set; }
         ICollection<Role> Roles { get; set; }
         bool IsVerified { get; }
         bool OwnsToken(string token);
@@ -45,7 +41,7 @@ namespace Ntk8.Models
     /// </summary>
     public class BaseUser : IBaseUser
     {
-        protected BaseUser()
+        public BaseUser()
         {
             Guid = Guid.NewGuid();
             DateCreated = DateTime.UtcNow;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using HigLabo.Core;
+using Newtonsoft.Json;
 using Ntk8.Constants;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
@@ -16,6 +17,7 @@ namespace Ntk8.Services
 {
     public class AccountService : IAccountService
     {
+        public static int USER_VERIFICATION_EXPIRATION_HOURS = 4;
         // private readonly AuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
@@ -126,25 +128,27 @@ namespace Ntk8.Services
 
         public void Register(RegisterRequest model, string origin)
         {
-            var dbUserModel = _queryExecutor
+            var existingUser = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
             
-            if (dbUserModel != null)
+            if (existingUser is not null)
             {
-                if (dbUserModel.IsVerified)
+                if (existingUser.IsVerified)
                 {
                     throw new UserAlreadyExistsException();
                 }
 
-                dbUserModel.VerificationToken = TokenService.RandomTokenString();
-                dbUserModel.DateModified = DateTime.Now;
-                _commandExecutor.Execute(new UpdateUser(dbUserModel));
+                existingUser.VerificationToken = TokenService.RandomTokenString();
+                existingUser.DateModified = DateTime.UtcNow;
+                existingUser.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
+                _commandExecutor.Execute(new UpdateUser(existingUser));
                 return;
             }
 
-            var user = model.Map((BaseUser) new object());
+            var user = model.MapTo<BaseUser>();
             user.IsActive = true;
             user.VerificationToken = TokenService.RandomTokenString();
+            user.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
             user.PasswordHash = BC.HashPassword(model.Password);
             
             _commandExecutor

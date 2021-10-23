@@ -9,6 +9,6 @@ namespace Ntk8.Dto.Interfaces
         string FirstName { get; set; }
         string LastName { get; set; }
         string Email { get; set; }
-        List<UserRole> UserRoles { get; set; }
+        ICollection<UserRole> UserRoles { get; set; }
     }
 }
