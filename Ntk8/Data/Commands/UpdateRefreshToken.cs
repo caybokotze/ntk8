@@ -5,11 +5,11 @@ namespace Ntk8.Data.Commands
 {
     public class UpdateRefreshToken : Command<int>
     {
-        private readonly RefreshToken _refreshToken;
+        public readonly RefreshToken RefreshToken;
 
         public UpdateRefreshToken(RefreshToken refreshToken)
         {
-            _refreshToken = refreshToken;
+            RefreshToken = refreshToken;
         }
         
         public override void Execute()
@@ -17,7 +17,7 @@ namespace Ntk8.Data.Commands
             Result = Execute("UPDATE refresh_tokens SET refresh_tokens = @RefreshToken",
                 new
                 {
-                    RefreshToken = _refreshToken.Token
+                    RefreshToken = RefreshToken.Token
                 });
         }
     }

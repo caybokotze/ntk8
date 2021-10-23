@@ -82,11 +82,16 @@ namespace Ntk8.Services
             string ipAddress)
         {
             var newRefreshToken = _tokenService.GenerateRefreshToken(ipAddress);
-            var user = RevokeRefreshTokenAndReturnUser(token, ipAddress, newRefreshToken.Token);
+            
+            var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
+            
+            var refreshToken = user
+                .RefreshTokens
+                .First();
+            
+            RevokeRefreshToken(refreshToken, ipAddress, newRefreshToken.Token);
 
             _commandExecutor.Execute(new InsertRefreshToken(newRefreshToken));
-
-            _tokenService.RemoveOldRefreshTokens(user);
 
             var jwtToken = _tokenService.GenerateJwtToken(user);
 
@@ -103,24 +108,20 @@ namespace Ntk8.Services
         /// <param name="token"></param>
         /// <param name="ipAddress"></param>
         /// <param name="newToken"></param>
-        public BaseUser RevokeRefreshTokenAndReturnUser(string token, string ipAddress, string newToken = null)
+        public void RevokeRefreshToken(
+            RefreshToken token, 
+            string ipAddress, 
+            string newToken = null)
         {
-            var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
+            token.DateRevoked = DateTime.UtcNow;
+            token.RevokedByIp = ipAddress;
             
-            var refreshToken = user
-                .RefreshTokens
-                .First();
-
-            refreshToken.DateRevoked = DateTime.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
             if (newToken is not null)
             {
-                refreshToken.ReplacedByToken = newToken;
+                token.ReplacedByToken = newToken;
             }
 
-            _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
-
-            return user;
+            _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
 
         public void Register(RegisterRequest model, string origin)

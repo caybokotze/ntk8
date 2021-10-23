@@ -31,14 +31,20 @@ namespace Ntk8.Tests.Data.Commands.User
                 // assert
                 Expect(id)
                     .To.Be.Greater.Than(1);
+                Expect(expectedUser.DateCreated).To.Approximately.Equal(user.DateCreated);
+                Expect(expectedUser.DateModified).To.Approximately.Equal(user.DateModified);
+                Expect(expectedUser.DateVerified).To.Approximately.Equal((DateTime)user.DateVerified);
+                Expect(expectedUser.DateOfPasswordReset).To.Approximately
+                    .Equal((DateTime) user.DateOfPasswordReset);
+                Expect(expectedUser.DateResetTokenExpires).To.Approximately
+                    .Equal((DateTime) user.DateResetTokenExpires);
                 expectedUser.DateCreated = user.DateCreated;
                 expectedUser.DateModified = user.DateModified;
                 expectedUser.DateVerified = user.DateVerified;
                 expectedUser.DateOfPasswordReset = user.DateOfPasswordReset;
                 expectedUser.DateResetTokenExpires = user.DateResetTokenExpires;
+                expectedUser.RefreshTokens = null;
                 user.RefreshTokens = null;
-                user.UserRoles = null;
-                user.Roles = null;
                 user.Id = id;
                 Expect(expectedUser)
                     .To.Deep.Equal(user);

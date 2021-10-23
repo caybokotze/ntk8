@@ -13,6 +13,7 @@ using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
+using PeanutButter.Utils;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
@@ -255,24 +256,46 @@ namespace Ntk8.Tests.Services
                 }
 
                 [Test]
-                public void ShouldGenerateNewRefreshToken()
+                public void ShouldGenerateNewRefreshTokenAndRevokeOldOnes()
                 {
                     // arrange
-                    var accountService = Create();
-                    var token = TokenHelpers.CreateValidJwtToken();
-                    var ipAddress = GetRandomIPv4Address();
+                    var token = CreateRefreshToken();
+                    var user = TestUser.Create();
+                    user.RefreshTokens = CreateRefreshTokens(2, token);
+                    user.RefreshTokens.ForEach(f =>
+                    {
+                        f.Expires = DateTime.Now.Subtract(TimeSpan.FromDays(1));
+                    });
+                    var queryExecutor = Substitute.For<IQueryExecutor>();
+                    var commandExecutor = Substitute.For<ICommandExecutor>();
+                    var tokenService = Substitute.For<ITokenService>();
+                    var newToken = CreateRefreshToken();
+                    tokenService
+                        .GenerateRefreshToken(Arg.Is<string>(s => s == token.CreatedByIp))
+                        .Returns(newToken);
+                    tokenService
+                        .FetchUserAndCheckIfRefreshTokenIsActive(token.Token)
+                        .Returns(user);
+                    queryExecutor
+                        .Execute(Arg.Is<FetchUserByRefreshToken>(f => f.Token == token.Token))
+                        .Returns(user);
                     // act
-                    var authenticatedResponse = accountService
-                        .RevokeRefreshTokenAndGenerateNewRefreshToken(token, ipAddress);
+                    var accountService = Create(queryExecutor, commandExecutor, tokenService);
+                    accountService
+                        .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
                     // assert
+                    Expect(commandExecutor)
+                        .To.Have
+                        .Received(1)
+                        .Execute(Arg.Is<InsertRefreshToken>(r => r.RefreshToken == newToken));
                 }
             }
             
             [TestFixture]
-            public class RevokeRefreshTokenAndReturnUser
+            public class RevokeRefreshToken
             {
                 [Test]
-                public void ShouldRevokeRefreshTokenAndReturnTheUser()
+                public void ShouldRevokeRefreshToken()
                 {
                     // arrange
                     var commandExecutor = Substitute.For<ICommandExecutor>();
@@ -285,24 +308,19 @@ namespace Ntk8.Tests.Services
                         .Execute(Arg.Any<UpdateRefreshToken>())
                         .Returns(1);
 
-                    queryExecutor
-                        .Execute(Arg.Any<FetchUserByRefreshToken>())
-                        .Returns(testUser);
-
-                    var ipAddress = GetRandomIPv4Address();
-
                     // act
                     var accountService = Create(queryExecutor, commandExecutor);
 
-                    var user = accountService
-                        .RevokeRefreshTokenAndReturnUser(refreshToken.Token, ipAddress);
+                    accountService
+                        .RevokeRefreshToken(
+                            refreshToken, 
+                            refreshToken.CreatedByIp, 
+                            refreshToken.Token);
+                    
                     // assert
-                    Expect(user.RefreshTokens.ToList()[0].DateRevoked).To.Approximately.Equal(DateTime.UtcNow);
-                    Expect(user.RefreshTokens.ToList()[0].RevokedByIp).To.Equal(ipAddress);
                     Expect(commandExecutor)
                         .To.Have.Received(1)
-                        .Execute(Arg.Any<UpdateRefreshToken>());
-                    Expect(user).To.Equal(testUser);
+                        .Execute(Arg.Is<UpdateRefreshToken>(u => u.RefreshToken == refreshToken));
                 }
             }
         }
