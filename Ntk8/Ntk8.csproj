@@ -16,9 +16,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="10.1.1" />
         <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
         <PackageReference Include="Dapper.CQRS" Version="1.2.1" />
-        <PackageReference Include="HigLabo.Mapper" Version="3.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />

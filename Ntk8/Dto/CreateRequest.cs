@@ -19,7 +19,7 @@ namespace Ntk8.Dto
         [EmailAddress]
         public string Email { get; set; }
 
-        public List<UserRole> UserRoles { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; }
 
         [Required]
         public string TelNumber { get; set; }

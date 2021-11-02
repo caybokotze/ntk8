@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
-using HigLabo.Core;
-using Newtonsoft.Json;
 using Ntk8.Constants;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
@@ -66,7 +63,7 @@ namespace Ntk8.Services
             _tokenService.RemoveOldRefreshTokens(user);
             _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.MapTo<AuthenticatedResponse>();
+            var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
 
             response.JwtToken = jwtToken;
             response.RefreshToken = refreshToken.Token;
@@ -97,7 +94,7 @@ namespace Ntk8.Services
 
             var jwtToken = _tokenService.GenerateJwtToken(user);
 
-            var response = user.MapTo<AuthenticatedResponse>();
+            var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
             
             response.JwtToken = jwtToken;
             response.RefreshToken = newRefreshToken.Token;
@@ -145,7 +142,7 @@ namespace Ntk8.Services
                 return;
             }
 
-            var user = model.MapTo<BaseUser>();
+            var user = model.MapFromTo<RegisterRequest, BaseUser>();
             user.IsActive = true;
             user.VerificationToken = TokenService.RandomTokenString();
             user.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
@@ -250,7 +247,7 @@ namespace Ntk8.Services
                 throw new NoUserFoundException();
             }
 
-            return user.MapTo<AccountResponse>();
+            return user.MapFromTo<BaseUser, AccountResponse>();
         }
 
         public AccountResponse Create(CreateRequest model)
@@ -260,7 +257,7 @@ namespace Ntk8.Services
                 throw new UserAlreadyExistsException();
             }
 
-            var user = model.Map((BaseUser) new object());
+            var user = model.MapFromTo<CreateRequest, BaseUser>();
             user.DateCreated = DateTime.UtcNow;
             user.DateVerified = DateTime.UtcNow;
 
@@ -268,7 +265,7 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new InsertUser(user));
 
-            return user.MapTo<AccountResponse>();
+            return user.MapFromTo<BaseUser, AccountResponse>();
         }
 
         public AccountResponse Update(int id, UpdateRequest model)
@@ -280,12 +277,11 @@ namespace Ntk8.Services
                 user.PasswordHash = BC.HashPassword(model.Password);
             }
             
-            model.Map(user);
             user.DateModified = DateTime.UtcNow;
 
             _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.MapTo<AccountResponse>();
+            var response = user.MapFromTo<BaseUser, AccountResponse>();
             return response;
         }
 

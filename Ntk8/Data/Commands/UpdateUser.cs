@@ -6,7 +6,7 @@ namespace Ntk8.Data.Commands
 {
     public class UpdateUser : Command<int>
     {
-        private BaseUser BaseUser { get; }
+        public BaseUser BaseUser { get; }
 
         public UpdateUser(BaseUser baseUserModel)
         {

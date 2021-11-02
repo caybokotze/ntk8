@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
-using HigLabo.Core;
 using NExpect;
 using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
+using Ntk8.Exceptions;
 using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
@@ -83,7 +82,7 @@ namespace Ntk8.Tests.Services
                     var userId = commandExecutor.Execute(new InsertUser(GetRandom<BaseUser>()));
                     accountService.Update(userId, updatedUser);
                     var user = queryExecutor.Execute(new FetchUserById(userId));
-                    var userToMatch = user.Map(new UpdateRequest());
+                    var userToMatch = user.MapFromTo<BaseUser, UpdateRequest>();
                     // assert
                     Expect(userToMatch).To.Deep.Equal(updatedUser);
                 }
@@ -101,24 +100,47 @@ namespace Ntk8.Tests.Services
                 {
                     // arrange
                     var queryExecutor = Substitute.For<IQueryExecutor>();
-                    var user = GetRandom<RegisterRequest>();
-                    queryExecutor.Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
-                        .Returns(user.MapTo<BaseUser>());
+                    var user = GetRandom<BaseUser>();
+                    var registerRequest = user.MapFromTo<BaseUser, RegisterRequest>();
+                    queryExecutor
+                        .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                        .Returns(user);
                     var commandExecutor = Substitute.For<ICommandExecutor>();
                     var ipAddress = GetRandomIPv4Address();
                     var accountService = Create(queryExecutor, commandExecutor);
                     // act
-                    accountService.Register(user, ipAddress);
                     // assert
+                    Expect(() => accountService.Register(registerRequest, ipAddress))
+                        .To.Throw<UserAlreadyExistsException>()
+                        .With.Message.Containing("User already exists");
                 }
 
-                [Test]
-                public void ShouldUpdateVerificationToken()
+                [TestFixture]
+                public class WhenUserIsNotVerified
                 {
-                    // arrange
-                
-                    // act
-                    // assert
+                    [Test]
+                    public void ShouldUpdateVerificationToken()
+                    {
+                        // arrange
+                        var queryExecutor = Substitute.For<IQueryExecutor>();
+                        var commandExecutor = Substitute.For<ICommandExecutor>();
+                        var user = GetRandom<BaseUser>();
+                        user.DateVerified = null;
+                        user.DateOfPasswordReset = null;
+                        var registerRequest = user.MapFromTo<BaseUser, RegisterRequest>();
+                        queryExecutor
+                            .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                            .Returns(user);
+                        var ipAddress = GetRandomIPv4Address();
+                        var accountService = Create(queryExecutor, commandExecutor);
+                        accountService.Register(registerRequest, ipAddress);
+                        // act
+                        // assert
+                        Expect(commandExecutor)
+                            .To.Have.Received(1)
+                            .Execute(Arg.Is<UpdateUser>(u => u.BaseUser.DateModified.Truncate(TimeSpan.FromMinutes(1))
+                                .Equals(DateTime.UtcNow.Truncate(TimeSpan.FromMinutes(1)))));
+                    }
                 }
             }
 

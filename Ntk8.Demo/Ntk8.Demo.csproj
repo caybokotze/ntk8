@@ -9,7 +9,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="HigLabo.Mapper" Version="3.0.1" />
       <PackageReference Include="MySql.Data" Version="8.0.26" />
       <PackageReference Include="PeanutButter.Utils" Version="2.0.40" />
       <PackageReference Include="ScopeFunction.Utils" Version="1.0.0" />

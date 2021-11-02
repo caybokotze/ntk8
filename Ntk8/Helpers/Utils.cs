@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using HigLabo.Core;
+using AutoMapper;
 
 namespace Ntk8.Helpers
 {
@@ -14,9 +14,16 @@ namespace Ntk8.Helpers
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static T MapTo<T>(this object map) where T : class, new()
+        public static T2 MapFromTo<T1, T2>(this T1 map, T2 instance = null) where T2 : class, new()
         {
-            return map.Map(new T());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<T1, T2>();
+            });
+
+            var mapper = new Mapper(config);
+
+            return mapper.Map(map, instance ?? new T2());
         }
     }
 }

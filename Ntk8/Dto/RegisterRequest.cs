@@ -35,19 +35,5 @@ namespace Ntk8.Dto
         
         [Range(typeof(bool), "true", "true")]
         public bool AcceptedTerms { get; set; }
-
-        public void Validate()
-        {
-            var propertyInfo = typeof(RegisterRequest).GetProperty(Password);
-            var passwordValidator =
-                (PasswordValidator) Attribute
-                    .GetCustomAttribute(propertyInfo ?? throw new InvalidOperationException(), typeof(PasswordValidator));
-
-            if (passwordValidator != null 
-                && passwordValidator.MeetsStrengthRequirement())
-            {
-                var something = (string)propertyInfo.GetValue(Password, null);
-            }
-        }
     }
 }
