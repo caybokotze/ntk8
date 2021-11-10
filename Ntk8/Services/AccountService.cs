@@ -22,7 +22,8 @@ namespace Ntk8.Services
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            IAuthenticationContextService contextService)
         {
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
@@ -54,6 +55,8 @@ namespace Ntk8.Services
                 throw new InvalidPasswordException("User is not verified or password is incorrect");
             }
             
+            var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
+            user.Roles = roles;
             var jwtToken = _tokenService.GenerateJwtToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken(ipAddress);
             refreshToken.UserId = user.Id;
@@ -62,13 +65,12 @@ namespace Ntk8.Services
 
             // _tokenService.RemoveOldRefreshTokens(user); todo: see if required.
             _commandExecutor.Execute(new UpdateUser(user));
-            var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
 
             response.Roles = roles.Select(s => s.RoleName).ToArray();
             response.JwtToken = jwtToken;
-            response.RefreshToken = refreshToken.Token;
+            _tokenService.SetRefreshTokenCookie(refreshToken.Token);
             return response;
         }
 
@@ -99,7 +101,7 @@ namespace Ntk8.Services
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
             
             response.JwtToken = jwtToken;
-            response.RefreshToken = newRefreshToken.Token;
+            _tokenService.SetRefreshTokenCookie(refreshToken.Token);
             
             return response;
         }
@@ -211,7 +213,10 @@ namespace Ntk8.Services
             var user = _queryExecutor.Execute(new FetchUserByEmailAddress(model.Email));
 
             // always return ok response to prevent email enumeration
-            if (user == null) return;
+            if (user == null)
+            {
+                return;
+            }
 
             // create reset token that expires after 1 day
             user.ResetToken = TokenService.RandomTokenString();

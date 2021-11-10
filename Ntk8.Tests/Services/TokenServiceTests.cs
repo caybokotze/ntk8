@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using Dapper.CQRS;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using NExpect;
 using NSubstitute;
@@ -242,11 +243,13 @@ namespace Ntk8.Tests.Services
 
         private static TokenService Create(
             IQueryExecutor queryExecutor = null, 
-            AuthSettings authSettings = null)
+            AuthSettings authSettings = null,
+            IHttpContextAccessor httpContextAccessor = null)
         {
             return new(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
-                authSettings ?? CreateAuthSettings());
+                authSettings ?? CreateAuthSettings(),
+                httpContextAccessor ?? Substitute.For<IHttpContextAccessor>());
         }
 
         private static AuthSettings CreateAuthSettings()

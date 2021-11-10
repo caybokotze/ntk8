@@ -79,10 +79,10 @@ namespace Ntk8.Middleware
             return context;
         }
 
-        private SecurityToken ValidateJwtSecurityToken(string token, string refreshTokenSecret)
+        private SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret)
         {
             var key = Encoding
-                .ASCII
+                .UTF8
                 .GetBytes(refreshTokenSecret);
             
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -90,7 +90,7 @@ namespace Ntk8.Middleware
             SecurityToken validatedToken;
             try
             {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),

@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Models;
@@ -77,7 +76,8 @@ namespace Ntk8.Services
         
         public string GetIpAddress()
         {
-            if (GetRequestHeaders().ContainsKey(ControllerConstants.IpForwardHeader))
+            if (GetRequestHeaders()
+                .ContainsKey(ControllerConstants.IpForwardHeader))
             {
                 return GetRequestHeaders()[ControllerConstants.IpForwardHeader];
             }

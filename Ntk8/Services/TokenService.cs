@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Dapper.CQRS;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
@@ -19,24 +20,25 @@ namespace Ntk8.Services
         BaseUser GetAccount(int id);
         string GenerateJwtToken(BaseUser baseUserModel);
         BaseUser FetchUserAndCheckIfRefreshTokenIsActive(string token);
-
-        BaseUser RemoveOldRefreshTokens(
-            BaseUser baseUserModel);
-
+        BaseUser RemoveOldRefreshTokens(BaseUser baseUserModel);
         RefreshToken GenerateRefreshToken(string ipAddress);
+        void SetRefreshTokenCookie(string token);
     }
 
     public class TokenService : ITokenService
     {
         private readonly IQueryExecutor _queryExecutor;
         private readonly IAuthSettings _authSettings;
+        private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
             IQueryExecutor queryExecutor,
-            IAuthSettings authSettings)
+            IAuthSettings authSettings,
+            IHttpContextAccessor contextAccessor)
         {
             _queryExecutor = queryExecutor;
             _authSettings = authSettings;
+            _contextAccessor = contextAccessor;
         }
         
         public BaseUser GetAccount(int id)
@@ -67,7 +69,10 @@ namespace Ntk8.Services
                 {
                     new Claim(AuthenticationConstants
                         .PrimaryKeyValue, baseUserModel.Id.ToString()),
-                    new Claim("roles", SerializeObject(baseUserModel.Roles))
+                    new Claim("roles", SerializeObject(
+                        baseUserModel
+                        .Roles
+                        .Select(s => s.RoleName)))
                 }),
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime
@@ -136,6 +141,20 @@ namespace Ntk8.Services
             var randomBytes = new byte[40];
             rngCryptoServiceProvider.GetBytes(randomBytes);
             return BitConverter.ToString(randomBytes).Replace("-", "");
+        }
+        
+        public void SetRefreshTokenCookie(string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            
+            _contextAccessor.HttpContext.Response.Cookies.Append(
+                AuthenticationConstants.RefreshToken, 
+                token,
+                cookieOptions);
         }
     }
 }

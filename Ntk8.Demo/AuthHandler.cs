@@ -64,7 +64,7 @@ namespace Ntk8.Demo
             _accountService
                 .Register(registerRequest, _authenticationContextService.GetIpAddress());
             
-            // stuff to send an email here.
+            // todo: send email or something...
         }
 
         public async Task Login(HttpContext context)
@@ -77,8 +77,12 @@ namespace Ntk8.Demo
             var response = _accountService
                 .Authenticate(authRequest, _authenticationContextService.GetIpAddress());
             
-            _authenticationContextService.SetTokenCookie(response.RefreshToken);
             await context.SerialiseResponseBody(response);
+        }
+        
+        public async Task SecureEndpoint(HttpContext context)
+        {
+            
         }
     }
 }
