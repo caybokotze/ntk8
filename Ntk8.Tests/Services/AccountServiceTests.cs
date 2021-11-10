@@ -373,12 +373,13 @@ namespace Ntk8.Tests.Services
             IQueryExecutor queryExecutor = null,
             ICommandExecutor commandExecutor = null,
             ITokenService tokenService = null,
-            IAuthenticationContextService contextService = null)
+            IAuthSettings authSettings = null)
         {
             return new AccountService(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
-                tokenService ?? Substitute.For<ITokenService>());
+                tokenService ?? Substitute.For<ITokenService>(),
+                authSettings ?? Substitute.For<IAuthSettings>());
         }
 
         private static List<RefreshToken> CreateRefreshTokens(int amount = 3, RefreshToken addTokenToList = null)

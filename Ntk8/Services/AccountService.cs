@@ -20,15 +20,18 @@ namespace Ntk8.Services
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
+        private readonly IAuthSettings _authSettings;
 
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            IAuthSettings authSettings)
         {
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
+            _authSettings = authSettings;
         }
         
         /// <summary>
@@ -119,7 +122,11 @@ namespace Ntk8.Services
 
                 existingUser.VerificationToken = _tokenService.RandomTokenString();
                 existingUser.DateModified = DateTime.UtcNow;
-                existingUser.DateResetTokenExpires = DateTime.UtcNow.AddHours(VERIFICATION_TOKEN_TTL);
+                existingUser.DateResetTokenExpires = DateTime.UtcNow
+                    .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
+                        ? VERIFICATION_TOKEN_TTL
+                        : _authSettings.UserVerificationTokenTTL);
+
                 _commandExecutor.Execute(new UpdateUser(existingUser));
                 return;
             }
@@ -129,7 +136,10 @@ namespace Ntk8.Services
             user.VerificationToken = _tokenService.RandomTokenString();
             user.DateCreated = DateTime.UtcNow;
             user.DateModified = DateTime.UtcNow;
-            user.DateResetTokenExpires = DateTime.UtcNow.AddHours(VERIFICATION_TOKEN_TTL);
+            user.DateResetTokenExpires = DateTime.UtcNow
+                .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
+                    ? VERIFICATION_TOKEN_TTL
+                    : _authSettings.UserVerificationTokenTTL);
             user.PasswordHash = BC.HashPassword(model.Password);
             
             _commandExecutor
@@ -162,8 +172,6 @@ namespace Ntk8.Services
 
         public void VerifyUserByVerificationToken(string token)
         {
-            //todo: Make sure that the verification token hasn't' expired...
-            
             var user = _queryExecutor
                 .Execute(new FetchUserByVerificationToken(token));
 
@@ -175,7 +183,9 @@ namespace Ntk8.Services
             if (user.DateResetTokenExpires != null
                 && user.DateResetTokenExpires
                     .Value
-                    .AddHours(VERIFICATION_TOKEN_TTL) < DateTime.UtcNow)
+                    .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
+                        ? VERIFICATION_TOKEN_TTL
+                        : _authSettings.UserVerificationTokenTTL) < DateTime.UtcNow)
             {
                 throw new VerificationTokenExpiredException();
             }
@@ -206,9 +216,11 @@ namespace Ntk8.Services
                 throw new UserNotFoundException("Email address does not exist.");
             }
 
-            // create reset token that expires after 1 day
             user.ResetToken = _tokenService.RandomTokenString();
-            user.DateResetTokenExpires = DateTime.UtcNow.AddDays(1);
+            user.DateResetTokenExpires = DateTime.UtcNow
+                .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
+                    ? RESET_TOKEN_TTL
+                    : _authSettings.PasswordResetTokenTTL);
 
             _commandExecutor.Execute(new UpdateUser(user));
         }
