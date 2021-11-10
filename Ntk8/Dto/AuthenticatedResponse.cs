@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Ntk8.Dto
 {
@@ -10,7 +10,7 @@ namespace Ntk8.Dto
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; }
+        public string[] Roles { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
         public bool IsVerified { get; set; }

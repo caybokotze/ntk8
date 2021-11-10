@@ -22,7 +22,7 @@ namespace Ntk8.Demo
             builder = ConfigureDependencies(builder);
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
-            var _ = new AuthHandler(app, 
+            var _ = new AuthHandler(app,
                 app.Resolve<IAccountService>(),
                 app.Resolve<IAuthenticationContextService>());
             app.Run();
@@ -38,6 +38,7 @@ namespace Ntk8.Demo
             builder.Services.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             builder.Services.AddTransient<IAccountService, AccountService>();
             builder.Services.AddTransient<IAuthSettings, AuthSettings>(sp => ResolveAuthSettings());
+            builder.Services.AddTransient<ITokenService, TokenService>();
             return builder;
         }
 

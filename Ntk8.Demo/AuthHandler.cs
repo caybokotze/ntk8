@@ -21,19 +21,56 @@ namespace Ntk8.Demo
         {
             _accountService = accountService;
             _authenticationContextService = authenticationContextService;
-            builder.MapGet("/authenticate", GetAuthenticate);
-            builder.MapPost("/authenticate", PostAuthenticate);
+            builder.MapPost("/login", Login);
+            builder.MapPost("/register", Register);
+            builder.MapGet("/verify", VerifyByUrl);
+            builder.MapPost("/verify", Verify);
         }
 
-        public async Task GetAuthenticate(HttpContext context)
+        public async Task Verify(HttpContext context)
         {
-            var reader = new StreamReader(context.Request.Body);
-            var data = await reader.ReadToEndAsync();
+            var verifyRequest = await context
+                .DeserializeRequestBody<VerifyEmailRequest>();
+            
+            var user = _accountService
+                .GetUserByEmail(verifyRequest.Email);
+            
+            _accountService
+                .VerifyEmailByVerificationToken(user.VerificationToken);
         }
 
-        public async Task PostAuthenticate(HttpContext context)
+        public Task VerifyByUrl(HttpContext context)
         {
-            var authRequest = await context.DeserializeRequestBody<AuthenticateRequest>();
+            var verifyRequest =  context
+                .Request
+                .Query[nameof(VerifyEmailByTokenRequest.Token)];
+
+            if (!string.IsNullOrEmpty(verifyRequest))
+            {
+                _accountService
+                    .VerifyEmailByVerificationToken(verifyRequest);
+            }
+            
+            return Task.CompletedTask;
+        }
+
+        public async Task Register(HttpContext context)
+        {
+            var registerRequest = await context
+                .DeserializeRequestBody<RegisterRequest>();
+            
+            ValidateModel(registerRequest);
+
+            _accountService
+                .Register(registerRequest, _authenticationContextService.GetIpAddress());
+            
+            // stuff to send an email here.
+        }
+
+        public async Task Login(HttpContext context)
+        {
+            var authRequest = await context
+                .DeserializeRequestBody<AuthenticateRequest>();
             
             ValidateModel(authRequest);
             

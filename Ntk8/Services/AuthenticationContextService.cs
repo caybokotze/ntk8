@@ -14,21 +14,16 @@ namespace Ntk8.Services
         string GetRemoteIpAddress();
         string GetLocalIpAddress();
         string GetIpAddress();
-        void SetTokenCookie(string token);
     }
 
     public class AuthenticationContextService : IAuthenticationContextService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IAuthSettings _authSettings;
-        
 
         public AuthenticationContextService(
-            IHttpContextAccessor httpContextAccessor,
-            IAuthSettings authSettings)
+            IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
-            _authSettings = authSettings;
         }
 
         public BaseUser BaseUser =>
@@ -89,20 +84,5 @@ namespace Ntk8.Services
 
             return GetRemoteIpAddress();
         }
-        
-        public void SetTokenCookie(string token)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-            
-            _httpContextAccessor.HttpContext.Response.Cookies.Append(
-                AuthenticationConstants.RefreshToken, 
-                token,
-                cookieOptions);
-        }
-        
     }
 }

@@ -29,11 +29,11 @@ namespace Ntk8.Services
     public class TokenService : ITokenService
     {
         private readonly IQueryExecutor _queryExecutor;
-        private readonly AuthSettings _authSettings;
+        private readonly IAuthSettings _authSettings;
 
         public TokenService(
             IQueryExecutor queryExecutor,
-            AuthSettings authSettings)
+            IAuthSettings authSettings)
         {
             _queryExecutor = queryExecutor;
             _authSettings = authSettings;
@@ -41,7 +41,8 @@ namespace Ntk8.Services
         
         public BaseUser GetAccount(int id)
         {
-            var account = _queryExecutor.Execute(new FetchUserById(id));
+            var account = _queryExecutor
+                .Execute(new FetchUserById(id));
             if (account == null)
             {
                 throw new UserNotFoundException("The user can not be found.");

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ntk8.Dto
 {
-    public class ValidateResetTokenRequest
+    public class ResetTokenRequest
     {
         [Required]
         public string Token { get; set; }

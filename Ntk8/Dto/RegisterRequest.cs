@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Ntk8.Attributes;
 using Ntk8.Dto.Interfaces;
 using Ntk8.Models;
 
@@ -21,6 +19,7 @@ namespace Ntk8.Dto
         [EmailAddress]
         public string Email { get; set; }
 
+        // todo: remove...
         public ICollection<UserRole> UserRoles { get; set; }
 
         public string TelNumber { get; set; }

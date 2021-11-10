@@ -15,7 +15,6 @@ namespace Ntk8.Services
     public class AccountService : IAccountService
     {
         public static int USER_VERIFICATION_EXPIRATION_HOURS = 4;
-        // private readonly AuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
@@ -57,14 +56,17 @@ namespace Ntk8.Services
             
             var jwtToken = _tokenService.GenerateJwtToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken(ipAddress);
-
+            refreshToken.UserId = user.Id;
+            
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
-            _tokenService.RemoveOldRefreshTokens(user);
+            // _tokenService.RemoveOldRefreshTokens(user); todo: see if required.
             _commandExecutor.Execute(new UpdateUser(user));
+            var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
 
+            response.Roles = roles.Select(s => s.RoleName).ToArray();
             response.JwtToken = jwtToken;
             response.RefreshToken = refreshToken.Token;
             return response;
@@ -98,6 +100,7 @@ namespace Ntk8.Services
             
             response.JwtToken = jwtToken;
             response.RefreshToken = newRefreshToken.Token;
+            
             return response;
         }
 
@@ -145,6 +148,8 @@ namespace Ntk8.Services
             var user = model.MapFromTo<RegisterRequest, BaseUser>();
             user.IsActive = true;
             user.VerificationToken = TokenService.RandomTokenString();
+            user.DateCreated = DateTime.UtcNow;
+            user.DateModified = DateTime.UtcNow;
             user.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
             user.PasswordHash = BC.HashPassword(model.Password);
             
@@ -167,9 +172,16 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new UpdateUser(user));
         }
-        
 
-        public void VerifyEmail(string token)
+        public BaseUser GetUserByEmail(string email)
+        {
+            var user = _queryExecutor
+                .Execute(new FetchUserByEmailAddress(email));
+
+            return user;
+        }
+
+        public void VerifyEmailByVerificationToken(string token)
         {
             //todo: Make sure that the verification token hasn't' expired...
             
@@ -208,7 +220,7 @@ namespace Ntk8.Services
             _commandExecutor.Execute(new UpdateUser(user));
         }
 
-        public void ValidateResetToken(ValidateResetTokenRequest model)
+        public void ValidateResetToken(ResetTokenRequest model)
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByResetToken(model.Token));
@@ -217,6 +229,8 @@ namespace Ntk8.Services
             {
                 throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
             }
+            
+            // todo: complete...
         }
 
         public void ResetPassword(ResetPasswordRequest model)
@@ -246,24 +260,6 @@ namespace Ntk8.Services
             {
                 throw new NoUserFoundException();
             }
-
-            return user.MapFromTo<BaseUser, AccountResponse>();
-        }
-
-        public AccountResponse Create(CreateRequest model)
-        {
-            if (_queryExecutor.Execute(new FetchUserByEmailAddress(model.Email)).Email is not null)
-            {
-                throw new UserAlreadyExistsException();
-            }
-
-            var user = model.MapFromTo<CreateRequest, BaseUser>();
-            user.DateCreated = DateTime.UtcNow;
-            user.DateVerified = DateTime.UtcNow;
-
-            user.PasswordHash = BC.HashPassword(model.Password);
-
-            _commandExecutor.Execute(new InsertUser(user));
 
             return user.MapFromTo<BaseUser, AccountResponse>();
         }

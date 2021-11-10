@@ -16,10 +16,11 @@ namespace Ntk8.Data.Queries
         public override void Execute()
         {
             Result = QueryList<Role>(
-                @"SELECT ur.*, r.* FROM user_roles ur 
-                LEFT JOIN roles r 
-                ON ur.role_id = r.id 
-                WHERE ur.user_id = @UserId",
+                @"SELECT r.id, r.role_name
+                    FROM user_roles ur
+                             INNER JOIN roles r
+                                        ON ur.role_id = r.id
+                    WHERE ur.user_id = @UserId;",
                 new
                 {
                     UserId = Id
