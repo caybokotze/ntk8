@@ -53,14 +53,13 @@ namespace Ntk8.Tests.Services
                     using (new TransactionScope())
                     {
                         // arrange
-                        var origin = GetRandomIPv4Address();
                         var registerRequest = GetRandom<RegisterRequest>();
                         registerRequest.Email = GetRandomEmail();
                         var queryExecutor = Resolve<IQueryExecutor>();
                         var commandExecutor = Resolve<ICommandExecutor>();
                         var accountService = Create(queryExecutor, commandExecutor);
                         // act
-                        accountService.Register(registerRequest, origin);
+                        accountService.Register(registerRequest);
                         var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
                         // assert
                         Expect(user.IsActive).To.Be.True();
@@ -106,11 +105,10 @@ namespace Ntk8.Tests.Services
                         .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
                         .Returns(user);
                     var commandExecutor = Substitute.For<ICommandExecutor>();
-                    var ipAddress = GetRandomIPv4Address();
                     var accountService = Create(queryExecutor, commandExecutor);
                     // act
                     // assert
-                    Expect(() => accountService.Register(registerRequest, ipAddress))
+                    Expect(() => accountService.Register(registerRequest))
                         .To.Throw<UserAlreadyExistsException>()
                         .With.Message.Containing("User already exists");
                 }
@@ -133,7 +131,7 @@ namespace Ntk8.Tests.Services
                             .Returns(user);
                         var ipAddress = GetRandomIPv4Address();
                         var accountService = Create(queryExecutor, commandExecutor);
-                        accountService.Register(registerRequest, ipAddress);
+                        accountService.Register(registerRequest);
                         // act
                         // assert
                         Expect(commandExecutor)
@@ -239,7 +237,7 @@ namespace Ntk8.Tests.Services
                         // act
                         var accountService = Create(queryExecutor, commandExecutor, tokenService);
                         var authenticatedResponse = accountService
-                            .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
+                            .GenerateNewRefreshToken(token.Token);
                         // assert
                         Expect(authenticatedResponse).Not.To.Be.Null();
                         // todo: see if refresh token is set in context.
@@ -294,7 +292,7 @@ namespace Ntk8.Tests.Services
                         // act
                         var accountService = Create(queryExecutor, commandExecutor, tokenService);
                         accountService
-                            .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
+                            .GenerateNewRefreshToken(token.Token);
                         // assert
                         Expect(commandExecutor)
                             .To.Have
@@ -330,7 +328,7 @@ namespace Ntk8.Tests.Services
                     // act
                     var accountService = Create(queryExecutor, commandExecutor, tokenService);
                     accountService
-                        .RevokeRefreshTokenAndGenerateNewRefreshToken(token.Token, token.CreatedByIp);
+                        .GenerateNewRefreshToken(token.Token);
                     // assert
                     Expect(commandExecutor)
                         .To.Have
@@ -360,10 +358,7 @@ namespace Ntk8.Tests.Services
                     var accountService = Create(queryExecutor, commandExecutor);
 
                     accountService
-                        .RevokeRefreshToken(
-                            refreshToken,
-                            refreshToken.CreatedByIp,
-                            refreshToken.Token);
+                        .RevokeRefreshToken(refreshToken);
                     
                     // assert
                     Expect(commandExecutor)
@@ -376,12 +371,14 @@ namespace Ntk8.Tests.Services
         private static IAccountService Create(
             IQueryExecutor queryExecutor = null,
             ICommandExecutor commandExecutor = null,
-            ITokenService tokenService = null)
+            ITokenService tokenService = null,
+            IAuthenticationContextService contextService = null)
         {
             return new AccountService(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
-                tokenService ?? Substitute.For<ITokenService>());
+                tokenService ?? Substitute.For<ITokenService>(),
+                contextService ?? Substitute.For<IAuthenticationContextService>());
         }
 
         private static List<RefreshToken> CreateRefreshTokens(int amount = 3, RefreshToken addTokenToList = null)

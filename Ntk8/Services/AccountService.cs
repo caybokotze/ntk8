@@ -15,9 +15,11 @@ namespace Ntk8.Services
     public class AccountService : IAccountService
     {
         public static int USER_VERIFICATION_EXPIRATION_HOURS = 4;
+        public static int USER_RESET_PASSWORD_EXPIRATION_HOURS = 12;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
+        private readonly IAuthenticationContextService _contextService;
 
         public AccountService(
             IQueryExecutor queryExecutor,
@@ -28,6 +30,7 @@ namespace Ntk8.Services
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
+            _contextService = contextService;
         }
         
         /// <summary>
@@ -39,7 +42,7 @@ namespace Ntk8.Services
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
         /// <exception cref="InvalidPasswordException"></exception>
-        public AuthenticatedResponse Authenticate(AuthenticateRequest model, string ipAddress)
+        public AuthenticatedResponse Authenticate(AuthenticateRequest model)
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
@@ -58,7 +61,7 @@ namespace Ntk8.Services
             var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
             user.Roles = roles;
             var jwtToken = _tokenService.GenerateJwtToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken(ipAddress);
+            var refreshToken = _tokenService.GenerateRefreshToken(_contextService.GetIpAddress());
             refreshToken.UserId = user.Id;
             
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
@@ -78,13 +81,11 @@ namespace Ntk8.Services
         /// GenerateRefreshToken is responsible for generating a new refresh token for a user and making sure that all the old refresh tokens for that user is deleted.
         /// </summary>
         /// <param name="token"></param>
-        /// <param name="ipAddress"></param>
         /// <returns>A new instance of AuthenticatedResponse, which includes some basic user information</returns>
-        public AuthenticatedResponse RevokeRefreshTokenAndGenerateNewRefreshToken(
-            string token,
-            string ipAddress)
+        public AuthenticatedResponse GenerateNewRefreshToken(string token)
         {
-            var newRefreshToken = _tokenService.GenerateRefreshToken(ipAddress);
+            var newRefreshToken = _tokenService
+                .GenerateRefreshToken(_contextService.GetIpAddress());
             
             var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
             
@@ -92,7 +93,7 @@ namespace Ntk8.Services
                 .RefreshTokens
                 .First();
             
-            RevokeRefreshToken(refreshToken, ipAddress, newRefreshToken.Token);
+            RevokeRefreshToken(refreshToken);
 
             _commandExecutor.Execute(new InsertRefreshToken(newRefreshToken));
 
@@ -110,25 +111,15 @@ namespace Ntk8.Services
         /// Revoke token will make sure that a token is set to invalid. It will also return the user for the associated refresh token.
         /// </summary>
         /// <param name="token"></param>
-        /// <param name="ipAddress"></param>
-        /// <param name="newToken"></param>
         public void RevokeRefreshToken(
-            RefreshToken token, 
-            string ipAddress, 
-            string newToken = null)
+            RefreshToken token)
         {
             token.DateRevoked = DateTime.UtcNow;
-            token.RevokedByIp = ipAddress;
-            
-            if (newToken is not null)
-            {
-                token.ReplacedByToken = newToken;
-            }
-
+            token.RevokedByIp = _contextService.GetIpAddress();
             _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
 
-        public void Register(RegisterRequest model, string origin)
+        public void Register(RegisterRequest model)
         {
             var existingUser = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
@@ -140,7 +131,7 @@ namespace Ntk8.Services
                     throw new UserAlreadyExistsException();
                 }
 
-                existingUser.VerificationToken = TokenService.RandomTokenString();
+                existingUser.VerificationToken = _tokenService.RandomTokenString();
                 existingUser.DateModified = DateTime.UtcNow;
                 existingUser.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
                 _commandExecutor.Execute(new UpdateUser(existingUser));
@@ -149,7 +140,7 @@ namespace Ntk8.Services
 
             var user = model.MapFromTo<RegisterRequest, BaseUser>();
             user.IsActive = true;
-            user.VerificationToken = TokenService.RandomTokenString();
+            user.VerificationToken = _tokenService.RandomTokenString();
             user.DateCreated = DateTime.UtcNow;
             user.DateModified = DateTime.UtcNow;
             user.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
@@ -183,22 +174,29 @@ namespace Ntk8.Services
             return user;
         }
 
-        public void VerifyEmailByVerificationToken(string token)
+        public void VerifyUserByVerificationToken(string token)
         {
             //todo: Make sure that the verification token hasn't' expired...
             
             var user = _queryExecutor
                 .Execute(new FetchUserByVerificationToken(token));
 
+            if (user is null)
+            {
+                throw new UserNotFoundException("User does not exist");
+            }
+
+            if (user.DateResetTokenExpires != null
+                && user.DateResetTokenExpires
+                    .Value
+                    .AddHours(USER_VERIFICATION_EXPIRATION_HOURS) < DateTime.UtcNow)
+            {
+                throw new VerificationTokenExpiredException();
+            }
+
             if (user.IsVerified)
             {
                 throw new UserIsVerifiedException();
-            }
-
-            if (user is null)
-            {
-                throw new NullReferenceException("Verification failed. " +
-                                                 "This record either no longer exists or the account has already been verified.");
             }
 
             user.DateVerified = DateTime.UtcNow;
@@ -208,18 +206,22 @@ namespace Ntk8.Services
             _commandExecutor.Execute(new UpdateUser(user));
         }
 
-        public void ForgotPassword(ForgotPasswordRequest model, string origin)
+        /// <summary>
+        /// Set's the user with a password reset token, which will expire in a few hours (as per app-settings configured.)
+        /// </summary>
+        /// <param name="model"></param>
+        /// <para>Tip: Catch the UserNotFoundException to prevent email enumeration attacks.</para>
+        public void ForgotPassword(ForgotPasswordRequest model)
         {
             var user = _queryExecutor.Execute(new FetchUserByEmailAddress(model.Email));
-
-            // always return ok response to prevent email enumeration
+            
             if (user == null)
             {
-                return;
+                throw new UserNotFoundException("Email address does not exist.");
             }
 
             // create reset token that expires after 1 day
-            user.ResetToken = TokenService.RandomTokenString();
+            user.ResetToken = _tokenService.RandomTokenString();
             user.DateResetTokenExpires = DateTime.UtcNow.AddDays(1);
 
             _commandExecutor.Execute(new UpdateUser(user));

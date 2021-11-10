@@ -10,6 +10,7 @@ using Ntk8.Constants;
 using Ntk8.Data.Queries;
 using Ntk8.Middleware;
 using Ntk8.Models;
+using Ntk8.Services;
 using Ntk8.Tests.ContextBuilders;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
@@ -137,7 +138,8 @@ namespace Ntk8.Tests.MiddlewareTests
 
         public static JwtMiddleware Create(
             AuthSettings authSettings = null, 
-            IQueryExecutor queryExecutor = null)
+            IQueryExecutor queryExecutor = null,
+            ITokenService tokenService = null)
         {
             authSettings ??= new AuthSettings
             {
@@ -148,7 +150,8 @@ namespace Ntk8.Tests.MiddlewareTests
             
             return new JwtMiddleware(
                 authSettings,
-                queryExecutor ?? Substitute.For<IQueryExecutor>());
+                queryExecutor ?? Substitute.For<IQueryExecutor>(),
+                tokenService ?? Substitute.For<ITokenService>());
         }
     }
 }

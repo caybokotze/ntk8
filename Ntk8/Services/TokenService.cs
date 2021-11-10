@@ -23,6 +23,8 @@ namespace Ntk8.Services
         BaseUser RemoveOldRefreshTokens(BaseUser baseUserModel);
         RefreshToken GenerateRefreshToken(string ipAddress);
         void SetRefreshTokenCookie(string token);
+        string RandomTokenString();
+        SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
     }
 
     public class TokenService : ITokenService
@@ -135,7 +137,7 @@ namespace Ntk8.Services
             };
         }
 
-        public static string RandomTokenString()
+        public string RandomTokenString()
         {
             var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[40];
@@ -155,6 +157,34 @@ namespace Ntk8.Services
                 AuthenticationConstants.RefreshToken, 
                 token,
                 cookieOptions);
+        }
+        
+        public SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret)
+        {
+            var key = Encoding
+                .UTF8
+                .GetBytes(refreshTokenSecret);
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            
+            SecurityToken validatedToken;
+            try
+            {
+                tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out validatedToken);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidTokenException(e.Message);
+            }
+
+            return validatedToken;
         }
     }
 }

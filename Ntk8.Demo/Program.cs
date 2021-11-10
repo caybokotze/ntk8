@@ -22,9 +22,7 @@ namespace Ntk8.Demo
             builder = ConfigureDependencies(builder);
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
-            var _ = new AuthHandler(app,
-                app.Resolve<IAccountService>(),
-                app.Resolve<IAuthenticationContextService>());
+            var _ = new AuthHandler(app, app.Resolve<IAccountService>());
             app.Run();
         }
 

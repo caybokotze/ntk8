@@ -10,6 +10,7 @@ using Ntk8.Constants;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using Ntk8.Services;
 
 namespace Ntk8.Middleware
 {
@@ -17,13 +18,16 @@ namespace Ntk8.Middleware
     {
         private readonly AuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
+        private readonly ITokenService _tokenService;
 
         public JwtMiddleware(
             AuthSettings authSettings,
-            IQueryExecutor queryExecutor)
+            IQueryExecutor queryExecutor,
+            ITokenService tokenService)
         {
             _authSettings = authSettings;
             _queryExecutor = queryExecutor;
+            _tokenService = tokenService;
         }
 
         public async Task InvokeAsync(
@@ -62,10 +66,10 @@ namespace Ntk8.Middleware
 
             if (token is null)
             {
-                throw new NullReferenceException("The jwt token is null and cannot be mounted to the context");
+                throw new InvalidTokenException("The JWT token can not be null");
             }
 
-            var validatedToken = ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
+            var validatedToken = _tokenService.ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
 
             var jwtToken = (JwtSecurityToken) validatedToken;
 
@@ -79,32 +83,6 @@ namespace Ntk8.Middleware
             return context;
         }
 
-        private SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret)
-        {
-            var key = Encoding
-                .UTF8
-                .GetBytes(refreshTokenSecret);
-            
-            var tokenHandler = new JwtSecurityTokenHandler();
-            
-            SecurityToken validatedToken;
-            try
-            {
-                tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                }, out validatedToken);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidTokenException(e.Message);
-            }
-
-            return validatedToken;
-        }
+        
     }
 }

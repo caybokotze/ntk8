@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -12,15 +11,12 @@ namespace Ntk8.Demo
     public class AuthHandler
     {
         private readonly IAccountService _accountService;
-        private readonly IAuthenticationContextService _authenticationContextService;
 
         public AuthHandler(
             IEndpointRouteBuilder builder,
-            IAccountService accountService,
-            IAuthenticationContextService authenticationContextService)
+            IAccountService accountService)
         {
             _accountService = accountService;
-            _authenticationContextService = authenticationContextService;
             builder.MapPost("/login", Login);
             builder.MapPost("/register", Register);
             builder.MapGet("/verify", VerifyByUrl);
@@ -36,7 +32,7 @@ namespace Ntk8.Demo
                 .GetUserByEmail(verifyRequest.Email);
             
             _accountService
-                .VerifyEmailByVerificationToken(user.VerificationToken);
+                .VerifyUserByVerificationToken(user.VerificationToken);
         }
 
         public Task VerifyByUrl(HttpContext context)
@@ -48,7 +44,7 @@ namespace Ntk8.Demo
             if (!string.IsNullOrEmpty(verifyRequest))
             {
                 _accountService
-                    .VerifyEmailByVerificationToken(verifyRequest);
+                    .VerifyUserByVerificationToken(verifyRequest);
             }
             
             return Task.CompletedTask;
@@ -62,7 +58,7 @@ namespace Ntk8.Demo
             ValidateModel(registerRequest);
 
             _accountService
-                .Register(registerRequest, _authenticationContextService.GetIpAddress());
+                .Register(registerRequest);
             
             // todo: send email or something...
         }
@@ -75,7 +71,7 @@ namespace Ntk8.Demo
             ValidateModel(authRequest);
             
             var response = _accountService
-                .Authenticate(authRequest, _authenticationContextService.GetIpAddress());
+                .Authenticate(authRequest);
             
             await context.SerialiseResponseBody(response);
         }
