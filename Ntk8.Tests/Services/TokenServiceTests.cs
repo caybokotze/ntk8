@@ -105,8 +105,7 @@ namespace Ntk8.Tests.Services
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Create(queryExecutor);
                 var randomUser = GetRandom<BaseUser>();
-                var ipAddress = GetRandomIPv4Address();
-                var refreshToken = tokenService.GenerateRefreshToken(ipAddress);
+                var refreshToken = tokenService.GenerateRefreshToken();
                 
                 randomUser.RefreshTokens = new List<RefreshToken>()
                 {
@@ -155,8 +154,8 @@ namespace Ntk8.Tests.Services
                 // arrange
                 var user = TestUser.Create();
                 var tokenService = Create();
-                var oldRefreshToken = tokenService.GenerateRefreshToken(GetRandomIPv4Address());
-                var newRefreshToken = tokenService.GenerateRefreshToken(GetRandomIPv4Address());
+                var oldRefreshToken = tokenService.GenerateRefreshToken();
+                var newRefreshToken = tokenService.GenerateRefreshToken();
                 oldRefreshToken.Expires = DateTime.UtcNow.Subtract(TimeSpan.FromHours(1));
                 oldRefreshToken.DateRevoked = DateTime.UtcNow;
                 oldRefreshToken.DateCreated = DateTime.UtcNow.Subtract(TimeSpan.FromDays(8));
@@ -181,7 +180,7 @@ namespace Ntk8.Tests.Services
                 // arrange
                 var user = TestUser.Create();
                 var tokenService = Create();
-                var newRefreshToken = tokenService.GenerateRefreshToken(GetRandomIPv4Address());
+                var newRefreshToken = tokenService.GenerateRefreshToken();
 
                 user.RefreshTokens = new List<RefreshToken>
                 {
@@ -242,12 +241,14 @@ namespace Ntk8.Tests.Services
 
 
         private static TokenService Create(
-            IQueryExecutor queryExecutor = null, 
+            IQueryExecutor queryExecutor = null,
+            ICommandExecutor commandExecutor = null,
             AuthSettings authSettings = null,
             IHttpContextAccessor httpContextAccessor = null)
         {
             return new(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
+                commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 authSettings ?? CreateAuthSettings(),
                 httpContextAccessor ?? Substitute.For<IHttpContextAccessor>());
         }

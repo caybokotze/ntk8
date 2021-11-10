@@ -7,7 +7,6 @@ namespace Ntk8.Services
     {
         AuthenticatedResponse Authenticate(AuthenticateRequest model);
         AuthenticatedResponse GenerateNewRefreshToken(string token);
-        void RevokeRefreshToken(RefreshToken token);
         void Register(RegisterRequest model);
         void VerifyUserByVerificationToken(string token);
         void ForgotPassword(ForgotPasswordRequest model);

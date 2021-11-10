@@ -10,9 +10,6 @@ namespace Ntk8.Services
         string GetRefreshToken();
         string GetOriginRequestHeader();
         IHeaderDictionary GetRequestHeaders();
-        string GetRemoteIpAddress();
-        string GetLocalIpAddress();
-        string GetIpAddress();
     }
 
     public class AuthenticationContextService : IAuthenticationContextService
@@ -52,37 +49,6 @@ namespace Ntk8.Services
                 .HttpContext
                 .Request
                 .Headers;
-        }
-        
-        public string GetRemoteIpAddress()
-        {
-            return _httpContextAccessor
-                .HttpContext
-                .Connection
-                .RemoteIpAddress
-                ?.MapToIPv4()
-                .ToString();
-        }
-        
-        public string GetLocalIpAddress()
-        {
-            return _httpContextAccessor
-                .HttpContext
-                .Connection
-                .LocalIpAddress
-                ?.MapToIPv4()
-                .ToString();
-        }
-        
-        public string GetIpAddress()
-        {
-            if (GetRequestHeaders()
-                .ContainsKey(ControllerConstants.IpForwardHeader))
-            {
-                return GetRequestHeaders()[ControllerConstants.IpForwardHeader];
-            }
-
-            return GetRemoteIpAddress();
         }
     }
 }

@@ -14,23 +14,21 @@ namespace Ntk8.Services
 {
     public class AccountService : IAccountService
     {
-        public static int USER_VERIFICATION_EXPIRATION_HOURS = 4;
-        public static int USER_RESET_PASSWORD_EXPIRATION_HOURS = 12;
+        public static int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
+        public static int RESET_TOKEN_TTL = 43200; // in seconds
+        
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
-        private readonly IAuthenticationContextService _contextService;
 
         public AccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
-            ITokenService tokenService,
-            IAuthenticationContextService contextService)
+            ITokenService tokenService)
         {
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
-            _contextService = contextService;
         }
         
         /// <summary>
@@ -61,7 +59,7 @@ namespace Ntk8.Services
             var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
             user.Roles = roles;
             var jwtToken = _tokenService.GenerateJwtToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken(_contextService.GetIpAddress());
+            var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
             
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
@@ -85,7 +83,7 @@ namespace Ntk8.Services
         public AuthenticatedResponse GenerateNewRefreshToken(string token)
         {
             var newRefreshToken = _tokenService
-                .GenerateRefreshToken(_contextService.GetIpAddress());
+                .GenerateRefreshToken();
             
             var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
             
@@ -93,7 +91,7 @@ namespace Ntk8.Services
                 .RefreshTokens
                 .First();
             
-            RevokeRefreshToken(refreshToken);
+            _tokenService.RevokeRefreshToken(refreshToken);
 
             _commandExecutor.Execute(new InsertRefreshToken(newRefreshToken));
 
@@ -105,18 +103,6 @@ namespace Ntk8.Services
             _tokenService.SetRefreshTokenCookie(refreshToken.Token);
             
             return response;
-        }
-
-        /// <summary>
-        /// Revoke token will make sure that a token is set to invalid. It will also return the user for the associated refresh token.
-        /// </summary>
-        /// <param name="token"></param>
-        public void RevokeRefreshToken(
-            RefreshToken token)
-        {
-            token.DateRevoked = DateTime.UtcNow;
-            token.RevokedByIp = _contextService.GetIpAddress();
-            _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
 
         public void Register(RegisterRequest model)
@@ -133,7 +119,7 @@ namespace Ntk8.Services
 
                 existingUser.VerificationToken = _tokenService.RandomTokenString();
                 existingUser.DateModified = DateTime.UtcNow;
-                existingUser.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
+                existingUser.DateResetTokenExpires = DateTime.UtcNow.AddHours(VERIFICATION_TOKEN_TTL);
                 _commandExecutor.Execute(new UpdateUser(existingUser));
                 return;
             }
@@ -143,7 +129,7 @@ namespace Ntk8.Services
             user.VerificationToken = _tokenService.RandomTokenString();
             user.DateCreated = DateTime.UtcNow;
             user.DateModified = DateTime.UtcNow;
-            user.DateResetTokenExpires = DateTime.UtcNow.AddHours(USER_VERIFICATION_EXPIRATION_HOURS);
+            user.DateResetTokenExpires = DateTime.UtcNow.AddHours(VERIFICATION_TOKEN_TTL);
             user.PasswordHash = BC.HashPassword(model.Password);
             
             _commandExecutor
@@ -189,7 +175,7 @@ namespace Ntk8.Services
             if (user.DateResetTokenExpires != null
                 && user.DateResetTokenExpires
                     .Value
-                    .AddHours(USER_VERIFICATION_EXPIRATION_HOURS) < DateTime.UtcNow)
+                    .AddHours(VERIFICATION_TOKEN_TTL) < DateTime.UtcNow)
             {
                 throw new VerificationTokenExpiredException();
             }

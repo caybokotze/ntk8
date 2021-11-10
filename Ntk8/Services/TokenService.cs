@@ -8,6 +8,7 @@ using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
+using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
@@ -21,24 +22,28 @@ namespace Ntk8.Services
         string GenerateJwtToken(BaseUser baseUserModel);
         BaseUser FetchUserAndCheckIfRefreshTokenIsActive(string token);
         BaseUser RemoveOldRefreshTokens(BaseUser baseUserModel);
-        RefreshToken GenerateRefreshToken(string ipAddress);
+        RefreshToken GenerateRefreshToken();
         void SetRefreshTokenCookie(string token);
         string RandomTokenString();
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
+        void RevokeRefreshToken(RefreshToken token);
     }
 
     public class TokenService : ITokenService
     {
         private readonly IQueryExecutor _queryExecutor;
+        private readonly ICommandExecutor _commandExecutor;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
             IQueryExecutor queryExecutor,
+            ICommandExecutor commandExecutor,
             IAuthSettings authSettings,
             IHttpContextAccessor contextAccessor)
         {
             _queryExecutor = queryExecutor;
+            _commandExecutor = commandExecutor;
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
@@ -53,6 +58,13 @@ namespace Ntk8.Services
             }
 
             return account;
+        }
+        
+        public void RevokeRefreshToken(RefreshToken token)
+        {
+            token.DateRevoked = DateTime.UtcNow;
+            token.RevokedByIp = GetIpAddress();
+            _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
 
         public string GenerateJwtToken(BaseUser baseUserModel)
@@ -126,14 +138,14 @@ namespace Ntk8.Services
             return baseUserModel;
         }
 
-        public RefreshToken GenerateRefreshToken(string ipAddress)
+        public RefreshToken GenerateRefreshToken()
         {
             return new()
             {
                 Token = RandomTokenString(),
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL),
                 DateCreated = DateTime.UtcNow,
-                CreatedByIp = ipAddress
+                CreatedByIp = GetIpAddress()
             };
         }
 
@@ -185,6 +197,35 @@ namespace Ntk8.Services
             }
 
             return validatedToken;
+        }
+        
+        private string GetRemoteIpAddress()
+        {
+            return _contextAccessor
+                .HttpContext
+                .Connection
+                .RemoteIpAddress
+                ?.MapToIPv4()
+                .ToString();
+        }
+
+        private IHeaderDictionary GetRequestHeaders()
+        {
+            return _contextAccessor
+                .HttpContext
+                .Request
+                .Headers;
+        }
+
+        private string GetIpAddress()
+        {
+            if (GetRequestHeaders()
+                .ContainsKey(ControllerConstants.IpForwardHeader))
+            {
+                return GetRequestHeaders()[ControllerConstants.IpForwardHeader];
+            }
+
+            return GetRemoteIpAddress();
         }
     }
 }
