@@ -3,7 +3,6 @@ using System.Data;
 using System.Data.Common;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -51,7 +50,7 @@ namespace Ntk8.Demo
             return builder;
         }
 
-        public static AuthSettings ResolveAuthSettings()
+        private static AuthSettings ResolveAuthSettings()
         {
             var authSettings = CreateConfigurationRoot()
                 .GetSection("AuthSettings")

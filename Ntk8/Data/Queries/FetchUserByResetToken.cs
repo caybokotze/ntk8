@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using Dapper.CQRS;
+﻿using Dapper.CQRS;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -22,5 +20,5 @@ namespace Ntk8.Data.Queries
                 ResetToken = Token
             });
         }
-}
+    }
 }

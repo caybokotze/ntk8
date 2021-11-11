@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
@@ -39,8 +38,7 @@ namespace Ntk8.Middleware
                 .FirstOrDefault()
                 ?.Split(" ")
                 .Last();
-
-
+            
             if (token is not null)
             {
                 context = MountUserToContext(context, token);
