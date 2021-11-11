@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Models;
@@ -10,6 +11,7 @@ namespace Ntk8.Services
         string GetRefreshToken();
         string GetOriginRequestHeader();
         IHeaderDictionary GetRequestHeaders();
+        bool IsUserAuthenticated();
     }
 
     public class AuthenticationContextService : IAuthenticationContextService
@@ -49,6 +51,14 @@ namespace Ntk8.Services
                 .HttpContext
                 .Request
                 .Headers;
+        }
+
+        public bool IsUserAuthenticated()
+        {
+            var user = _httpContextAccessor
+                .HttpContext
+                .Items[AuthenticationConstants.ContextAccount];
+            return user is not null;
         }
     }
 }

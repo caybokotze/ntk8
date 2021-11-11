@@ -6,7 +6,7 @@ namespace Ntk8.Services
     public interface IAccountService
     {
         AuthenticatedResponse Authenticate(AuthenticateRequest model);
-        AuthenticatedResponse GenerateNewRefreshToken(string token);
+        AuthenticatedResponse GenerateNewJwtToken(string refreshToken);
         void Register(RegisterRequest model);
         void VerifyUserByVerificationToken(string token);
         void ForgotPassword(ForgotPasswordRequest model);

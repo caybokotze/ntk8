@@ -237,7 +237,7 @@ namespace Ntk8.Tests.Services
                         // act
                         var accountService = Create(queryExecutor, commandExecutor, tokenService);
                         var authenticatedResponse = accountService
-                            .GenerateNewRefreshToken(token.Token);
+                            .GenerateNewJwtToken(token.Token);
                         // assert
                         Expect(authenticatedResponse).Not.To.Be.Null();
                         // todo: see if refresh token is set in context.
@@ -292,7 +292,7 @@ namespace Ntk8.Tests.Services
                         // act
                         var accountService = Create(queryExecutor, commandExecutor, tokenService);
                         accountService
-                            .GenerateNewRefreshToken(token.Token);
+                            .GenerateNewJwtToken(token.Token);
                         // assert
                         Expect(commandExecutor)
                             .To.Have
@@ -328,7 +328,7 @@ namespace Ntk8.Tests.Services
                     // act
                     var accountService = Create(queryExecutor, commandExecutor, tokenService);
                     accountService
-                        .GenerateNewRefreshToken(token.Token);
+                        .GenerateNewJwtToken(token.Token);
                     // assert
                     Expect(commandExecutor)
                         .To.Have

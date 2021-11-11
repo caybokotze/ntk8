@@ -81,30 +81,17 @@ namespace Ntk8.Services
         /// <summary>
         /// GenerateRefreshToken is responsible for generating a new refresh token for a user and making sure that all the old refresh tokens for that user is deleted.
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="refreshToken"></param>
         /// <returns>A new instance of AuthenticatedResponse, which includes some basic user information</returns>
-        public AuthenticatedResponse GenerateNewRefreshToken(string token)
+        public AuthenticatedResponse GenerateNewJwtToken(string refreshToken)
         {
-            var newRefreshToken = _tokenService
-                .GenerateRefreshToken();
-            
-            var user = _tokenService.FetchUserAndCheckIfRefreshTokenIsActive(token);
-            
-            var refreshToken = user
-                .RefreshTokens
-                .First();
-            
-            _tokenService.RevokeRefreshToken(refreshToken);
-
-            _commandExecutor.Execute(new InsertRefreshToken(newRefreshToken));
-
+            var user = _tokenService
+                .FetchUserAndCheckIfRefreshTokenIsActive(refreshToken);
             var jwtToken = _tokenService.GenerateJwtToken(user);
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
-            
             response.JwtToken = jwtToken;
-            _tokenService.SetRefreshTokenCookie(refreshToken.Token);
-            
+
             return response;
         }
 
@@ -224,19 +211,7 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new UpdateUser(user));
         }
-
-        public void ValidateResetToken(ResetTokenRequest model)
-        {
-            var user = _queryExecutor
-                .Execute(new FetchUserByResetToken(model.Token));
-
-            if (user == null)
-            {
-                throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
-            }
-            
-            // todo: complete...
-        }
+        
 
         public void ResetPassword(ResetPasswordRequest model)
         {

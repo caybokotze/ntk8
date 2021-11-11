@@ -3,11 +3,12 @@ using System.Data;
 using System.Data.Common;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySql.Data.MySqlClient;
-using Ntk8.Helpers;
+using Ntk8.Middleware;
 using Ntk8.Models;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
@@ -19,24 +20,34 @@ namespace Ntk8.Demo
         static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // builder.Services.AddCors();
             builder = ConfigureDependencies(builder);
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
-            var _ = new AuthHandler(app, app.Resolve<IAccountService>());
+            var _ = new AuthHandler(app, app.Resolve<IAccountService>(),
+                app.Resolve<IAuthenticationContextService>());
+            app.UseMiddleware<JwtMiddleware>();
+            // app.UseCors();
             app.Run();
         }
+        
+        // TODO: Build middleware that will dispose the refresh token once it has been set.
+        // TODO: Make sure that fetching a user and user_roles is optimized to one database call.
+        // TODO: When fetching a user, also attach the most recent token to that user.
+        // TODO: Setup the middleware to handle exceptions and return 403, 401's appropriately.
+        // TODO: Write custom authorise attribute to handle role management.
 
         private static WebApplicationBuilder ConfigureDependencies(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
-            builder.Services.AddTransient<IDbConnection, DbConnection>(
-                sp => new MySqlConnection(GetConnectionString()));
+            builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
             builder.Services.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             builder.Services.AddTransient<IAccountService, AccountService>();
             builder.Services.AddTransient<IAuthSettings, AuthSettings>(sp => ResolveAuthSettings());
             builder.Services.AddTransient<ITokenService, TokenService>();
+            builder.Services.AddTransient<JwtMiddleware>();
             return builder;
         }
 

@@ -18,7 +18,10 @@ namespace Ntk8.Data.Queries
 
         public override void Execute()
         {
-            var sql = "SELECT * FROM users LEFT JOIN refresh_tokens ON users.id = refresh_tokens.user_id WHERE refresh_tokens.id = @Token;";
+            var sql = @"SELECT u.*, rt.* FROM users u
+            LEFT JOIN refresh_tokens rt
+            ON u.id = rt.user_id
+            WHERE rt.token = @Token;";
 
             Result = Query<BaseUser, RefreshToken, BaseUser>(
                     sql, (user, refreshToken) =>
@@ -28,7 +31,7 @@ namespace Ntk8.Data.Queries
                     },
                     new
                     {
-                        Token = Token
+                        Token
                     }).FirstOrDefault();
         }
     }

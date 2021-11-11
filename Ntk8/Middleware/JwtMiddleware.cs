@@ -16,13 +16,13 @@ namespace Ntk8.Middleware
 {
     public class JwtMiddleware : IMiddleware
     {
-        private readonly AuthSettings _authSettings;
+        private readonly IAuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ITokenService _tokenService;
 
         public JwtMiddleware(
-            AuthSettings authSettings,
-            IQueryExecutor queryExecutor,
+            IAuthSettings authSettings, 
+            IQueryExecutor queryExecutor, 
             ITokenService tokenService)
         {
             _authSettings = authSettings;
@@ -33,15 +33,19 @@ namespace Ntk8.Middleware
         public async Task InvokeAsync(
             HttpContext context, RequestDelegate next)
         {
-            var token = context.Request.Headers[AuthenticationConstants.DefaultJwtHeader]
+            var token = context
+                .Request
+                .Headers[AuthenticationConstants.DefaultJwtHeader]
                 .FirstOrDefault()
                 ?.Split(" ")
                 .Last();
 
-            if (token != null)
+
+            if (token is not null)
             {
                 context = MountUserToContext(context, token);
             }
+
 
             try
             {
@@ -59,17 +63,14 @@ namespace Ntk8.Middleware
             HttpContext context,
             string token)
         {
+            
             if (_authSettings.RefreshTokenSecret.Length < 32)
             {
                 throw new InvalidTokenLengthException();
             }
 
-            if (token is null)
-            {
-                throw new InvalidTokenException("The JWT token can not be null");
-            }
-
-            var validatedToken = _tokenService.ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
+            var validatedToken = _tokenService
+                .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
 
             var jwtToken = (JwtSecurityToken) validatedToken;
 
@@ -78,11 +79,12 @@ namespace Ntk8.Middleware
                 .Value);
 
             context.Items[AuthenticationConstants.ContextAccount] =
-                _queryExecutor.Execute(new FetchUserById(accountId));
+                _queryExecutor
+                    .Execute(new FetchUserById(accountId));
+            
+            // todo: Role management, attach user roles to the context.
             
             return context;
         }
-
-        
     }
 }

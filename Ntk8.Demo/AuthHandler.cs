@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Ntk8.Dto;
+using Ntk8.Exceptions;
 using Ntk8.Services;
 using static Ntk8.Demo.GlobalHelpers;
 
@@ -11,16 +12,21 @@ namespace Ntk8.Demo
     public class AuthHandler
     {
         private readonly IAccountService _accountService;
+        private readonly IAuthenticationContextService _authenticationContextService;
 
         public AuthHandler(
             IEndpointRouteBuilder builder,
-            IAccountService accountService)
+            IAccountService accountService,
+            IAuthenticationContextService authenticationContextService)
         {
             _accountService = accountService;
+            _authenticationContextService = authenticationContextService;
             builder.MapPost("/login", Login);
             builder.MapPost("/register", Register);
             builder.MapGet("/verify", VerifyByUrl);
             builder.MapPost("/verify", Verify);
+            builder.MapPost("/secure", SecureEndpoint);
+            builder.MapPost("/new-token", NewToken);
         }
 
         public async Task Verify(HttpContext context)
@@ -75,10 +81,28 @@ namespace Ntk8.Demo
             
             await context.SerialiseResponseBody(response);
         }
+
+        public async Task NewToken(HttpContext context)
+        {
+            var resetTokenRequest = await context
+                .DeserializeRequestBody<ResetTokenRequest>();
+            
+            ValidateModel(resetTokenRequest);
+
+            var response = _accountService
+                .GenerateNewJwtToken(resetTokenRequest.Token);
+            await context.SerialiseResponseBody(response);
+        }
         
         public async Task SecureEndpoint(HttpContext context)
         {
-            
+            if (_authenticationContextService
+                .IsUserAuthenticated())
+            {
+                await context.SerialiseResponseBody("Hi there jonny.");
+            }
+
+            throw new UserNotAuthenticatedException();
         }
     }
 }
