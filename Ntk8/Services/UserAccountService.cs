@@ -12,7 +12,7 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
 {
-    public class AccountService : IAccountService
+    public class UserAccountService : IUserAccountService
     {
         public static int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
         public static int RESET_TOKEN_TTL = 43200; // in seconds
@@ -22,7 +22,7 @@ namespace Ntk8.Services
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
 
-        public AccountService(
+        public UserAccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
             ITokenService tokenService,
@@ -43,7 +43,7 @@ namespace Ntk8.Services
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
         /// <exception cref="InvalidPasswordException"></exception>
-        public AuthenticatedResponse Authenticate(AuthenticateRequest model)
+        public AuthenticatedResponse AuthenticateUser(AuthenticateRequest model)
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
@@ -95,7 +95,7 @@ namespace Ntk8.Services
             return response;
         }
 
-        public void Register(RegisterRequest model)
+        public void RegisterUser(RegisterRequest model)
         {
             var existingUser = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
@@ -133,6 +133,16 @@ namespace Ntk8.Services
                 .Execute(new InsertUser(user));
         }
 
+        public void UpdateAccount()
+        {
+            
+        }
+        
+        public void DeleteAccount()
+        {
+            
+        }
+
         public void AutoVerifyUser(RegisterRequest model)
         {
             var user = _queryExecutor
@@ -147,14 +157,6 @@ namespace Ntk8.Services
             user.VerificationToken = null;
 
             _commandExecutor.Execute(new UpdateUser(user));
-        }
-
-        public BaseUser GetUserByEmail(string email)
-        {
-            var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress(email));
-
-            return user;
         }
 
         public void VerifyUserByVerificationToken(string token)
@@ -194,9 +196,10 @@ namespace Ntk8.Services
         /// </summary>
         /// <param name="model"></param>
         /// <para>Tip: Catch the UserNotFoundException to prevent email enumeration attacks.</para>
-        public void ForgotPassword(ForgotPasswordRequest model)
+        public string ForgotUserPassword(ForgotPasswordRequest model)
         {
-            var user = _queryExecutor.Execute(new FetchUserByEmailAddress(model.Email));
+            var user = _queryExecutor
+                .Execute(new FetchUserByEmailAddress(model.Email));
             
             if (user == null)
             {
@@ -210,10 +213,11 @@ namespace Ntk8.Services
                     : _authSettings.PasswordResetTokenTTL);
 
             _commandExecutor.Execute(new UpdateUser(user));
+            return user.ResetToken;
         }
         
 
-        public void ResetPassword(ResetPasswordRequest model)
+        public void ResetUserPassword(ResetPasswordRequest model)
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByResetToken(model.Token));
@@ -231,7 +235,7 @@ namespace Ntk8.Services
             _commandExecutor.Execute(new UpdateUser(user));
         }
 
-        public AccountResponse GetById(int id)
+        public UserAccountResponse GetUserById(int id)
         {
             var user = _queryExecutor
                 .Execute(new FetchUserById(id));
@@ -241,10 +245,10 @@ namespace Ntk8.Services
                 throw new NoUserFoundException();
             }
 
-            return user.MapFromTo<BaseUser, AccountResponse>();
+            return user.MapFromTo<BaseUser, UserAccountResponse>();
         }
 
-        public AccountResponse Update(int id, UpdateRequest model)
+        public UserAccountResponse UpdateUser(int id, UpdateRequest model)
         {
             var user = _tokenService.GetAccount(id);
 
@@ -257,11 +261,11 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.MapFromTo<BaseUser, AccountResponse>();
+            var response = user.MapFromTo<BaseUser, UserAccountResponse>();
             return response;
         }
 
-        public void Delete(int id)
+        public void DeleteUser(int id)
         {
             _commandExecutor.Execute(new DeleteUserById(id));
         }

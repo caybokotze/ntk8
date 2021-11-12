@@ -11,15 +11,15 @@ namespace Ntk8.Demo
 {
     public class AuthHandler
     {
-        private readonly IAccountService _accountService;
+        private readonly IUserAccountService _userAccountService;
         private readonly IAuthenticationContextService _authenticationContextService;
 
         public AuthHandler(
             IEndpointRouteBuilder builder,
-            IAccountService accountService,
+            IUserAccountService userAccountService,
             IAuthenticationContextService authenticationContextService)
         {
-            _accountService = accountService;
+            _userAccountService = userAccountService;
             _authenticationContextService = authenticationContextService;
             builder.MapPost("/login", Login);
             builder.MapPost("/register", Register);
@@ -34,10 +34,10 @@ namespace Ntk8.Demo
             var verifyRequest = await context
                 .DeserializeRequestBody<VerifyEmailRequest>();
             
-            var user = _accountService
+            var user = _userAccountService
                 .GetUserByEmail(verifyRequest.Email);
             
-            _accountService
+            _userAccountService
                 .VerifyUserByVerificationToken(user.VerificationToken);
         }
 
@@ -49,7 +49,7 @@ namespace Ntk8.Demo
 
             if (!string.IsNullOrEmpty(verifyRequest))
             {
-                _accountService
+                _userAccountService
                     .VerifyUserByVerificationToken(verifyRequest);
             }
             
@@ -63,8 +63,8 @@ namespace Ntk8.Demo
             
             ValidateModel(registerRequest);
 
-            _accountService
-                .Register(registerRequest);
+            _userAccountService
+                .RegisterUser(registerRequest);
             
             // todo: send email or something...
         }
@@ -76,8 +76,8 @@ namespace Ntk8.Demo
             
             ValidateModel(authRequest);
             
-            var response = _accountService
-                .Authenticate(authRequest);
+            var response = _userAccountService
+                .AuthenticateUser(authRequest);
             
             await context.SerialiseResponseBody(response);
         }
@@ -89,7 +89,7 @@ namespace Ntk8.Demo
             
             ValidateModel(resetTokenRequest);
 
-            var response = _accountService
+            var response = _userAccountService
                 .GenerateNewJwtToken(resetTokenRequest.Token);
             await context.SerialiseResponseBody(response);
         }

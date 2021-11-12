@@ -7,4 +7,9 @@ namespace Ntk8.Dto
         [Required]
         public string Token { get; set; }
     }
+
+    public class ResetTokenResponse : ResetTokenRequest
+    {
+
+    }
 }

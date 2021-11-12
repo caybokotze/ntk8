@@ -20,26 +20,31 @@ using static PeanutButter.RandomGenerators.RandomValueGen;
 namespace Ntk8.Tests.Services
 {
     [TestFixture]
-    public class AccountServiceTests : TestFixtureWithServiceProvider
+    public class AccountServiceTests
     {
-        [Test]
-        public void PrimaryServicesShouldNotBeNull()
+        [TestFixture]
+        public class DependencyInjection : TestFixtureWithServiceProvider
         {
-            using (new TransactionScope())
+            [Test]
+            public void PrimaryServicesShouldNotBeNull()
             {
-                // arrange
-                var accountService = Resolve<IAccountService>();
-                var commandExecutor = Resolve<ICommandExecutor>();
-                var queryExecutor = Resolve<IQueryExecutor>();
-                var tokenService = Resolve<ITokenService>();
-                // act
-                // assert
-                Expect(accountService).Not.To.Be.Null();
-                Expect(commandExecutor).Not.To.Be.Null();
-                Expect(queryExecutor).Not.To.Be.Null();
-                Expect(tokenService).Not.To.Be.Null();
+                using (new TransactionScope())
+                {
+                    // arrange
+                    var accountService = Resolve<IUserAccountService>();
+                    var commandExecutor = Resolve<ICommandExecutor>();
+                    var queryExecutor = Resolve<IQueryExecutor>();
+                    var tokenService = Resolve<ITokenService>();
+                    // act
+                    // assert
+                    Expect(accountService).Not.To.Be.Null();
+                    Expect(commandExecutor).Not.To.Be.Null();
+                    Expect(queryExecutor).Not.To.Be.Null();
+                    Expect(tokenService).Not.To.Be.Null();
+                }
             }
         }
+        
 
         [TestFixture]
         public class IntegrationTests : TestFixtureWithServiceProvider
@@ -59,7 +64,7 @@ namespace Ntk8.Tests.Services
                         var commandExecutor = Resolve<ICommandExecutor>();
                         var accountService = Create(queryExecutor, commandExecutor);
                         // act
-                        accountService.Register(registerRequest);
+                        accountService.RegisterUser(registerRequest);
                         var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
                         // assert
                         Expect(user.IsActive).To.Be.True();
@@ -79,12 +84,167 @@ namespace Ntk8.Tests.Services
                 using (Transactions.RepeatableRead())
                 {
                     var userId = commandExecutor.Execute(new InsertUser(GetRandom<BaseUser>()));
-                    accountService.Update(userId, updatedUser);
+                    accountService.UpdateUser(userId, updatedUser);
                     var user = queryExecutor.Execute(new FetchUserById(userId));
                     var userToMatch = user.MapFromTo<BaseUser, UpdateRequest>();
                     // assert
                     Expect(userToMatch).To.Deep.Equal(updatedUser);
                 }
+            }
+        }
+
+        [TestFixture]
+        public class Authenticate
+        {
+            [Test]
+            public void ShouldGenerateNewJwtToken()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldGenerateNewRefreshToken()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldHashUserPassword()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldFetchTheUserFromDb()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldAttachUserRolesToUserResponse()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldNotAttachUserToHttpContext()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+        }
+
+        [TestFixture]
+        public class GenerateJwtToken
+        {
+            [Test]
+            public void ShouldNotCreateNewRefreshToken()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldCreateNewJwtToken()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+        }
+
+        [TestFixture]
+        public class Register
+        {
+            [Test]
+            public void ShouldRegisterUser()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldNotSetUserToValidated()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldHashThePassword()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+        }
+
+        [TestFixture]
+        public class ForgotPassword
+        {
+            [Test]
+            public void ShouldUpdateResetToken()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldUpdateDateResetTokenExpires()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldReturnResetToken()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+        }
+
+        [TestFixture]
+        public class ResetPassword
+        {
+            [Test]
+            public void ShouldSetResetTokenToNull()
+            {
+                // arrange
+                
+                // act
+                // assert
             }
         }
 
@@ -108,7 +268,7 @@ namespace Ntk8.Tests.Services
                     var accountService = Create(queryExecutor, commandExecutor);
                     // act
                     // assert
-                    Expect(() => accountService.Register(registerRequest))
+                    Expect(() => accountService.RegisterUser(registerRequest))
                         .To.Throw<UserAlreadyExistsException>()
                         .With.Message.Containing("User already exists");
                 }
@@ -131,7 +291,7 @@ namespace Ntk8.Tests.Services
                             .Returns(user);
                         var ipAddress = GetRandomIPv4Address();
                         var accountService = Create(queryExecutor, commandExecutor);
-                        accountService.Register(registerRequest);
+                        accountService.RegisterUser(registerRequest);
                         // act
                         // assert
                         Expect(commandExecutor)
@@ -205,6 +365,19 @@ namespace Ntk8.Tests.Services
                         // act
                         // assert
                     }
+                }
+
+
+                [TestFixture]
+                public class WhenUserDoesExist
+                {
+                    
+                }
+
+                [TestFixture]
+                public class WhenUserDoesNotExist
+                {
+                    
                 }
             }
 
@@ -369,13 +542,13 @@ namespace Ntk8.Tests.Services
             }
         }
 
-        private static IAccountService Create(
+        private static IUserAccountService Create(
             IQueryExecutor queryExecutor = null,
             ICommandExecutor commandExecutor = null,
             ITokenService tokenService = null,
             IAuthSettings authSettings = null)
         {
-            return new AccountService(
+            return new UserAccountService(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),

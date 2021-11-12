@@ -61,7 +61,7 @@ namespace Ntk8.Tests
                         new MySqlConnection(AppSettingProvider.CreateAppSettings().DefaultConnection));
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
-                    config.AddTransient<IAccountService, AccountService>();
+                    config.AddTransient<IUserAccountService, UserAccountService>();
                     config.Configure<IAuthSettings>(options => appSettings.GetSection("AuthSettings").Bind(options));
                 });
             });

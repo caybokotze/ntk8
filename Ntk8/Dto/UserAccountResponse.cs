@@ -5,7 +5,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Dto
 {
-    public class AccountResponse : IUserPrimaryProperties
+    public class UserAccountResponse : IUserPrimaryProperties
     {
         public int Id { get; set; }
         public string Title { get; set; }

@@ -23,7 +23,7 @@ namespace Ntk8.Demo
             builder = ConfigureDependencies(builder);
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
-            var _ = new AuthHandler(app, app.Resolve<IAccountService>(),
+            var _ = new AuthHandler(app, app.Resolve<IUserAccountService>(),
                 app.Resolve<IAuthenticationContextService>());
             app.UseMiddleware<JwtMiddleware>();
             // app.UseCors();
@@ -35,6 +35,9 @@ namespace Ntk8.Demo
         // TODO: When fetching a user, also attach the most recent token to that user.
         // TODO: Setup the middleware to handle exceptions and return 403, 401's appropriately.
         // TODO: Write custom authorise attribute to handle role management.
+        // TODO: When saving new users, isActive should be set to true.
+        // TODO: When deleting a user, isActive should be set to false.
+        // TODO: When fetching users, isActive results set to false, should be ignored.
 
         private static WebApplicationBuilder ConfigureDependencies(WebApplicationBuilder builder)
         {
@@ -43,7 +46,7 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
             builder.Services.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
-            builder.Services.AddTransient<IAccountService, AccountService>();
+            builder.Services.AddTransient<IUserAccountService, UserAccountService>();
             builder.Services.AddTransient<IAuthSettings, AuthSettings>(sp => ResolveAuthSettings());
             builder.Services.AddTransient<ITokenService, TokenService>();
             builder.Services.AddTransient<JwtMiddleware>();
