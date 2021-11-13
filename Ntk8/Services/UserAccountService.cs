@@ -86,7 +86,7 @@ namespace Ntk8.Services
         public AuthenticatedResponse GenerateNewJwtToken(string refreshToken)
         {
             var user = _tokenService
-                .FetchUserAndCheckIfRefreshTokenIsActive(refreshToken);
+                .IsRefreshTokenActive(refreshToken);
             var jwtToken = _tokenService.GenerateJwtToken(user);
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();

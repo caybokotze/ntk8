@@ -117,7 +117,7 @@ namespace Ntk8.Tests.Services
                     .Returns(randomUser);
                 
                 var baseUser = tokenService
-                    .FetchUserAndCheckIfRefreshTokenIsActive(refreshToken.Token);
+                    .IsRefreshTokenActive(refreshToken.Token);
                 // act
                 // assert
                 Expect(queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token)))
@@ -140,7 +140,7 @@ namespace Ntk8.Tests.Services
                 // act
                 // assert
                 Expect(() => tokenService
-                        .FetchUserAndCheckIfRefreshTokenIsActive(token))
+                        .IsRefreshTokenActive(token))
                     .To.Throw<InvalidOperationException>();
             }
         }

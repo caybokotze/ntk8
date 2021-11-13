@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
+using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using static Newtonsoft.Json.JsonConvert;
@@ -18,10 +19,8 @@ namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        BaseUser GetAccount(int id);
-        string GenerateJwtToken(BaseUser baseUserModel);
-        BaseUser FetchUserAndCheckIfRefreshTokenIsActive(string token);
-        BaseUser RemoveOldRefreshTokens(BaseUser baseUserModel);
+        string GenerateJwtToken(long userId, string[] roles);
+        (bool isActive, long userId, string[] roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken();
         void SetRefreshTokenCookie(string token);
         string RandomTokenString();
@@ -47,27 +46,47 @@ namespace Ntk8.Services
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
-        
-        public BaseUser GetAccount(int id)
-        {
-            var account = _queryExecutor
-                .Execute(new FetchUserById(id));
-            if (account == null)
-            {
-                throw new UserNotFoundException("The user can not be found.");
-            }
 
-            return account;
-        }
-        
         public void RevokeRefreshToken(RefreshToken token)
         {
             token.DateRevoked = DateTime.UtcNow;
             token.RevokedByIp = GetIpAddress();
             _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
+        
+        public ResetTokenResponse GenerateNewJwtToken(string refreshToken)
+        {
+            var (isActive, userId, roles) = IsRefreshTokenActive(refreshToken);
 
-        public string GenerateJwtToken(BaseUser baseUserModel)
+            if (!isActive)
+            {
+                throw new InvalidTokenException("The refresh token has expired.");
+            }
+            
+            var jwtToken = GenerateJwtToken(userId, roles);
+            
+            return new ResetTokenResponse
+            {
+                Token = jwtToken
+            };
+        }
+        
+        public (bool isActive, long userId, string[] roles) IsRefreshTokenActive(string token)
+        {
+            var account = _queryExecutor
+                .Execute(new FetchUserByRefreshToken(token));
+            
+            if (account is null)
+            {
+                throw new InvalidTokenException("The refresh token does not exist.");
+            }
+
+            var refreshToken = account.RefreshTokens.First();
+
+            return (refreshToken.IsActive, account.Id, account.Roles.Select(s => s.RoleName).ToArray());
+        }
+
+        public string GenerateJwtToken(long userId, string[] roles)
         {
             if (_authSettings.RefreshTokenSecret.Length < 32)
             {
@@ -82,16 +101,15 @@ namespace Ntk8.Services
                 Subject = new ClaimsIdentity(new []
                 {
                     new Claim(AuthenticationConstants
-                        .PrimaryKeyValue, baseUserModel.Id.ToString()),
-                    new Claim("roles", SerializeObject(
-                        baseUserModel
-                        .Roles
-                        .Select(s => s.RoleName)))
+                        .PrimaryKeyValue, userId.ToString()),
+                    new Claim("roles", SerializeObject(roles))
                 }),
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime
                     .UtcNow
-                    .AddSeconds(_authSettings.JwtTTL == 0 ? 900 : _authSettings.JwtTTL),
+                    .AddSeconds(_authSettings.JwtTTL == 0 
+                        ? 900 
+                        : _authSettings.JwtTTL),
                 Issuer = "NTK8",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), 
                     SecurityAlgorithms.HmacSha256Signature)
@@ -100,47 +118,9 @@ namespace Ntk8.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public BaseUser FetchUserAndCheckIfRefreshTokenIsActive(string token)
-        {
-            var account = _queryExecutor
-                .Execute(new FetchUserByRefreshToken(token));
-            
-            if (account is null)
-            {
-                throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
-            }
-
-            RefreshToken refreshToken;
-            
-            refreshToken = account
-                .RefreshTokens
-                .Single(x => x.Token == token);
-
-
-            if (!refreshToken.IsActive)
-            {
-                throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
-            }
-
-            return account;
-        }
-
-        public BaseUser RemoveOldRefreshTokens(
-            BaseUser baseUserModel)
-        {
-            baseUserModel
-                .RefreshTokens
-                .ToList()
-                .RemoveAll(x => !x.IsActive &&
-                                x.DateCreated.AddSeconds(_authSettings.RefreshTokenTTL)
-                                <= DateTime.UtcNow);
-
-            return baseUserModel;
-        }
-
         public RefreshToken GenerateRefreshToken()
         {
-            return new()
+            return new RefreshToken
             {
                 Token = RandomTokenString(),
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL),
