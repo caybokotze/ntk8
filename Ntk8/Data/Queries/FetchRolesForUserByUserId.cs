@@ -6,9 +6,9 @@ namespace Ntk8.Data.Queries
 {
     public class FetchUserRolesForUserId : Query<List<Role>>
     {
-        public int Id { get; }
+        public long Id { get; }
 
-        public FetchUserRolesForUserId(int id)
+        public FetchUserRolesForUserId(long id)
         {
             Id = id;
         }

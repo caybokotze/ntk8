@@ -39,7 +39,6 @@ namespace Ntk8.Services
         /// A refresh and JWT token is also generated for the user and send back to the caller.
         /// </summary>
         /// <param name="model"></param>
-        /// <param name="ipAddress"></param>
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
         /// <exception cref="InvalidPasswordException"></exception>
@@ -61,7 +60,7 @@ namespace Ntk8.Services
             
             var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
             user.Roles = roles;
-            var jwtToken = _tokenService.GenerateJwtToken(user);
+            var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.Select(s => s.RoleName).ToArray());
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
             
@@ -75,23 +74,6 @@ namespace Ntk8.Services
             response.Roles = roles.Select(s => s.RoleName).ToArray();
             response.JwtToken = jwtToken;
             _tokenService.SetRefreshTokenCookie(refreshToken.Token);
-            return response;
-        }
-
-        /// <summary>
-        /// GenerateRefreshToken is responsible for generating a new refresh token for a user and making sure that all the old refresh tokens for that user is deleted.
-        /// </summary>
-        /// <param name="refreshToken"></param>
-        /// <returns>A new instance of AuthenticatedResponse, which includes some basic user information</returns>
-        public AuthenticatedResponse GenerateNewJwtToken(string refreshToken)
-        {
-            var user = _tokenService
-                .IsRefreshTokenActive(refreshToken);
-            var jwtToken = _tokenService.GenerateJwtToken(user);
-
-            var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
-            response.JwtToken = jwtToken;
-
             return response;
         }
 
@@ -250,7 +232,7 @@ namespace Ntk8.Services
 
         public UserAccountResponse UpdateUser(int id, UpdateRequest model)
         {
-            var user = _tokenService.GetAccount(id);
+            var user = _queryExecutor.Execute(new FetchUserById(id));
 
             if (!string.IsNullOrEmpty(model.Password))
             {

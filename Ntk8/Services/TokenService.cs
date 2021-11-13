@@ -19,9 +19,10 @@ namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        string GenerateJwtToken(long userId, string[] roles);
-        (bool isActive, long userId, string[] roles) IsRefreshTokenActive(string token);
+        string GenerateJwtToken(long userId, Role[] roles);
+        (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken();
+        ResetTokenResponse GenerateNewJwtToken(string refreshToken);
         void SetRefreshTokenCookie(string token);
         string RandomTokenString();
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
@@ -71,22 +72,27 @@ namespace Ntk8.Services
             };
         }
         
-        public (bool isActive, long userId, string[] roles) IsRefreshTokenActive(string token)
+        public (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token)
         {
-            var account = _queryExecutor
+            var user = _queryExecutor
                 .Execute(new FetchUserByRefreshToken(token));
+
+            var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
+            user.Roles = roles;
             
-            if (account is null)
+            if (user is null)
             {
                 throw new InvalidTokenException("The refresh token does not exist.");
             }
 
-            var refreshToken = account.RefreshTokens.First();
+            var refreshToken = user
+                .RefreshTokens
+                .First();
 
-            return (refreshToken.IsActive, account.Id, account.Roles.Select(s => s.RoleName).ToArray());
+            return (refreshToken.IsActive, user.Id, user.Roles.ToArray());
         }
 
-        public string GenerateJwtToken(long userId, string[] roles)
+        public string GenerateJwtToken(long userId, Role[] roles)
         {
             if (_authSettings.RefreshTokenSecret.Length < 32)
             {

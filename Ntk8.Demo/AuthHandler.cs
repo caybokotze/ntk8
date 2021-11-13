@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Services;
@@ -13,14 +16,20 @@ namespace Ntk8.Demo
     {
         private readonly IUserAccountService _userAccountService;
         private readonly IAuthenticationContextService _authenticationContextService;
+        private readonly IQueryExecutor _queryExecutor;
+        private readonly ITokenService _tokenService;
 
         public AuthHandler(
             IEndpointRouteBuilder builder,
             IUserAccountService userAccountService,
-            IAuthenticationContextService authenticationContextService)
+            IAuthenticationContextService authenticationContextService,
+            IQueryExecutor queryExecutor,
+            ITokenService tokenService)
         {
             _userAccountService = userAccountService;
             _authenticationContextService = authenticationContextService;
+            _queryExecutor = queryExecutor;
+            _tokenService = tokenService;
             builder.MapPost("/login", Login);
             builder.MapPost("/register", Register);
             builder.MapGet("/verify", VerifyByUrl);
@@ -34,8 +43,8 @@ namespace Ntk8.Demo
             var verifyRequest = await context
                 .DeserializeRequestBody<VerifyEmailRequest>();
             
-            var user = _userAccountService
-                .GetUserByEmail(verifyRequest.Email);
+            var user = _queryExecutor
+                .Execute(new FetchUserByEmailAddress(verifyRequest.Email));
             
             _userAccountService
                 .VerifyUserByVerificationToken(user.VerificationToken);
@@ -89,8 +98,8 @@ namespace Ntk8.Demo
             
             ValidateModel(resetTokenRequest);
 
-            var response = _userAccountService
-                .GenerateNewJwtToken(resetTokenRequest.Token);
+            var user = _queryExecutor.Execute(new FetchUserByRefreshToken(resetTokenRequest.Token));
+            var response = _tokenService.GenerateJwtToken(user.Id, user.Roles);
             await context.SerialiseResponseBody(response);
         }
         

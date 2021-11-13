@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Ntk8.Models;
 
 namespace Ntk8.Dto.Interfaces
@@ -9,6 +8,6 @@ namespace Ntk8.Dto.Interfaces
         string FirstName { get; set; }
         string LastName { get; set; }
         string Email { get; set; }
-        ICollection<UserRole> UserRoles { get; set; }
+        Role[] Roles { get; set; }
     }
 }
