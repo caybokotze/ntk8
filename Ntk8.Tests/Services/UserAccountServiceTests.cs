@@ -55,8 +55,12 @@ namespace Ntk8.Tests.Services
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<BaseUser>();
-                var token = TokenHelpers
+                var tokenString = TokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
+                var token = new ResetTokenResponse()
+                {
+                    Token = tokenString
+                };
                 var authenticateRequest = user.MapFromTo<BaseUser, AuthenticateRequest>();
                 authenticateRequest.Password = GetRandomString();
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
@@ -77,7 +81,7 @@ namespace Ntk8.Tests.Services
                 var authenticatedResponse = accountService.AuthenticateUser(authenticateRequest);
                 // assert
                 Expect(authenticatedResponse.JwtToken).Not.To.Be.Null();
-                Expect(authenticatedResponse.JwtToken).To.Equal(token);
+                Expect(authenticatedResponse.JwtToken).To.Equal(token.Token);
             }
 
             [TestFixture]

@@ -49,14 +49,14 @@ namespace Ntk8.Tests.Services
                 // act
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
                 
-                var header = token
+                var header = token.Token
                     .Split(".")[0];
 
-                var payload = token
+                var payload = token.Token
                     .Split(".")[1];
                 
                 var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(token);
+                var jwtToken = handler.ReadJwtToken(token.Token);
                 
                 // assert
                 Expect(header).To.Not.Be.Empty();
@@ -140,7 +140,7 @@ namespace Ntk8.Tests.Services
                 // act
                 // assert
                 Expect(() => tokenService
-                        .IsRefreshTokenActive(token))
+                        .IsRefreshTokenActive(token.Token))
                     .To.Throw<InvalidOperationException>();
             }
         }
