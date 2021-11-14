@@ -77,7 +77,8 @@ namespace Ntk8.Services
             var user = _queryExecutor
                 .Execute(new FetchUserByRefreshToken(token));
 
-            var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
+            // todo: build fetching of roles into fetchingUserByRefreshTokens;
+            var roles = _queryExecutor.Execute(new FetchUserRolesByUserId(user.Id));
             user.Roles = roles.ToArray();
             
             if (user is null)

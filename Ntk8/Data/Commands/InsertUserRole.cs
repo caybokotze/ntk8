@@ -6,7 +6,7 @@ namespace Ntk8.Data.Commands
     public class InsertUserRole : Command<int>
     {
         public int RoleId { get; }
-        public int UserId { get; }
+        public long UserId { get; }
 
         public InsertUserRole(UserRole userRole)
         {

@@ -13,7 +13,7 @@ namespace Ntk8.Tests.Helpers
 {
     public static class TokenHelpers
     {
-        public static string CreateValidJwtToken(string secret = null, int? userId = null)
+        public static string CreateValidJwtToken(string secret = null, long? userId = null)
         {
             userId ??= GetRandomInt();
             secret ??= GetRandomString(50);

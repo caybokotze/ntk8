@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Dapper.CQRS;
 using Newtonsoft.Json;
-using Ntk8.Data.Queries;
 using Ntk8.Dto.Interfaces;
 
 namespace Ntk8.Models
@@ -14,7 +12,7 @@ namespace Ntk8.Models
         DateTime DateCreated { get; set; }
         DateTime DateModified { get; set; }
         bool IsActive { get; set; }
-        int Id { get; set; }
+        long Id { get; set; }
         Guid Guid { get; set; }
         string TelNumber { get; set; }
         string Username { get; set; }
@@ -32,7 +30,6 @@ namespace Ntk8.Models
         Role[] Roles { get; set; }
         bool IsVerified { get; }
         bool OwnsToken(string token);
-        IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor);
     }
 
     /// <summary>
@@ -80,7 +77,7 @@ namespace Ntk8.Models
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
         public bool IsActive { get; set; }
-        public int Id { get; set; }
+        public long Id { get; set; }
         public Guid Guid { get; set; }
 
         [StringLength(100)]
@@ -131,13 +128,5 @@ namespace Ntk8.Models
         }
         
         public bool IsVerified => DateVerified.HasValue || DateOfPasswordReset.HasValue;
-        
-        public IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor)
-        {
-            Roles = queryExecutor
-                .Execute(new FetchUserRolesForUserId(Id))
-                .ToArray();
-            return Roles;
-        }
     }
 }

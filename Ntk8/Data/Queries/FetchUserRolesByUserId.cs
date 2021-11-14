@@ -4,11 +4,11 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserRolesForUserId : Query<List<Role>>
+    public class FetchUserRolesByUserId : Query<List<Role>>
     {
         public long Id { get; }
 
-        public FetchUserRolesForUserId(long id)
+        public FetchUserRolesByUserId(long id)
         {
             Id = id;
         }

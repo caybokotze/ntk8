@@ -58,8 +58,6 @@ namespace Ntk8.Services
                 throw new InvalidPasswordException("User is not verified or password is incorrect");
             }
             
-            var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
-            user.Roles = roles.ToArray();
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
@@ -67,8 +65,7 @@ namespace Ntk8.Services
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
-
-            response.Roles = roles.ToArray();
+            
             response.JwtToken = jwtToken;
             _tokenService.SetRefreshTokenCookie(refreshToken.Token);
             return response;
@@ -112,12 +109,12 @@ namespace Ntk8.Services
                 .Execute(new InsertUser(user));
         }
 
-        public void UpdateAccount()
+        public void UpdateAccount(RegisterRequest request)
         {
             
         }
         
-        public void DeleteAccount()
+        public void DeleteAccount(long userId)
         {
             
         }

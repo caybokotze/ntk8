@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
-using Microsoft.AspNetCore.Routing.Template;
 using NExpect;
 using NSubstitute;
 using Ntk8.Data.Commands;
@@ -65,10 +64,6 @@ namespace Ntk8.Tests.Services
                 queryExecutor
                     .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
                     .Returns(user);
-
-                queryExecutor
-                    .Execute(Arg.Is<FetchUserRolesForUserId>(u => u.Id == user.Id))
-                    .Returns(user.Roles.ToList());
 
                 tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray())
                     .Returns(token);
