@@ -52,10 +52,14 @@ namespace Ntk8.Services
                 throw new UserNotFoundException("The user does not exist");
             }
 
-            if (!user.IsVerified || 
-                !BC.Verify(model.Password, user.PasswordHash))
+            if (!user.IsVerified)
             {
-                throw new InvalidPasswordException("User is not verified or password is incorrect");
+                throw new UserIsNotVerifiedException();
+            }
+
+            if (!BC.Verify(model.Password, user.PasswordHash))
+            {
+                throw new InvalidPasswordException("The password specified is not correct");
             }
             
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());

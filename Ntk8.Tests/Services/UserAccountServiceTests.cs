@@ -87,9 +87,19 @@ namespace Ntk8.Tests.Services
                 public void ShouldThrow()
                 {
                     // arrange
-                    
+                    var queryExecutor = Substitute.For<IQueryExecutor>();
+                    var user = TestUser.Create();
+                    user.DateVerified = null;
+                    user.DateOfPasswordReset = null;
+                    queryExecutor.Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                        .Returns(user);
+                    var tokenService = Substitute.For<ITokenService>();
+                    var authenticateRequest = user.MapFromTo<BaseUser, AuthenticateRequest>();
+                    var sut = Create(queryExecutor, null, tokenService);
                     // act
                     // assert
+                    Expect(() => sut.AuthenticateUser(authenticateRequest))
+                        .To.Throw<UserIsNotVerifiedException>();
                 }
             }
 
