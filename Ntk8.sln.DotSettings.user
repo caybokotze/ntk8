@@ -4,6 +4,11 @@
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeRefreshTokenAndGenerateNewRefreshToken+WhenUserHasExistingRefreshTokens.ShouldGenerateNewRefreshToken&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=488db646_002D0d45_002D44a0_002D9cbf_002D5b83b73a8dce/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldAttachUserRolesToFirstResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachUserRolesToFirstResult&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	
 	
 	
@@ -21,6 +26,9 @@
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e599877a_002Dee94_002D4e60_002D8e8d_002D2e71dda0f937/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldGenerateNewRefreshToken #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeRefreshTokenAndGenerateNewRefreshToken+WhenUserHasExistingRefreshTokens.ShouldGenerateNewRefreshToken&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Services.UserAccountServiceTests+DependencyInjection.ShouldNotBeNull&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachUserRolesToFirstResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldFetchAllUserProperties&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachRefreshTokenToUser&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

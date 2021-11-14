@@ -1,4 +1,5 @@
 using System;
+using Ntk8.Models;
 
 namespace Ntk8.Dto
 {
@@ -9,7 +10,7 @@ namespace Ntk8.Dto
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string[] Roles { get; set; }
+        public Role[] Roles { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
         public bool IsVerified { get; set; }

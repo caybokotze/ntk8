@@ -59,19 +59,16 @@ namespace Ntk8.Services
             }
             
             var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
-            user.Roles = roles;
-            var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.Select(s => s.RoleName).ToArray());
+            user.Roles = roles.ToArray();
+            var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
             
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
-            // _tokenService.RemoveOldRefreshTokens(user); todo: see if required.
-            _commandExecutor.Execute(new UpdateUser(user));
-
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
 
-            response.Roles = roles.Select(s => s.RoleName).ToArray();
+            response.Roles = roles.ToArray();
             response.JwtToken = jwtToken;
             _tokenService.SetRefreshTokenCookie(refreshToken.Token);
             return response;

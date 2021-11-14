@@ -24,8 +24,6 @@ namespace Ntk8.Tests
                 .To.Have.Property(nameof(primaryProperties.FirstName));
             Expect(typeof(IUserPrimaryProperties))
                 .To.Have.Property(nameof(primaryProperties.LastName));
-            Expect(typeof(IUserPrimaryProperties))
-                .To.Have.Property(nameof(primaryProperties.UserRoles));
         }
     }
 }

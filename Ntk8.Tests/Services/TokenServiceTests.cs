@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using NExpect;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
 using Ntk8.Models;
@@ -30,7 +29,8 @@ namespace Ntk8.Tests.Services
             {
                 // arrange
                 var tokenService = Create();
-                var token = tokenService.GenerateJwtToken(GetRandom<BaseUser>());
+                var user = TestUser.Create();
+                var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
                 // act
                 // assert
                 Expect(token).Not.To.Be.Null();
@@ -45,10 +45,9 @@ namespace Ntk8.Tests.Services
                 var tokenService = Create(authSettings:authSettings);
 
                 var user = TestUser.Create();
-                user.Roles = CreateRandomRoles();
 
                 // act
-                var token = tokenService.GenerateJwtToken(user);
+                var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
                 
                 var header = token
                     .Split(".")[0];
@@ -85,10 +84,11 @@ namespace Ntk8.Tests.Services
                     var authSettings = CreateAuthSettings();
                     authSettings.RefreshTokenSecret = GetRandomString(20, 22);
                     var tokenService = Create(authSettings:authSettings);
+                    var user = TestUser.Create();
                     // act
                     // assert
                     Expect(() => tokenService
-                            .GenerateJwtToken(GetRandom<BaseUser>()))
+                            .GenerateJwtToken(user.Id, user.Roles))
                         .To
                         .Throw<InvalidTokenLengthException>();
                 }
@@ -104,7 +104,7 @@ namespace Ntk8.Tests.Services
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Create(queryExecutor);
-                var randomUser = GetRandom<BaseUser>();
+                var randomUser = TestUser.Create();
                 var refreshToken = tokenService.GenerateRefreshToken();
                 
                 randomUser.RefreshTokens = new List<RefreshToken>()
@@ -116,13 +116,13 @@ namespace Ntk8.Tests.Services
                     .Execute(Arg.Any<FetchUserByRefreshToken>())
                     .Returns(randomUser);
                 
-                var baseUser = tokenService
+                var _ = tokenService
                     .IsRefreshTokenActive(refreshToken.Token);
                 // act
                 // assert
                 Expect(queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token)))
                     .To
-                    .Equal(baseUser);
+                    .Equal(randomUser);
             }
             
             [Test]
@@ -131,8 +131,8 @@ namespace Ntk8.Tests.Services
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Create(queryExecutor);
-                var user = GetRandom<BaseUser>();
-                var token = tokenService.GenerateJwtToken(user);
+                var user = TestUser.Create();
+                var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
                 var randomUser = GetRandom<BaseUser>();
                 queryExecutor
                     .Execute(Arg.Any<FetchUserByRefreshToken>())
@@ -144,109 +144,14 @@ namespace Ntk8.Tests.Services
                     .To.Throw<InvalidOperationException>();
             }
         }
-
-        [TestFixture]
-        public class RemoveOldRefreshTokens
-        {
-            [Test]
-            public void ShouldRemoveOldRefreshTokens()
-            {
-                // arrange
-                var user = TestUser.Create();
-                var tokenService = Create();
-                var oldRefreshToken = tokenService.GenerateRefreshToken();
-                var newRefreshToken = tokenService.GenerateRefreshToken();
-                oldRefreshToken.Expires = DateTime.UtcNow.Subtract(TimeSpan.FromHours(1));
-                oldRefreshToken.DateRevoked = DateTime.UtcNow;
-                oldRefreshToken.DateCreated = DateTime.UtcNow.Subtract(TimeSpan.FromDays(8));
-                
-                user.RefreshTokens = new List<RefreshToken>
-                {
-                    newRefreshToken,
-                    oldRefreshToken
-                };
-                
-                // act
-                var expectedUser = tokenService
-                    .RemoveOldRefreshTokens(user);
-                // assert
-                Expect(expectedUser.RefreshTokens.Count).To.Equal(1);
-                Expect(expectedUser.RefreshTokens).To.Contain(newRefreshToken);
-            }
-
-            [Test]
-            public void ShouldNotRemoveValidRefreshTokens()
-            {
-                // arrange
-                var user = TestUser.Create();
-                var tokenService = Create();
-                var newRefreshToken = tokenService.GenerateRefreshToken();
-
-                user.RefreshTokens = new List<RefreshToken>
-                {
-                    newRefreshToken
-                };
-                // act
-                var expectedUser = tokenService.RemoveOldRefreshTokens(user);
-                // assert
-                Expect(expectedUser.RefreshTokens.Count).To.Equal(1);
-                Expect(expectedUser.RefreshTokens).To.Contain(newRefreshToken);
-            }
-        }
-
-        [TestFixture]
-        public class GetAccount
-        {
-            [TestFixture]
-            public class WhenUserCanNotBeFound
-            {
-                [Test]
-                public void ShouldThrow()
-                {
-                    // arrange
-                    var queryExecutor = Substitute.For<IQueryExecutor>();
-                    var tokenService = Create(queryExecutor);
-                    var user = TestUser.Create();
-                    queryExecutor
-                        .Execute(Arg.Is<FetchUserById>(f => f.Id == user.Id))
-                        .ReturnsNull();
-                    // act
-                    // assert
-                    Expect(() => tokenService.GetAccount(user.Id))
-                        .To.Throw<UserNotFoundException>()
-                        .With.Message.Containing("The user can not be found");
-                }
-            }
-
-            [TestFixture]
-            public class WhenUserCanBeFound
-            {
-                [Test]
-                public void ShouldReturnUser()
-                {
-                    // arrange
-                    var queryExecutor = Substitute.For<IQueryExecutor>();
-                    var tokenService = Create(queryExecutor);
-                    var user = TestUser.Create();
-                    queryExecutor
-                        .Execute(Arg.Is<FetchUserById>(f => f.Id == user.Id))
-                        .Returns(user);
-                    // act
-                    var expectedUser = tokenService.GetAccount(user.Id);
-                    // assert
-                    Expect(expectedUser).To.Equal(user);
-                }
-            }
-        }
-
-
+        
         private static TokenService Create(
             IQueryExecutor queryExecutor = null,
             ICommandExecutor commandExecutor = null,
             AuthSettings authSettings = null,
             IHttpContextAccessor httpContextAccessor = null)
         {
-            return new(
+            return new TokenService(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 authSettings ?? CreateAuthSettings(),
@@ -255,26 +160,11 @@ namespace Ntk8.Tests.Services
 
         private static AuthSettings CreateAuthSettings()
         {
-            return new()
+            return new AuthSettings
             {
                 RefreshTokenSecret = GetRandomAlphaString(40),
                 RefreshTokenTTL = 604800,
                 JwtTTL = 1000
-            };
-        }
-
-        private static Role[] CreateRandomRoles()
-        {
-            return new Role[]
-            {
-                new()
-                {
-                    RoleName = GetRandomString()
-                },
-                new()
-                {
-                    RoleName = GetRandomString()
-                }
             };
         }
     }

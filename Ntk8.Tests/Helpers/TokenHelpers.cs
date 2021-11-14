@@ -1,9 +1,12 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
+using Ntk8.Models;
+using Ntk8.Services;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
 namespace Ntk8.Tests.Helpers
@@ -11,25 +14,42 @@ namespace Ntk8.Tests.Helpers
     public static class TokenHelpers
     {
         public static string CreateValidJwtToken(string secret = null, int? userId = null)
+        {
+            userId ??= GetRandomInt();
+            secret ??= GetRandomString(50);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(
+                new SecurityTokenDescriptor
                 {
-                    userId ??= GetRandomInt();
-                    secret ??= GetRandomString(50);
-        
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var token = tokenHandler.CreateToken(
-                        new SecurityTokenDescriptor
-                        {
-                            Subject = new ClaimsIdentity(new[]
-                            {
-                                new Claim(AuthenticationConstants.PrimaryKeyValue, userId.ToString())
-                            }),
-                            Expires = DateTime.UtcNow.AddMinutes(15),
-                            SigningCredentials = new SigningCredentials(
-                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-                                SecurityAlgorithms.HmacSha256Signature)
-                        });
-                    return tokenHandler.WriteToken(token);
-                }
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                        new Claim(AuthenticationConstants.PrimaryKeyValue, userId.ToString())
+                    }),
+                    Expires = DateTime.UtcNow.AddMinutes(15),
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+                        SecurityAlgorithms.HmacSha256Signature)
+                });
+            return tokenHandler.WriteToken(token);
+        }
+
+        public static RefreshToken CreateRandomRefreshToken()
+        {
+            var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[40];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            var token = BitConverter.ToString(randomBytes).Replace("-", "");
+            return new RefreshToken
+            {
+                Token = token,
+                Expires = DateTime.UtcNow.AddSeconds(UserAccountService.RESET_TOKEN_TTL),
+                DateCreated = DateTime.UtcNow,
+                CreatedByIp = GetRandomIPv4Address()
+            };
+            
+            
+        }
 
         public static bool IsJwtTokenValid(string token, string refreshTokenSecret)
         {
@@ -37,7 +57,7 @@ namespace Ntk8.Tests.Helpers
             var key = Encoding
                 .UTF8
                 .GetBytes(refreshTokenSecret);
-            
+
             var tokenHandler = new JwtSecurityTokenHandler();
 
             try

@@ -78,7 +78,7 @@ namespace Ntk8.Services
                 .Execute(new FetchUserByRefreshToken(token));
 
             var roles = _queryExecutor.Execute(new FetchUserRolesForUserId(user.Id));
-            user.Roles = roles;
+            user.Roles = roles.ToArray();
             
             if (user is null)
             {
@@ -126,6 +126,7 @@ namespace Ntk8.Services
 
         public RefreshToken GenerateRefreshToken()
         {
+            // TODO: Should revoke refresh token for current user.
             return new RefreshToken
             {
                 Token = RandomTokenString(),

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
+using Microsoft.AspNetCore.Routing.Template;
 using NExpect;
 using NSubstitute;
 using Ntk8.Data.Commands;
@@ -25,7 +27,7 @@ namespace Ntk8.Tests.Services
         public class DependencyInjection : TestFixtureWithServiceProvider
         {
             [Test]
-            public void PrimaryServicesShouldNotBeNull()
+            public void ShouldNotBeNull()
             {
                 using (new TransactionScope())
                 {
@@ -51,22 +53,53 @@ namespace Ntk8.Tests.Services
             public void ShouldGenerateNewJwtToken()
             {
                 // arrange
+                var queryExecutor = Substitute.For<IQueryExecutor>();
+                var tokenService = Substitute.For<ITokenService>();
+                var user = GetRandom<BaseUser>();
+                var token = TokenHelpers
+                    .CreateValidJwtToken(GetRandomString(40), user.Id);
+                var authenticateRequest = user.MapFromTo<BaseUser, AuthenticateRequest>();
+                authenticateRequest.Password = GetRandomString();
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
 
+                queryExecutor
+                    .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                    .Returns(user);
+
+                queryExecutor
+                    .Execute(Arg.Is<FetchUserRolesForUserId>(u => u.Id == user.Id))
+                    .Returns(user.Roles.ToList());
+
+                tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray())
+                    .Returns(token);
+
+                tokenService.GenerateRefreshToken()
+                    .Returns(TokenHelpers.CreateRandomRefreshToken());
+                
+                var commandExecutor = Substitute.For<ICommandExecutor>();
+                var accountService = Create(queryExecutor, commandExecutor, tokenService);
                 // act
+                var authenticatedResponse = accountService.AuthenticateUser(authenticateRequest);
                 // assert
+                Expect(authenticatedResponse.JwtToken).Not.To.Be.Null();
+                Expect(authenticatedResponse.JwtToken).To.Equal(token);
+            }
+
+            [TestFixture]
+            public class WhenUserIsNotVerified
+            {
+                [Test]
+                public void ShouldThrow()
+                {
+                    // arrange
+                    
+                    // act
+                    // assert
+                }
             }
 
             [Test]
             public void ShouldGenerateNewRefreshToken()
-            {
-                // arrange
-
-                // act
-                // assert
-            }
-
-            [Test]
-            public void ShouldHashUserPassword()
             {
                 // arrange
 
@@ -97,6 +130,33 @@ namespace Ntk8.Tests.Services
             {
                 // arrange
 
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldNotUpdateUser()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldRespondWithUserRoles()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
+
+            [Test]
+            public void ShouldSetRefreshTokenCookie()
+            {
+                // arrange
+                
                 // act
                 // assert
             }
@@ -163,80 +223,40 @@ namespace Ntk8.Tests.Services
                 public void ShouldSetVerificationToken()
                 {
                     // arrange
-
                     // act
                     // assert
                 }
-            }
 
-            [Test]
-            public void ShouldBeActiveUser()
-            {
-                using (new TransactionScope())
+                [TestFixture]
+                public class WhenUserHasNotAcceptedTerms
                 {
-                    // arrange
-                    var registerRequest = GetRandom<RegisterRequest>();
-                    registerRequest.Email = GetRandomEmail();
-                    var queryExecutor = Resolve<IQueryExecutor>();
-                    var commandExecutor = Resolve<ICommandExecutor>();
-                    var accountService = Create(queryExecutor, commandExecutor);
-                    // act
-                    accountService.RegisterUser(registerRequest);
-                    var user = queryExecutor.Execute(new FetchUserByEmailAddress(registerRequest.Email));
-                    // assert
-                    Expect(user.IsActive).To.Be.True();
-                }
-            }
+                    [Test]
+                    public void ShouldThrow()
+                    {
+                        // arrange
 
-            [TestFixture]
-            public class WhenUserHasNotAcceptedTerms
-            {
+                        // act
+                        // assert
+                    }
+                }
+
                 [Test]
-                public void ShouldThrow()
+                public void ShouldHaveAcceptedTerms()
                 {
                     // arrange
 
                     // act
                     // assert
                 }
-            }
-
-            [Test]
-            public void ShouldHaveAcceptedTerms()
-            {
-                // arrange
-
-                // act
-                // assert
-            }
-
-            [Test]
-            public void UpdateShouldUpdateUser()
-            {
-                // arrange
-                var accountService = Create();
-                var updatedUser = GetRandom<UpdateRequest>();
-                var queryExecutor = Resolve<IQueryExecutor>();
-                var commandExecutor = Resolve<ICommandExecutor>();
-                // act
-                using (Transactions.RepeatableRead())
+                
+                [Test]
+                public void ShouldHashUserPassword()
                 {
-                    var userId = commandExecutor.Execute(new InsertUser(GetRandom<BaseUser>()));
-                    accountService.UpdateUser(userId, updatedUser);
-                    var user = queryExecutor.Execute(new FetchUserById(userId));
-                    var userToMatch = user.MapFromTo<BaseUser, UpdateRequest>();
+                    // arrange
+
+                    // act
                     // assert
-                    Expect(userToMatch).To.Deep.Equal(updatedUser);
                 }
-            }
-
-            [Test]
-            public void ShouldHashUserPassword()
-            {
-                // arrange
-
-                // act
-                // assert
             }
         }
 

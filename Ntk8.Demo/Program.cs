@@ -19,18 +19,17 @@ namespace Ntk8.Demo
         static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            // builder.Services.AddCors();
             builder = ConfigureDependencies(builder);
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
             var _ = new AuthHandler(app, app.Resolve<IUserAccountService>(),
-                app.Resolve<IAuthenticationContextService>());
+                app.Resolve<IAuthenticationContextService>(),
+                app.Resolve<IQueryExecutor>(),
+                app.Resolve<ITokenService>());
             app.UseMiddleware<JwtMiddleware>();
-            // app.UseCors();
             app.Run();
         }
         
-        // TODO: Build middleware that will dispose the refresh token once it has been set.
         // TODO: Make sure that fetching a user and user_roles is optimized to one database call.
         // TODO: When fetching a user, also attach the most recent token to that user.
         // TODO: Setup the middleware to handle exceptions and return 403, 401's appropriately.

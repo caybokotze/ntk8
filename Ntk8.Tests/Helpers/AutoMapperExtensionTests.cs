@@ -29,7 +29,6 @@ namespace Ntk8.Tests.Helpers
                 Expect(request.Password).To.Equal(null);
                 Expect(request.AcceptedTerms).To.Equal(user.AcceptedTerms);
                 Expect(request.TelNumber).To.Equal(user.TelNumber);
-                Expect(request.UserRoles).To.Equal(user.UserRoles);
             }
 
             [Test]
@@ -49,7 +48,6 @@ namespace Ntk8.Tests.Helpers
                 Expect(request.Password).To.Equal(requestPassword);
                 Expect(request.AcceptedTerms).To.Equal(user.AcceptedTerms);
                 Expect(request.TelNumber).To.Equal(user.TelNumber);
-                Expect(request.UserRoles).To.Equal(user.UserRoles);
             }
         }
     }

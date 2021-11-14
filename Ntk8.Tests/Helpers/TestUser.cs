@@ -17,7 +17,14 @@ namespace Ntk8.Tests.Helpers
 
         public static TestUser Create()
         {
-            return GetRandom<TestUser>();
+            var user = GetRandom<TestUser>();
+            user.Roles = CreateRandomRoles();
+            return user;
+        }
+
+        public static Role[] CreateRandomRoles()
+        {
+            return GetRandomArray<Role>();
         }
     }
 }

@@ -99,7 +99,7 @@ namespace Ntk8.Demo
             ValidateModel(resetTokenRequest);
 
             var user = _queryExecutor.Execute(new FetchUserByRefreshToken(resetTokenRequest.Token));
-            var response = _tokenService.GenerateJwtToken(user.Id, user.Roles);
+            var response = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
             await context.SerialiseResponseBody(response);
         }
         

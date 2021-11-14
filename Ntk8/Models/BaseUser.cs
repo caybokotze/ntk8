@@ -29,7 +29,7 @@ namespace Ntk8.Models
         DateTime? DateOfPasswordReset { get; set; }
         DateTime? DateResetTokenExpires { get; set; }
         ICollection<RefreshToken> RefreshTokens { get; set; }
-        ICollection<Role> Roles { get; set; }
+        Role[] Roles { get; set; }
         bool IsVerified { get; }
         bool OwnsToken(string token);
         IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor);
@@ -46,7 +46,7 @@ namespace Ntk8.Models
             Guid = Guid.NewGuid();
             DateCreated = DateTime.UtcNow;
             DateModified = DateTime.UtcNow;
-            Roles = new List<Role>();
+            Roles = new Role[] {};
             UserRoles = new List<UserRole>();
             RefreshTokens = new List<RefreshToken>();
         }
@@ -121,7 +121,7 @@ namespace Ntk8.Models
         public virtual ICollection<UserRole> UserRoles { get; set; }
         
         [JsonIgnore]
-        public virtual ICollection<Role> Roles { get; set; }
+        public virtual Role[] Roles { get; set; }
         
         public bool OwnsToken(string token)
         {
@@ -135,7 +135,8 @@ namespace Ntk8.Models
         public IEnumerable<Role> GetUserRoles(IQueryExecutor queryExecutor)
         {
             Roles = queryExecutor
-                .Execute(new FetchUserRolesForUserId(Id));
+                .Execute(new FetchUserRolesForUserId(Id))
+                .ToArray();
             return Roles;
         }
     }

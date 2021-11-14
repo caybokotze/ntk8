@@ -11,13 +11,15 @@ namespace Ntk8.Data.Commands
         public InsertUser(BaseUser baseUser)
         {
             BaseUser = baseUser;
+            BaseUser.Email = BaseUser.Email.ToLowerInvariant();
             BaseUser.DateModified = DateTime.UtcNow;
             BaseUser.DateCreated = DateTime.UtcNow;
         }
-        
+
         public override void Execute()
         {
-            Result = QueryFirst<int>(@"INSERT INTO users (
+            Result = QueryFirst<int>(@"
+            INSERT INTO users (
             first_name, 
             last_name, 
             guid, 
@@ -57,7 +59,8 @@ namespace Ntk8.Data.Commands
                     @DateResetTokenExpires,
                     @DateModified,
                     @DateCreated,
-                    @IsActive); SELECT last_insert_id();", BaseUser);
+                    @IsActive); SELECT last_insert_id();", 
+                BaseUser);
         }
     }
 }

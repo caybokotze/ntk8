@@ -1,22 +1,20 @@
 ﻿using Dapper.CQRS;
+using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
     public class InsertRole : Command<int>
     {
-        public string RoleName { get; }
+        public Role Role { get; }
 
-        public InsertRole(string roleName)
+        public InsertRole(Role role)
         {
-            RoleName = roleName;
+            Role = role;
         }
         
         public override void Execute()
         {
-            Result = Execute("INSERT INTO roles (name) VALUES (@Name)", new
-            {
-                Name = RoleName
-            });
+            Result = Execute("INSERT INTO roles (id, role_name) VALUES (@Id, @RoleName);", Role);
         }
     }
 }

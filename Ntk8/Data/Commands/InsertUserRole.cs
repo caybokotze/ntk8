@@ -17,11 +17,12 @@ namespace Ntk8.Data.Commands
         public override void Execute()
         {
             Result = Execute(@"INSERT INTO user_roles (role_id, user_id) 
-            VALUES (@RoleId, @UserId)", new
-            {
-                RoleId,
-                UserId
-            });
+            VALUES (@RoleId, @UserId)",
+                new
+                {
+                    RoleId,
+                    UserId
+                });
         }
     }
 }
