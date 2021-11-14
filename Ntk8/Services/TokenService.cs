@@ -19,10 +19,10 @@ namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        string GenerateJwtToken(long userId, Role[] roles);
+        ResetTokenResponse GenerateJwtToken(long userId, Role[] roles);
         (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken();
-        ResetTokenResponse GenerateNewJwtToken(string refreshToken);
+        ResetTokenResponse GenerateJwtToken(string refreshToken);
         void SetRefreshTokenCookie(string token);
         string RandomTokenString();
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
@@ -54,24 +54,7 @@ namespace Ntk8.Services
             token.RevokedByIp = GetIpAddress();
             _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
-        
-        public ResetTokenResponse GenerateNewJwtToken(string refreshToken)
-        {
-            var (isActive, userId, roles) = IsRefreshTokenActive(refreshToken);
 
-            if (!isActive)
-            {
-                throw new InvalidTokenException("The refresh token has expired.");
-            }
-            
-            var jwtToken = GenerateJwtToken(userId, roles);
-            
-            return new ResetTokenResponse
-            {
-                Token = jwtToken
-            };
-        }
-        
         public (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token)
         {
             var user = _queryExecutor
@@ -92,8 +75,25 @@ namespace Ntk8.Services
 
             return (refreshToken.IsActive, user.Id, user.Roles.ToArray());
         }
+        
+        public ResetTokenResponse GenerateJwtToken(string refreshToken)
+        {
+            var (isActive, userId, roles) = IsRefreshTokenActive(refreshToken);
 
-        public string GenerateJwtToken(long userId, Role[] roles)
+            if (!isActive)
+            {
+                throw new InvalidTokenException("The refresh token has expired.");
+            }
+            
+            var jwtToken = GenerateJwtToken(userId, roles);
+            
+            return new ResetTokenResponse
+            {
+                Token = jwtToken.Token
+            };
+        }
+
+        public ResetTokenResponse GenerateJwtToken(long userId, Role[] roles)
         {
             if (_authSettings.RefreshTokenSecret.Length < 32)
             {
@@ -122,7 +122,11 @@ namespace Ntk8.Services
                     SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            
+            return new ResetTokenResponse()
+            {
+                Token = tokenHandler.WriteToken(token)
+            };
         }
 
         public RefreshToken GenerateRefreshToken()

@@ -70,7 +70,7 @@ namespace Ntk8.Services
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
             
-            response.JwtToken = jwtToken;
+            response.JwtToken = jwtToken.Token;
             _tokenService.SetRefreshTokenCookie(refreshToken.Token);
             return response;
         }
@@ -196,7 +196,6 @@ namespace Ntk8.Services
             return user.ResetToken;
         }
         
-
         public void ResetUserPassword(ResetPasswordRequest model)
         {
             var user = _queryExecutor

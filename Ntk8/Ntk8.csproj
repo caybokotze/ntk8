@@ -4,15 +4,19 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Title>Ntk8</Title>
+        <PackageId>Ntk8</PackageId>
         <Authors>Caybo Kotze</Authors>
         <Description>Auth-Ntk8 (authenticate) is a basic authentication package that could assist you to setup auth within your project a lot quicker. Use the provided base classes and services to quickly setup authentication within your project.</Description>
-        <Copyright></Copyright>
+        <Copyright>Merge Digital</Copyright>
         <RespositoryUrl>https://github.com/caybokotze/ntk8.git</RespositoryUrl>
         <RepositoryType>github</RepositoryType>
         <Authors>Caybo Kotze</Authors>
-        <PackageReleaseNotes>Initial Release, Not well tested yet.</PackageReleaseNotes>
+        <Company>Merge Digital</Company>
+        <PackageReleaseNotes>Pre-release of version 2.0.0, with some optimizations and simplification of interface seperation of concerns.</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>1.0.2</PackageVersion>
+        <PackageVersion>2.0.0-beta</PackageVersion>
+        <PackageTags>jwt token package, security, authentication</PackageTags>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
