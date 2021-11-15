@@ -46,7 +46,7 @@ namespace Ntk8.Demo
             builder.Services.AddHttpContextAccessor();
             builder.Services.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             builder.Services.AddTransient<IUserAccountService, UserAccountService>();
-            builder.Services.AddTransient<IAuthSettings, AuthSettings>(sp => ResolveAuthSettings());
+            builder.Services.AddSingleton<IAuthSettings, AuthSettings>(sp => ResolveAuthSettings());
             builder.Services.AddTransient<ITokenService, TokenService>();
             builder.Services.AddTransient<JwtMiddleware>();
             return builder;

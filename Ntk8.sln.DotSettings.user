@@ -32,5 +32,7 @@
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachRefreshTokenToUser&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Services.UserAccountServiceTests+AuthenticateUser.ShouldGenerateNewJwtToken&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Services.UserAccountServiceTests+AuthenticateUser+WhenUserIsNotVerified.ShouldThrow&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.InfrastructureTests+AuthSettingsTests.ShouldContainAllSpecifiedProperties&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.InfrastructureTests+AuthSettingsTests.ShouldResolveForAllAppSettings&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
