@@ -24,7 +24,7 @@ namespace Ntk8.Tests
     public class TestFixtureWithServiceProvider
     {
         public IServiceProvider ServiceProvider { get; set; }
-        
+
         [SetUp]
         public async Task SetupHostEnvironment()
         {

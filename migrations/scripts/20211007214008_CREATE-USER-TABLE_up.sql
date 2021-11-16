@@ -22,5 +22,6 @@ CREATE TABLE users
     date_reset_token_expires datetime,
     date_created        datetime,
     date_modified       datetime,
-    is_active           tinyint(1)
+    is_active           tinyint(1),
+    CONSTRAINT unique_email UNIQUE (email)
 );
