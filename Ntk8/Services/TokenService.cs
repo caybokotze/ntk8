@@ -183,9 +183,9 @@ namespace Ntk8.Services
                     ClockSkew = TimeSpan.Zero
                 }, out validatedToken);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw new InvalidTokenException(e.Message);
+                throw new InvalidTokenException("The token has expired.");
             }
 
             return validatedToken;

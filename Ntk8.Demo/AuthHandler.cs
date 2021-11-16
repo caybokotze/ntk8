@@ -4,6 +4,7 @@ using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Ntk8.ActionFilters;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
@@ -77,7 +78,7 @@ namespace Ntk8.Demo
             
             // todo: send email or something...
         }
-
+        
         public async Task Login(HttpContext context)
         {
             var authRequest = await context
@@ -103,15 +104,16 @@ namespace Ntk8.Demo
             await context.SerialiseResponseBody(response);
         }
         
+        [Authorise("role1")]
         public async Task SecureEndpoint(HttpContext context)
         {
-            if (_authenticationContextService
+            if (!_authenticationContextService
                 .IsUserAuthenticated())
             {
-                await context.SerialiseResponseBody("Hi there jonny.");
+                throw new UserNotAuthenticatedException();
             }
-
-            throw new UserNotAuthenticatedException();
+            
+            await context.SerialiseResponseBody($"Hi there {_authenticationContextService.CurrentUser.FirstName}. You have these roles: {_authenticationContextService.CurrentUser.Roles.Select(s => s.RoleName)}");
         }
     }
 }
