@@ -123,7 +123,7 @@ namespace Ntk8.Services
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             
-            return new ResetTokenResponse()
+            return new ResetTokenResponse
             {
                 Token = tokenHandler.WriteToken(token)
             };

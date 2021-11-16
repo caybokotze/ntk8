@@ -1,8 +1,12 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Ntk8.ActionFilters;
 using Ntk8.Data.Queries;
@@ -19,18 +23,21 @@ namespace Ntk8.Demo
         private readonly IAuthenticationContextService _authenticationContextService;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ITokenService _tokenService;
+        private readonly IHttpContextAccessor _contextAccessor;
 
         public AuthHandler(
             IEndpointRouteBuilder builder,
             IUserAccountService userAccountService,
             IAuthenticationContextService authenticationContextService,
             IQueryExecutor queryExecutor,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            IHttpContextAccessor contextAccessor)
         {
             _userAccountService = userAccountService;
             _authenticationContextService = authenticationContextService;
             _queryExecutor = queryExecutor;
             _tokenService = tokenService;
+            _contextAccessor = contextAccessor;
             builder.MapPost("/login", Login);
             builder.MapPost("/register", Register);
             builder.MapGet("/verify", VerifyByUrl);
@@ -104,9 +111,11 @@ namespace Ntk8.Demo
             await context.SerialiseResponseBody(response);
         }
         
-        [Authorise("role1")]
         public async Task SecureEndpoint(HttpContext context)
         {
+            new AuthoriseAttribute("admin").OnAuthorization(
+                new AuthorizationFilterContext(new ActionContext(_contextAccessor.HttpContext, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>()));
+            
             if (!_authenticationContextService
                 .IsUserAuthenticated())
             {

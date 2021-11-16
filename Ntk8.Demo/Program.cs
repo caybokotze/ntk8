@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.Common;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -25,7 +26,8 @@ namespace Ntk8.Demo
             var _ = new AuthHandler(app, app.Resolve<IUserAccountService>(),
                 app.Resolve<IAuthenticationContextService>(),
                 app.Resolve<IQueryExecutor>(),
-                app.Resolve<ITokenService>());
+                app.Resolve<ITokenService>(),
+                app.Resolve<IHttpContextAccessor>());
             app.UseMiddleware<JwtMiddleware>();
             app.Run();
         }
