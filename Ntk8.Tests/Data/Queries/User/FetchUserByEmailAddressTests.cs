@@ -133,6 +133,29 @@ namespace Ntk8.Tests.Data.Queries.User
                     Expect(result.RefreshTokens.First()).To.Deep.Equal(refreshToken);
                 }
             }
+
+            [Test]
+            public void ShouldNotAttachRolesOrRefreshTokensIfNull()
+            {
+                using (new TransactionScope())
+                {
+                    // arrange
+                    var commandExecutor = Resolve<ICommandExecutor>();
+                    var queryExecutor = Resolve<IQueryExecutor>();
+                    var user = GetRandom<BaseUser>();
+                   
+                    commandExecutor.Execute(new InsertUser(user));
+
+                    // act
+                    var result = queryExecutor
+                        .Execute(new FetchUserByEmailAddress(user.Email));
+
+                    // assert
+                    Expect(result).Not.To.Be.Null();
+                    Expect(result.RefreshTokens.Count).To.Equal(0);
+                    Expect(result.Roles.Length).To.Equal(0);
+                }
+            }
         }
     }
 }

@@ -32,8 +32,15 @@ namespace Ntk8.Data.Queries
                         WHERE u.email = @EmailAddress",
                     (user, token, role) =>
                     {
-                        user.RefreshTokens.Add(token);
-                        roles.Add(role);
+                        if (token is not null)
+                        {
+                            user.RefreshTokens.Add(token);
+                        }
+
+                        if (role is not null)
+                        {
+                            roles.Add(role);
+                        }
                         return user;
                     }, new
                     {
