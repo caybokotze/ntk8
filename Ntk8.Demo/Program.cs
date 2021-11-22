@@ -1,16 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySql.Data.MySqlClient;
 using Ntk8.Helpers;
 using Ntk8.Middleware;
-using Ntk8.Models;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
 
@@ -33,9 +30,7 @@ namespace Ntk8.Demo
             app.Run();
         }
         
-        // TODO: Make sure that fetching a user and user_roles is optimized to one database call.
-        // TODO: When fetching a user, also attach the most recent token to that user.
-        // TODO: Setup the middleware to handle exceptions and return 403, 401's appropriately.
+        // TODO: Setup the middleware to handle exceptions and return 403, 401's appropriately
         // TODO: Write custom authorise attribute to handle role management.
         // TODO: When saving new users, isActive should be set to true.
         // TODO: When deleting a user, isActive should be set to false.

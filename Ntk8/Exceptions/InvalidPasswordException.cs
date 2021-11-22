@@ -4,7 +4,7 @@ namespace Ntk8.Exceptions
 {
     public class InvalidPasswordException : Exception
     {
-        public InvalidPasswordException(string message) : base(message)
+        public InvalidPasswordException() : base("The provided password is incorrect")
         {
             
         }

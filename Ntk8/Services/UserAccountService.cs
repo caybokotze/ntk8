@@ -59,7 +59,7 @@ namespace Ntk8.Services
 
             if (!BC.Verify(model.Password, user.PasswordHash))
             {
-                throw new InvalidPasswordException("The password specified is not correct");
+                throw new InvalidPasswordException();
             }
             
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());

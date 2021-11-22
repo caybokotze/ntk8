@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Ntk8.Exceptions;
 using Ntk8.Exceptions.Middleware;
 using Ntk8.Middleware;
 using Ntk8.Models;
@@ -41,6 +42,11 @@ namespace Ntk8.Helpers
             if (authSettings is null)
             {
                 throw new KeyNotFoundException("The authentication settings can not be found in the specified appsettings.json file.");
+            }
+
+            if (authSettings.RefreshTokenSecret.Length < 32)
+            {
+                throw new InvalidTokenLengthException();
             }
             
             serviceCollection

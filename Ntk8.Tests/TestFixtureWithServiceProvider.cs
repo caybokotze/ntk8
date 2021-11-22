@@ -28,9 +28,11 @@ namespace Ntk8.Tests
         [SetUp]
         public async Task SetupHostEnvironment()
         {
-            var appSettings = AppSettingProvider.CreateConfigurationRoot();
+            var appSettings = AppSettingProvider
+                .CreateConfigurationRoot();
             
-            var hostBuilder = new HostBuilder().ConfigureWebHost(webHost =>
+            var hostBuilder = new HostBuilder()
+                .ConfigureWebHost(webHost =>
             {
                 webHost.UseTestServer();
                 webHost.Configure(app =>

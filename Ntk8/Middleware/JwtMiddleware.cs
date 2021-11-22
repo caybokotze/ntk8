@@ -66,12 +66,6 @@ namespace Ntk8.Middleware
             HttpContext context,
             string token)
         {
-            
-            if (_authSettings.RefreshTokenSecret.Length < 32)
-            {
-                throw new InvalidTokenLengthException();
-            }
-
             try
             {
                 var validatedToken = _tokenService
