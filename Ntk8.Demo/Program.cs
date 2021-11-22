@@ -61,7 +61,7 @@ namespace Ntk8.Demo
             var authSettings = CreateConfigurationRoot()
                 .GetSection("AuthSettings")
                 .Get<AuthSettings>();
-            
+
             if (authSettings is null)
             {
                 throw new KeyNotFoundException("The key specified can not be found in the appsettings.json file.");
