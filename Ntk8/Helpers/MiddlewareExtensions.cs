@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -33,10 +34,18 @@ namespace Ntk8.Helpers
             this IServiceCollection serviceCollection,
             IConfiguration configuration, string jsonSettingName = null)
         {
+            var authSettings = configuration
+                .GetSection(jsonSettingName ?? "AuthSettings")
+                .Get<AuthSettings>();
+
+            if (authSettings is null)
+            {
+                throw new KeyNotFoundException("The authentication settings can not be found in the specified appsettings.json file.");
+            }
+            
             serviceCollection
-                .AddSingleton<IAuthSettings, AuthSettings>(sp => configuration
-                    .GetSection(jsonSettingName ?? "AuthSettings")
-                    .Get<AuthSettings>());
+                .AddSingleton<IAuthSettings, AuthSettings>(sp => authSettings);
+            
             return serviceCollection;
         }
 

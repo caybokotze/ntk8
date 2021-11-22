@@ -48,26 +48,11 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
-            builder.Services.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
-            builder.Services.AddTransient<IUserAccountService, UserAccountService>();
-            builder.Services.AddSingleton<IAuthSettings, AuthSettings>(sp => ResolveAuthSettings());
-            builder.Services.AddTransient<ITokenService, TokenService>();
-            builder.Services.AddTransient<JwtMiddleware>();
+            builder.Services.RegisterNtk8AuthenticationServices();
+            builder.Services.RegisterNtk8JwtMiddleware();
+            builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
+            builder.Services.RegisterAndConfigureNtk8AuthenticationSettings(CreateConfigurationRoot());
             return builder;
-        }
-
-        private static AuthSettings ResolveAuthSettings()
-        {
-            var authSettings = CreateConfigurationRoot()
-                .GetSection("AuthSettings")
-                .Get<AuthSettings>();
-
-            if (authSettings is null)
-            {
-                throw new KeyNotFoundException("The key specified can not be found in the appsettings.json file.");
-            }
-
-            return authSettings;
         }
 
         public static string GetConnectionString()
