@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySql.Data.MySqlClient;
+using Ntk8.Helpers;
 using Ntk8.Middleware;
 using Ntk8.Models;
 using Ntk8.Services;
@@ -42,6 +43,7 @@ namespace Ntk8.Demo
 
         private static WebApplicationBuilder ConfigureDependencies(WebApplicationBuilder builder)
         {
+            builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));

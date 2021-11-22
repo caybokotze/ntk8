@@ -55,11 +55,11 @@ namespace Ntk8.Tests.Services
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<BaseUser>();
-                var tokenString = TokenHelpers
+                var validJwtToken = TokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
                 var token = new ResetTokenResponse()
                 {
-                    Token = tokenString
+                    Token = TokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
                 var authenticateRequest = user.MapFromTo<BaseUser, AuthenticateRequest>();
                 authenticateRequest.Password = GetRandomString();

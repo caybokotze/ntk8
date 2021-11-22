@@ -15,7 +15,8 @@ namespace Ntk8.Data.Commands
         public override void Execute()
         {
             Result =
-                QueryFirst<int>(@"INSERT INTO refresh_tokens (user_id, 
+                QueryFirst<int>(@"INSERT INTO refresh_tokens (
+                            user_id, 
                             token, 
                             expires,
                             date_created, 
@@ -31,7 +32,8 @@ namespace Ntk8.Data.Commands
                     @DateRevoked, 
                     @RevokedByIp, 
                     @ReplacedByToken); 
-            SELECT last_insert_id();", RefreshToken);
+            SELECT last_insert_id();", 
+                    RefreshToken);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Ntk8.Tests.Helpers
 {
     public static class TokenHelpers
     {
-        public static string CreateValidJwtToken(string secret = null, long? userId = null)
+        public static SecurityToken CreateValidJwtToken(string secret = null, long? userId = null)
         {
             userId ??= GetRandomInt();
             secret ??= GetRandomString(50);
@@ -31,7 +31,25 @@ namespace Ntk8.Tests.Helpers
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
                         SecurityAlgorithms.HmacSha256Signature)
                 });
-            return tokenHandler.WriteToken(token);
+            return token;
+        }
+
+        public static string CreateValidJwtTokenAsString(string secret = null, long? userId = null)
+        {
+            var securityToken = CreateValidJwtToken(secret, userId);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            
+            return tokenHandler
+                .WriteToken(securityToken);
+        }
+        
+        public static string CreateValidJwtTokenAsString(SecurityToken securityToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            
+            return tokenHandler
+                .WriteToken(securityToken);
         }
 
         public static RefreshToken CreateRandomRefreshToken()

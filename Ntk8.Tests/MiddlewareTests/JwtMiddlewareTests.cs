@@ -73,13 +73,16 @@ namespace Ntk8.Tests.MiddlewareTests
                 var user = GetRandom<BaseUser>();
                 authSettings.RefreshTokenSecret = secret;
                 var queryExecutor = Substitute.For<IQueryExecutor>();
+                var tokenService = Substitute.For<ITokenService>();
+                var validToken = TokenHelpers.CreateValidJwtToken(secret, user.Id);
+                var validTokenAsString = TokenHelpers.CreateValidJwtTokenAsString(secret, user.Id);
+                tokenService
+                    .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret)
+                    .Returns(validToken);
                 queryExecutor.Execute(Arg.Is<FetchUserById>(
                         u => u.Id == user.Id))
                     .Returns(user);
-                var middleware = Substitute.For<JwtMiddleware>(
-                    authSettings,
-                    GetRandom<IQueryExecutor>());
-                var validToken = TokenHelpers.CreateValidJwtToken(secret, user.Id);
+                var middleware = Create(authSettings, queryExecutor);
                 var httpContext = new HttpContextBuilder()
                     .WithRequest(new HttpRequestBuilder()
                         .WithHeaders(new HeaderDictionary
@@ -87,10 +90,13 @@ namespace Ntk8.Tests.MiddlewareTests
                             KeyValuePair
                                 .Create<string, StringValues>(
                                     AuthenticationConstants.DefaultJwtHeader,
-                                    validToken)
+                                    validTokenAsString)
                         })
                         .Build())
                     .WithItems(new Dictionary<object, object>())
+                    .WithResponse(new HttpResponseBuilder()
+                        .HasStarted(false)
+                        .Build())
                     .Build();
                 var requestDelegate = Substitute.For<RequestDelegate>();
                 // act
@@ -101,7 +107,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     .To
                     .Have
                     .Received()
-                    .MountUserToContext(httpContext, validToken);
+                    .MountUserToContext(httpContext, validTokenAsString);
             }
         }
 
@@ -128,7 +134,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 // act
                 httpContext = middleware
-                    .MountUserToContext(httpContext, token);
+                    .MountUserToContext(httpContext, TokenHelpers.CreateValidJwtTokenAsString(token));
                 // assert
                 Expect(httpContext.Items[AuthenticationConstants.ContextAccount])
                     .To
