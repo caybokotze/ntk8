@@ -16,6 +16,7 @@ using MySql.Data.MySqlClient;
 using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 
@@ -50,9 +51,9 @@ namespace Ntk8.Tests
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                    config.AddTransient<IDbConnection, MySqlConnection>(sp => new MySqlConnection(appSettings.GetDefaultConnection()));
                     config.RegisterAndConfigureNtk8AuthenticationSettings(appSettings);
                     config.RegisterNtk8AuthenticationServices();
-                    config.RegisterNtk8JwtMiddleware();
                     config.RegisterNtk8MiddlewareExceptionHandlers();
                 });
             });

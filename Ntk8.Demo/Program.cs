@@ -44,7 +44,6 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
             builder.Services.RegisterNtk8AuthenticationServices();
-            builder.Services.RegisterNtk8JwtMiddleware();
             builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
             builder.Services.RegisterAndConfigureNtk8AuthenticationSettings(CreateConfigurationRoot());
             return builder;

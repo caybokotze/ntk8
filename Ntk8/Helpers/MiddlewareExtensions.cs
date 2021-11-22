@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,6 +13,12 @@ namespace Ntk8.Helpers
 {
     public static class MiddlewareExtensions
     {
+        public static IApplicationBuilder UseJwtMiddleware(this IApplicationBuilder builder)
+        {
+            builder.UseMiddleware<JwtMiddleware>();
+            return builder;
+        }
+        
         public static IServiceCollection RegisterNtk8MiddlewareExceptionHandlers(this IServiceCollection serviceCollection)
         {
             serviceCollection
@@ -52,12 +59,6 @@ namespace Ntk8.Helpers
             serviceCollection
                 .AddSingleton<IAuthSettings, AuthSettings>(sp => authSettings);
             
-            return serviceCollection;
-        }
-
-        public static IServiceCollection RegisterNtk8JwtMiddleware(this IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddTransient<JwtMiddleware>();
             return serviceCollection;
         }
     }
