@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
+using Ntk8.Helpers;
 using Ntk8.Models;
 using Ntk8.Services;
 using NUnit.Framework;
@@ -48,23 +49,11 @@ namespace Ntk8.Tests
                     config.AddSingleton<IMemoryCache, MemoryCache>();
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
-                    config.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
-                    config.AddTransient<IAuthenticationContextService, AuthenticationContextService>();
-                    config.AddTransient<ITokenService, TokenService>();
-                    config.AddTransient<IAuthSettings, AuthSettings>();
-                    config.AddTransient(
-                        _ => new AuthSettings
-                    {
-                        RefreshTokenSecret = RandomValueGen.GetRandomAlphaString(),
-                        RefreshTokenTTL = 3600,
-                        JwtTTL = 1000
-                    });
-                    config.AddTransient<IDbConnection, DbConnection>(p =>
-                        new MySqlConnection(AppSettingProvider.CreateAppSettings().DefaultConnection));
-                    config.AddTransient<IQueryExecutor, QueryExecutor>();
-                    config.AddTransient<ICommandExecutor, CommandExecutor>();
-                    config.AddTransient<IUserAccountService, UserAccountService>();
-                    config.Configure<IAuthSettings>(options => appSettings.GetSection("AuthSettings").Bind(options));
+                    config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                    config.RegisterAndConfigureNtk8AuthenticationSettings(appSettings);
+                    config.RegisterNtk8AuthenticationServices();
+                    config.RegisterNtk8JwtMiddleware();
+                    config.RegisterNtk8MiddlewareExceptionHandlers();
                 });
             });
 

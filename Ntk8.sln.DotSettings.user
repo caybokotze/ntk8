@@ -37,5 +37,6 @@
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByIdTests+WhenFetchingUser.ShouldFetchAllProperties&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+WhenResolvingForApplicationSettings+WhenTokenLengthIsInvalid.ShouldThrowException&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+WhenResolvingForApplicationSettings.ShouldResolveForAppSettingsAsSingleton&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
