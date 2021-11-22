@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
+using Ntk8.Exceptions.Middleware;
 using Ntk8.Helpers;
 using Ntk8.Middleware;
 using Ntk8.Services;
@@ -26,7 +27,8 @@ namespace Ntk8.Demo
                 app.Resolve<IQueryExecutor>(),
                 app.Resolve<ITokenService>(),
                 app.Resolve<IHttpContextAccessor>());
-            app.UseMiddleware<JwtMiddleware>();
+            app.UseNtk8JwtMiddleware();
+            app.UseNtk8ExceptionMiddleware();
             app.Run();
         }
         
@@ -38,13 +40,12 @@ namespace Ntk8.Demo
 
         private static WebApplicationBuilder ConfigureDependencies(WebApplicationBuilder builder)
         {
-            builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
-            builder.Services.RegisterNtk8AuthenticationServices();
             builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
+            builder.Services.RegisterNtk8AuthenticationServices();
             builder.Services.RegisterAndConfigureNtk8AuthenticationSettings(CreateConfigurationRoot());
             return builder;
         }

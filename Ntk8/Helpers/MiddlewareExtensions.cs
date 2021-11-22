@@ -13,9 +13,17 @@ namespace Ntk8.Helpers
 {
     public static class MiddlewareExtensions
     {
-        public static IApplicationBuilder UseJwtMiddleware(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseNtk8JwtMiddleware(this IApplicationBuilder builder)
         {
             builder.UseMiddleware<JwtMiddleware>();
+            return builder;
+        }
+
+        public static IApplicationBuilder UseNtk8ExceptionMiddleware(this IApplicationBuilder builder)
+        {
+            builder.UseMiddleware<UserNotAuthenticatedExceptionMiddleware>();
+            builder.UseMiddleware<UserNotAuthorisedExceptionMiddleware>();
+            builder.UseMiddleware<InvalidPasswordExceptionMiddleware>();
             return builder;
         }
         
@@ -25,6 +33,8 @@ namespace Ntk8.Helpers
                 .AddSingleton<UserNotAuthorisedExceptionMiddleware, UserNotAuthorisedExceptionMiddleware>();
             serviceCollection
                 .AddSingleton<UserNotAuthenticatedExceptionMiddleware, UserNotAuthenticatedExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<InvalidPasswordExceptionMiddleware, InvalidPasswordExceptionMiddleware>();
             return serviceCollection;
         }
 
