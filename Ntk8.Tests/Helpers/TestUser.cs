@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Ntk8.Models;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -22,6 +23,7 @@ namespace Ntk8.Tests.Helpers
             var user = GetRandom<TestUser>();
             user.UserRoles = CreateRandomUserRoles(user);
             user.Roles = user.UserRoles.Select(s => s.Role).ToArray();
+            user.RefreshTokens = CreateRefreshTokens();
             return user;
         }
 
@@ -40,6 +42,14 @@ namespace Ntk8.Tests.Helpers
             }
 
             return userRoles.ToArray();
+        }
+
+        public static RefreshToken[] CreateRefreshTokens()
+        {
+            return new[]
+            {
+                GetRandom<RefreshToken>(),
+            };
         }
         
         public static Role[] CreateRandomRoles()
