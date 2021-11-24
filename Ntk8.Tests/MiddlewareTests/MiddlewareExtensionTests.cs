@@ -34,6 +34,11 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(IAuthenticationContextService))]
             [TestCase(typeof(UserNotAuthorisedExceptionMiddleware))]
             [TestCase(typeof(UserNotAuthenticatedExceptionMiddleware))]
+            [TestCase(typeof(NoUserFoundExceptionMiddleware))]
+            [TestCase(typeof(UserAlreadyExistsExceptionMiddleware))]
+            [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]
+            [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]
+            [TestCase(typeof(VerificationTokenExpiredExceptionMiddleware))]
             public void ShouldResolveAsSingleton(Type type)
             {
                 // arrange
@@ -67,7 +72,6 @@ namespace Ntk8.Tests.MiddlewareTests
             }
         }
         
-
         [TestFixture]
         public class WhenResolvingForApplicationSettings
         {

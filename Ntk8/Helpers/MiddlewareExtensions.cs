@@ -24,6 +24,11 @@ namespace Ntk8.Helpers
             builder.UseMiddleware<UserNotAuthenticatedExceptionMiddleware>();
             builder.UseMiddleware<UserNotAuthorisedExceptionMiddleware>();
             builder.UseMiddleware<InvalidPasswordExceptionMiddleware>();
+            builder.UseMiddleware<NoUserFoundExceptionMiddleware>();
+            builder.UseMiddleware<UserAlreadyExistsExceptionMiddleware>();
+            builder.UseMiddleware<UserIsNotVerifiedExceptionMiddleware>();
+            builder.UseMiddleware<UserIsVerifiedExceptionMiddleware>();
+            builder.UseMiddleware<VerificationTokenExpiredExceptionMiddleware>();
             return builder;
         }
         
@@ -35,6 +40,17 @@ namespace Ntk8.Helpers
                 .AddSingleton<UserNotAuthenticatedExceptionMiddleware, UserNotAuthenticatedExceptionMiddleware>();
             serviceCollection
                 .AddSingleton<InvalidPasswordExceptionMiddleware, InvalidPasswordExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<NoUserFoundExceptionMiddleware, NoUserFoundExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<UserAlreadyExistsExceptionMiddleware, UserAlreadyExistsExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<UserIsNotVerifiedExceptionMiddleware, UserIsNotVerifiedExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<UserIsVerifiedExceptionMiddleware, UserIsVerifiedExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<VerificationTokenExpiredExceptionMiddleware,
+                    VerificationTokenExpiredExceptionMiddleware>();
             return serviceCollection;
         }
 

@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
-using Ntk8.Exceptions.Middleware;
 using Ntk8.Helpers;
-using Ntk8.Middleware;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
 
@@ -32,11 +30,11 @@ namespace Ntk8.Demo
             app.Run();
         }
         
-        // TODO: Setup the middleware to handle exceptions and return 403, 401's appropriately
         // TODO: Write custom authorise attribute to handle role management.
         // TODO: When saving new users, isActive should be set to true.
         // TODO: When deleting a user, isActive should be set to false.
         // TODO: When fetching users, isActive results set to false, should be ignored.
+        // TODO: Salt the password before storing.
 
         private static WebApplicationBuilder ConfigureDependencies(WebApplicationBuilder builder)
         {
