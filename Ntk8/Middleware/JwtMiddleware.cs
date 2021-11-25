@@ -1,15 +1,12 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
-using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
 

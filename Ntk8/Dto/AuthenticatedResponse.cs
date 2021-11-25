@@ -1,4 +1,3 @@
-using System;
 using Ntk8.Models;
 
 namespace Ntk8.Dto
@@ -11,9 +10,6 @@ namespace Ntk8.Dto
         public string LastName { get; set; }
         public string Email { get; set; }
         public Role[] Roles { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime? Updated { get; set; }
-        public bool IsVerified { get; set; }
         public string JwtToken { get; set; }
     }
 }
