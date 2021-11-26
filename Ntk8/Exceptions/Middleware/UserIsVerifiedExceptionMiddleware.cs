@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
@@ -7,7 +8,7 @@ namespace Ntk8.Exceptions.Middleware
     /// </summary>
     public class UserIsVerifiedExceptionMiddleware: ExceptionHandlerMiddleware<UserIsVerifiedException>
     {
-        public UserIsVerifiedExceptionMiddleware() : base(400, GenerateMessage)
+        public UserIsVerifiedExceptionMiddleware() : base((int)HttpStatusCode.BadRequest, GenerateMessage)
         {
         }
 

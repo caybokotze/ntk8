@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
@@ -7,7 +8,7 @@ namespace Ntk8.Exceptions.Middleware
     /// </summary>
     public class UserAlreadyExistsExceptionMiddleware: ExceptionHandlerMiddleware<UserAlreadyExistsException>
     {
-        public UserAlreadyExistsExceptionMiddleware() : base(400, GenerateMessage)
+        public UserAlreadyExistsExceptionMiddleware() : base((int)HttpStatusCode.BadRequest, GenerateMessage)
         {
         }
 

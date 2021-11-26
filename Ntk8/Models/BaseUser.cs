@@ -79,26 +79,17 @@ namespace Ntk8.Models
         public bool IsActive { get; set; }
         public long Id { get; set; }
         public Guid Guid { get; set; }
-
-        [StringLength(100)]
         public string Title { get; set; }
-
-        [Required]
+        
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
-
-        [StringLength(50)]
-        [Required]
         public string FirstName { get; set; }
 
         [StringLength(50)]
         public string LastName { get; set; }
-
-        [StringLength(15)]
+        
         [DataType(DataType.PhoneNumber)]
         public string TelNumber { get; set; }
-
-        [StringLength(30)]
         public string Username { get; set; }
         public int AccessFailedCount { get; set; }
         public bool LockoutEnabled { get; set; }
