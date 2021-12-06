@@ -34,7 +34,7 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(IAuthenticationContextService))]
             [TestCase(typeof(UserNotAuthorisedExceptionMiddleware))]
             [TestCase(typeof(UserNotAuthenticatedExceptionMiddleware))]
-            [TestCase(typeof(NoUserFoundExceptionMiddleware))]
+            [TestCase(typeof(UserNotFoundExceptionMiddleware))]
             [TestCase(typeof(UserAlreadyExistsExceptionMiddleware))]
             [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]
             [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]

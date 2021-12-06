@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
 using Ntk8.Exceptions;
@@ -54,7 +52,7 @@ namespace Ntk8.Middleware
                 }
                 catch (Exception ex)
                 {
-                    context.Response.Cookies.Delete(AuthenticationConstants.RefreshToken);
+                    context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
                     context.Response.StatusCode = 500;
                     var bytes = Encoding.UTF8.GetBytes(ex.Message);
                     await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
@@ -77,15 +75,23 @@ namespace Ntk8.Middleware
                     .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                     .Value);
 
-                context.Items[AuthenticationConstants.ContextAccount] =
-                    _queryExecutor
-                        .Execute(new FetchUserById(accountId));
+                var user = _queryExecutor.Execute(new FetchUserById(accountId));
+
+                if (user.RefreshTokens.First().IsExpired || !user.RefreshTokens.First().IsActive)
+                {
+                    throw new InvalidRefreshTokenException();
+                }
+
+                context.Items[AuthenticationConstants.ContextAccount] = user;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (!context.Response.HasStarted)
                 {
-                    context.Response.Cookies.Delete(AuthenticationConstants.RefreshToken);
+                    context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
+                    context.Response.StatusCode = 401;
+                    var bytes = Encoding.UTF8.GetBytes(ex.Message);
+                    context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
                 }
             }
             

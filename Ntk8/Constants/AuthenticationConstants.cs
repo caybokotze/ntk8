@@ -9,5 +9,6 @@
         public const string InvalidAuthenticationMessage = "Invalid Token";
         public const string IpForwardHeader = "X-Forwarded-For";
         public const string RefreshToken = "refreshToken";
+        public const string SetCookie = "Set-Cookie";
     }
 }
