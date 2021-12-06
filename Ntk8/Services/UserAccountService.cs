@@ -65,7 +65,8 @@ namespace Ntk8.Services
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
-            
+
+            _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshTokens.First().Token));
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
