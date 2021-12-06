@@ -1,10 +1,11 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
 {
     public class InvalidPasswordExceptionMiddleware : ExceptionHandlerMiddleware<InvalidPasswordException>
     {
-        public InvalidPasswordExceptionMiddleware() : base(401, GenerateMessage)
+        public InvalidPasswordExceptionMiddleware() : base((int)HttpStatusCode.Unauthorized, GenerateMessage)
         {
         }
 

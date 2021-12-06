@@ -44,9 +44,7 @@ namespace Ntk8.Tests.MiddlewareTests
             public void ShouldThrowForNullAuthenticationToken()
             {
                 // arrange
-                var middleware = Substitute.For<JwtMiddleware>(
-                    GetRandom<AuthSettings>(),
-                    GetRandom<IQueryExecutor>());
+                var middleware = Create();
                 
                 var httpContext = new HttpContextBuilder()
                     .Build();
@@ -82,7 +80,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 queryExecutor.Execute(Arg.Is<FetchUserById>(
                         u => u.Id == user.Id))
                     .Returns(user);
-                var middleware = Create(authSettings, queryExecutor);
+                var middleware = Substitute.For<JwtMiddleware>(authSettings, queryExecutor, tokenService);
                 var httpContext = new HttpContextBuilder()
                     .WithRequest(new HttpRequestBuilder()
                         .WithHeaders(new HeaderDictionary
@@ -119,19 +117,26 @@ namespace Ntk8.Tests.MiddlewareTests
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var secret = GetRandomString(40);
+                var user = GetRandom<BaseUser>();
+                var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
+                var tokenService = Substitute.For<ITokenService>();
+                tokenService
+                    .ValidateJwtSecurityToken(Arg.Any<string>(), Arg.Any<string>())
+                    .Returns(token);
+
                 var middleware = Create(new AuthSettings
                 {
                     RefreshTokenSecret = secret
                 },
-                    queryExecutor);
-                var user = GetRandom<BaseUser>();
+                    queryExecutor,
+                    tokenService);
+                
                 queryExecutor
                     .Execute(Arg.Is<FetchUserById>(f => f.Id == user.Id))
                     .Returns(user);
                 var httpContext = new HttpContextBuilder()
                     .WithItems(new Dictionary<object, object>())
                     .Build();
-                var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 // act
                 httpContext = middleware
                     .MountUserToContext(httpContext, TokenHelpers.CreateValidJwtTokenAsString(token));
@@ -143,19 +148,17 @@ namespace Ntk8.Tests.MiddlewareTests
         }
 
         public static JwtMiddleware Create(
-            AuthSettings authSettings = null, 
+            IAuthSettings authSettings = null, 
             IQueryExecutor queryExecutor = null,
             ITokenService tokenService = null)
         {
-            authSettings ??= new AuthSettings
-            {
-                RefreshTokenSecret = GetRandomString(40),
-                RefreshTokenTTL = 3600,
-                JwtTTL = 1000
-            };
-            
             return new JwtMiddleware(
-                authSettings,
+                authSettings ?? new AuthSettings
+                {
+                    RefreshTokenSecret = GetRandomString(40),
+                    RefreshTokenTTL = 3600,
+                    JwtTTL = 1000
+                },
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>());
         }

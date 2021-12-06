@@ -1,10 +1,11 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
 {
     public class VerificationTokenExpiredExceptionMiddleware: ExceptionHandlerMiddleware<VerificationTokenExpiredException>
     {
-        public VerificationTokenExpiredExceptionMiddleware() : base(401, GenerateMessage)
+        public VerificationTokenExpiredExceptionMiddleware() : base((int)HttpStatusCode.Unauthorized, GenerateMessage)
         {
         }
 

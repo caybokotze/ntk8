@@ -13,26 +13,24 @@ namespace Ntk8.Helpers
 {
     public static class MiddlewareExtensions
     {
-        public static IApplicationBuilder UseNtk8JwtMiddleware(this IApplicationBuilder builder)
+        public static void UseNtk8JwtMiddleware(this IApplicationBuilder builder)
         {
             builder.UseMiddleware<JwtMiddleware>();
-            return builder;
         }
 
-        public static IApplicationBuilder UseNtk8ExceptionMiddleware(this IApplicationBuilder builder)
+        public static void UseNtk8ExceptionMiddleware(this IApplicationBuilder builder)
         {
             builder.UseMiddleware<UserNotAuthenticatedExceptionMiddleware>();
             builder.UseMiddleware<UserNotAuthorisedExceptionMiddleware>();
             builder.UseMiddleware<InvalidPasswordExceptionMiddleware>();
-            builder.UseMiddleware<NoUserFoundExceptionMiddleware>();
+            builder.UseMiddleware<UserNotFoundExceptionMiddleware>();
             builder.UseMiddleware<UserAlreadyExistsExceptionMiddleware>();
             builder.UseMiddleware<UserIsNotVerifiedExceptionMiddleware>();
             builder.UseMiddleware<UserIsVerifiedExceptionMiddleware>();
             builder.UseMiddleware<VerificationTokenExpiredExceptionMiddleware>();
-            return builder;
         }
         
-        public static IServiceCollection RegisterNtk8MiddlewareExceptionHandlers(this IServiceCollection serviceCollection)
+        public static void RegisterNtk8MiddlewareExceptionHandlers(this IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddSingleton<UserNotAuthorisedExceptionMiddleware, UserNotAuthorisedExceptionMiddleware>();
@@ -41,7 +39,7 @@ namespace Ntk8.Helpers
             serviceCollection
                 .AddSingleton<InvalidPasswordExceptionMiddleware, InvalidPasswordExceptionMiddleware>();
             serviceCollection
-                .AddSingleton<NoUserFoundExceptionMiddleware, NoUserFoundExceptionMiddleware>();
+                .AddSingleton<UserNotFoundExceptionMiddleware, UserNotFoundExceptionMiddleware>();
             serviceCollection
                 .AddSingleton<UserAlreadyExistsExceptionMiddleware, UserAlreadyExistsExceptionMiddleware>();
             serviceCollection
@@ -51,21 +49,17 @@ namespace Ntk8.Helpers
             serviceCollection
                 .AddSingleton<VerificationTokenExpiredExceptionMiddleware,
                     VerificationTokenExpiredExceptionMiddleware>();
-            return serviceCollection;
         }
 
-        public static IServiceCollection RegisterNtk8AuthenticationServices(
-            this IServiceCollection serviceCollection)
+        public static void RegisterNtk8AuthenticationServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             serviceCollection.AddTransient<IUserAccountService, UserAccountService>();
             serviceCollection.AddTransient<ITokenService, TokenService>();
             serviceCollection.AddTransient<JwtMiddleware>();
-            return serviceCollection;
         }
 
-        public static IServiceCollection RegisterAndConfigureNtk8AuthenticationSettings(
-            this IServiceCollection serviceCollection,
+        public static void RegisterAndConfigureNtk8AuthenticationSettings(this IServiceCollection serviceCollection,
             IConfiguration configuration, string jsonSettingName = null)
         {
             var authSettings = configuration
@@ -84,8 +78,6 @@ namespace Ntk8.Helpers
             
             serviceCollection
                 .AddSingleton<IAuthSettings, AuthSettings>(sp => authSettings);
-            
-            return serviceCollection;
         }
     }
 }

@@ -1,10 +1,11 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
 {
     public class UserIsNotVerifiedExceptionMiddleware : ExceptionHandlerMiddleware<UserIsNotVerifiedException>
     {
-        public UserIsNotVerifiedExceptionMiddleware() : base(400, GenerateMessage)
+        public UserIsNotVerifiedExceptionMiddleware() : base((int)HttpStatusCode.BadRequest, GenerateMessage)
         {
         }
 

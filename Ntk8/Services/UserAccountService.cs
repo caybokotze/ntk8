@@ -49,7 +49,7 @@ namespace Ntk8.Services
 
             if (user is null)
             {
-                throw new UserNotFoundException("The user does not exist");
+                throw new UserNotFoundException();
             }
 
             if (!user.IsVerified)
@@ -146,7 +146,7 @@ namespace Ntk8.Services
 
             if (user is null)
             {
-                throw new UserNotFoundException("User does not exist");
+                throw new UserNotFoundException();
             }
 
             if (user.DateResetTokenExpires != null
@@ -183,7 +183,7 @@ namespace Ntk8.Services
             
             if (user == null)
             {
-                throw new UserNotFoundException("Email address does not exist.");
+                throw new UserNotFoundException();
             }
 
             user.ResetToken = _tokenService.RandomTokenString();
@@ -221,7 +221,7 @@ namespace Ntk8.Services
             
             if (user is null)
             {
-                throw new NoUserFoundException();
+                throw new UserNotFoundException();
             }
 
             return user.MapFromTo<BaseUser, UserAccountResponse>();

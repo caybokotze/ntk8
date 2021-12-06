@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
@@ -8,7 +9,7 @@ namespace Ntk8.Exceptions.Middleware
     public class UserNotAuthenticatedExceptionMiddleware : ExceptionHandlerMiddleware<UserNotAuthenticatedException>
     {
         public UserNotAuthenticatedExceptionMiddleware() 
-            : base(401, ErrorMessageGenerator)
+            : base((int)HttpStatusCode.Unauthorized, ErrorMessageGenerator)
         {
             
         }
