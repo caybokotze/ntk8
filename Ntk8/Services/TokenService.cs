@@ -27,6 +27,7 @@ namespace Ntk8.Services
         string RandomTokenString();
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
         void RevokeRefreshToken(RefreshToken token);
+        string GetRefreshToken();
     }
 
     public class TokenService : ITokenService
@@ -46,6 +47,14 @@ namespace Ntk8.Services
             _commandExecutor = commandExecutor;
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
+        }
+        
+        public string GetRefreshToken()
+        {
+            return _contextAccessor
+                .HttpContext
+                .Request
+                .Cookies[AuthenticationConstants.RefreshToken];
         }
 
         public void RevokeRefreshToken(RefreshToken token)

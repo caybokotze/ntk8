@@ -7,6 +7,7 @@ using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
 
@@ -51,7 +52,7 @@ namespace Ntk8.Middleware
                 }
                 catch (Exception ex)
                 {
-                    context.Response.Cookies.Delete(AuthenticationConstants.RefreshToken);
+                    context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
                     context.Response.StatusCode = 500;
                     var bytes = Encoding.UTF8.GetBytes(ex.Message);
                     await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
@@ -74,15 +75,30 @@ namespace Ntk8.Middleware
                     .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                     .Value);
 
-                context.Items[AuthenticationConstants.ContextAccount] =
-                    _queryExecutor
-                        .Execute(new FetchUserById(accountId));
+                var user = _queryExecutor.Execute(new FetchUserById(accountId));
+                var cookieToken = _tokenService.GetRefreshToken();
+                var comparerToken = user.RefreshTokens.First().Token;
+
+                if (user.RefreshTokens.First().IsExpired)
+                {
+                    throw new RefreshTokenExpiredException();
+                }
+
+                if (string.IsNullOrEmpty(cookieToken) || !cookieToken.Equals(comparerToken))
+                {
+                    throw new RefreshTokenNotIncludedException();
+                }
+                
+                context.Items[AuthenticationConstants.ContextAccount] = user;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (!context.Response.HasStarted)
                 {
-                    context.Response.Cookies.Delete(AuthenticationConstants.RefreshToken);
+                    context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
+                    context.Response.StatusCode = 401;
+                    var bytes = Encoding.UTF8.GetBytes(ex.Message);
+                    context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
                 }
             }
             
