@@ -14,7 +14,7 @@ namespace Ntk8.Data.Commands
         public override void Execute()
         {
             Result = Execute(@"UPDATE refresh_tokens 
-                SET date_revoked = utc_timestamp(3), revoked_by_ip = '0.0.0.0' 
+                SET date_revoked = utc_timestamp(3), revoked_by_ip = '0.0.0.0', expires = utc_timestamp(3)
                 WHERE token = @Token;", new { Token });
         }
     }

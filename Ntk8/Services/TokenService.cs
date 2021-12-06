@@ -131,7 +131,6 @@ namespace Ntk8.Services
 
         public RefreshToken GenerateRefreshToken()
         {
-            // TODO: Should revoke refresh token for current user.
             return new RefreshToken
             {
                 Token = RandomTokenString(),
