@@ -91,7 +91,7 @@ namespace Ntk8.Middleware
                     context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
                     context.Response.StatusCode = 401;
                     var bytes = Encoding.UTF8.GetBytes(ex.Message);
-                    context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                    context.Response.Body.Write(bytes, 0, bytes.Length);
                 }
             }
             
