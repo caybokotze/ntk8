@@ -1,10 +1,11 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Ntk8.Exceptions.Middleware
 {
     public class UserNotFoundExceptionMiddleware: ExceptionHandlerMiddleware<UserNotFoundException>
     {
-        public UserNotFoundExceptionMiddleware() : base(400, GenerateMessage)
+        public UserNotFoundExceptionMiddleware() : base((int)HttpStatusCode.BadRequest, GenerateMessage)
         {
         }
 

@@ -154,7 +154,7 @@ namespace Ntk8.Services
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL)
             };
             
             _contextAccessor.HttpContext.Response.Cookies.Append(
