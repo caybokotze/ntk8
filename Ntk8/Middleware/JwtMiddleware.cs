@@ -76,19 +76,12 @@ namespace Ntk8.Middleware
                     .Value);
 
                 var user = _queryExecutor.Execute(new FetchUserById(accountId));
-                var cookieToken = _tokenService.GetRefreshToken();
-                var comparerToken = user.RefreshTokens.First().Token;
 
-                if (user.RefreshTokens.First().IsExpired)
+                if (user.RefreshTokens.First().IsExpired || !user.RefreshTokens.First().IsActive)
                 {
-                    throw new RefreshTokenExpiredException();
+                    throw new InvalidRefreshTokenException();
                 }
 
-                if (string.IsNullOrEmpty(cookieToken) || !cookieToken.Equals(comparerToken))
-                {
-                    throw new RefreshTokenNotIncludedException();
-                }
-                
                 context.Items[AuthenticationConstants.ContextAccount] = user;
             }
             catch (Exception ex)
