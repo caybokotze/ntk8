@@ -20,8 +20,8 @@ namespace Ntk8.Middleware
         private readonly ITokenService _tokenService;
 
         public JwtMiddleware(
-            IAuthSettings authSettings, 
-            IQueryExecutor queryExecutor, 
+            IAuthSettings authSettings,
+            IQueryExecutor queryExecutor,
             ITokenService tokenService)
         {
             _authSettings = authSettings;
@@ -32,7 +32,7 @@ namespace Ntk8.Middleware
         public async Task InvokeAsync(
             HttpContext context, RequestDelegate next)
         {
-            if (!context.Response.HasStarted)
+            try
             {
                 var token = context
                     .Request
@@ -40,61 +40,69 @@ namespace Ntk8.Middleware
                     .FirstOrDefault()
                     ?.Split(" ")
                     .Last();
-            
+
                 if (token is not null)
                 {
-                    context = await MountUserToContext(context, token);
+                    context = MountUserToContext(context, token);
                 }
 
-                try
+                if (!context.Response.HasStarted)
                 {
                     await next.Invoke(context);
                 }
-                catch (Exception ex)
+            }
+            catch (InvalidJwtTokenException ex)
+            {
+                if (!context.Response.HasStarted)
                 {
-                    context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
-                    context.Response.StatusCode = 500;
-                    var bytes = Encoding.UTF8.GetBytes(ex.Message);
-                    await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                    await MessageGenerator(context, ex, 401);
                 }
             }
-        }
-
-        public async Task<HttpContext> MountUserToContext(
-            HttpContext context,
-            string token)
-        {
-            try
+            catch (InvalidRefreshTokenException ex)
             {
-                var validatedToken = _tokenService
-                    .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
-
-                var jwtToken = (JwtSecurityToken) validatedToken;
-
-                var accountId = int.Parse(jwtToken.Claims
-                    .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
-                    .Value);
-
-                var user = _queryExecutor.Execute(new FetchUserById(accountId));
-
-                if (user.RefreshTokens.First().IsExpired || !user.RefreshTokens.First().IsActive)
+                if (!context.Response.HasStarted)
                 {
-                    throw new InvalidRefreshTokenException();
+                    await MessageGenerator(context, ex, 401);
                 }
-
-                context.Items[AuthenticationConstants.ContextAccount] = user;
             }
             catch (Exception ex)
             {
                 if (!context.Response.HasStarted)
                 {
-                    context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
-                    context.Response.StatusCode = 401;
-                    var bytes = Encoding.UTF8.GetBytes(ex.Message);
-                    await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                    await MessageGenerator(context, ex, 500);
                 }
             }
-            
+        }
+
+        private async Task MessageGenerator(HttpContext context, Exception ex, int statusCode)
+        {
+            context.Response.StatusCode = statusCode;
+            var bytes = Encoding.UTF8.GetBytes(ex.Message);
+            await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        public HttpContext MountUserToContext(
+            HttpContext context,
+            string token)
+        {
+            var validatedToken = _tokenService
+                .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
+
+            var jwtToken = (JwtSecurityToken)validatedToken;
+
+            var accountId = int.Parse(jwtToken.Claims
+                .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
+                .Value);
+
+            var user = _queryExecutor.Execute(new FetchUserById(accountId));
+
+            if (user.RefreshTokens.First().IsExpired || !user.RefreshTokens.First().IsActive)
+            {
+                throw new InvalidRefreshTokenException();
+            }
+
+            context.Items[AuthenticationConstants.ContextAccount] = user;
+
             return context;
         }
     }

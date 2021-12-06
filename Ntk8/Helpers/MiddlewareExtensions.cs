@@ -28,6 +28,8 @@ namespace Ntk8.Helpers
             builder.UseMiddleware<UserIsNotVerifiedExceptionMiddleware>();
             builder.UseMiddleware<UserIsVerifiedExceptionMiddleware>();
             builder.UseMiddleware<VerificationTokenExpiredExceptionMiddleware>();
+            builder.UseMiddleware<InvalidRefreshTokenExceptionMiddleware>();
+            builder.UseMiddleware<InvalidJwtTokenExceptionMiddleware>();
         }
         
         public static void RegisterNtk8MiddlewareExceptionHandlers(this IServiceCollection serviceCollection)
@@ -49,6 +51,9 @@ namespace Ntk8.Helpers
             serviceCollection
                 .AddSingleton<VerificationTokenExpiredExceptionMiddleware,
                     VerificationTokenExpiredExceptionMiddleware>();
+            serviceCollection
+                .AddSingleton<InvalidRefreshTokenExceptionMiddleware, InvalidRefreshTokenExceptionMiddleware>();
+            serviceCollection.AddSingleton<InvalidJwtTokenExceptionMiddleware, InvalidJwtTokenExceptionMiddleware>();
         }
 
         public static void RegisterNtk8AuthenticationServices(this IServiceCollection serviceCollection)

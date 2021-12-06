@@ -204,7 +204,7 @@ namespace Ntk8.Services
 
             if (user is null)
             {
-                throw new InvalidTokenException(AuthenticationConstants.InvalidAuthenticationMessage);
+                throw new InvalidResetTokenException();
             }
             
             user.PasswordHash = BC.HashPassword(model.Password);
