@@ -154,6 +154,8 @@ namespace Ntk8.Services
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL)
             };
             
