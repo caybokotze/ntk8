@@ -43,7 +43,7 @@ namespace Ntk8.Middleware
             
                 if (token is not null)
                 {
-                    context = MountUserToContext(context, token);
+                    context = await MountUserToContext(context, token);
                 }
 
                 try
@@ -60,7 +60,7 @@ namespace Ntk8.Middleware
             }
         }
 
-        public HttpContext MountUserToContext(
+        public async Task<HttpContext> MountUserToContext(
             HttpContext context,
             string token)
         {
@@ -91,7 +91,7 @@ namespace Ntk8.Middleware
                     context.Response.Headers.Remove(AuthenticationConstants.SetCookie);
                     context.Response.StatusCode = 401;
                     var bytes = Encoding.UTF8.GetBytes(ex.Message);
-                    context.Response.Body.Write(bytes, 0, bytes.Length);
+                    await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
                 }
             }
             
