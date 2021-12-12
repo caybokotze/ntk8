@@ -73,7 +73,7 @@ namespace Ntk8.Tests.Services
                     .Returns(token);
 
                 tokenService.GenerateRefreshToken()
-                    .Returns(TokenHelpers.CreateRandomRefreshToken());
+                    .Returns(TokenHelpers.CreateRefreshToken());
                 
                 var commandExecutor = Substitute.For<ICommandExecutor>();
                 var accountService = Create(queryExecutor, commandExecutor, tokenService);
