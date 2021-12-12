@@ -46,7 +46,7 @@ namespace Ntk8.Services
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
-
+            
             if (user is null)
             {
                 throw new UserNotFoundException();
@@ -66,7 +66,11 @@ namespace Ntk8.Services
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
 
-            _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshTokens.First().Token));
+            if (user.RefreshTokens.Count > 0)
+            {
+                _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshTokens.First().Token));
+            }
+            
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
