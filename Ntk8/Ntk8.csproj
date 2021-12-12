@@ -12,9 +12,9 @@
         <RepositoryType>github</RepositoryType>
         <Authors>Caybo Kotze</Authors>
         <Company>Merge Digital</Company>
-        <PackageReleaseNotes>Pre-release of version 2.0.0, with some optimizations and simplification of interface seperation of concerns.</PackageReleaseNotes>
+        <PackageReleaseNotes>Pre-release of version 2.0.0.</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>2.0.0.4-beta</PackageVersion>
+        <PackageVersion>2.0.0.9-beta</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
     </PropertyGroup>

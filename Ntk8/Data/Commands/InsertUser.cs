@@ -4,7 +4,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertUser : Command<int>
+    public class InsertUser : Command<long>
     {
         public BaseUser BaseUser { get; }
 

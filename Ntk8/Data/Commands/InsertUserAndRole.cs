@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertUserAndRole : Command<int>
+    public class InsertUserAndRole : Command<long>
     {
         private BaseUser BaseUser { get; }
         private UserRole UserRole { get; }
@@ -23,12 +23,12 @@ namespace Ntk8.Data.Commands
             Result = userId;
         }
 
-        private int InsertUser()
+        private long InsertUser()
         {
             return CommandExecutor.Execute(new InsertUser(BaseUser));
         }
 
-        private int InsertUserRole(int userId)
+        private long InsertUserRole(long userId)
         {
             UserRole.UserId = userId;
             return CommandExecutor

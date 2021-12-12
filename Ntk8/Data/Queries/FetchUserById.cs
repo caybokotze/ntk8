@@ -7,9 +7,9 @@ namespace Ntk8.Data.Queries
 {
     public class FetchUserById : Query<BaseUser>
     {
-        public int Id { get; }
+        public long Id { get; }
 
-        public FetchUserById(int id)
+        public FetchUserById(long id)
         {
             Id = id;
         }
