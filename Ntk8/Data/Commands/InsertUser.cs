@@ -11,7 +11,7 @@ namespace Ntk8.Data.Commands
         public InsertUser(BaseUser baseUser)
         {
             BaseUser = baseUser;
-            BaseUser.Email = BaseUser.Email.ToLowerInvariant();
+            BaseUser.Email = baseUser.Email.ToLowerInvariant();
             BaseUser.DateModified = DateTime.UtcNow;
             BaseUser.DateCreated = DateTime.UtcNow;
         }
