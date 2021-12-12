@@ -34,6 +34,14 @@ namespace Ntk8.Services
             _authSettings = authSettings;
         }
         
+        //todo: Add testing around this...
+        // - Should throw if user is null.
+        // - Should throw if user is not verified.
+        // - Should throw if the password doesn't match.
+        // - Should not invalidate token if no refresh tokens exist.
+        // - Should insert new refresh token.
+        // - Should set the refresh token cookie on context.
+        
         /// <summary>
         /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.
         /// A refresh and JWT token is also generated for the user and send back to the caller.
@@ -46,7 +54,7 @@ namespace Ntk8.Services
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress(model.Email));
-
+            
             if (user is null)
             {
                 throw new UserNotFoundException();
@@ -66,7 +74,11 @@ namespace Ntk8.Services
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
 
-            _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshTokens.First().Token));
+            if (user.RefreshTokens.Count > 0)
+            {
+                _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshTokens.First().Token));
+            }
+            
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
             var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
