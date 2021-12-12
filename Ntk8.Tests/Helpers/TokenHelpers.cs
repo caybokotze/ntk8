@@ -52,7 +52,7 @@ namespace Ntk8.Tests.Helpers
                 .WriteToken(securityToken);
         }
 
-        public static RefreshToken CreateRandomRefreshToken()
+        public static RefreshToken CreateRefreshToken()
         {
             var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[40];
