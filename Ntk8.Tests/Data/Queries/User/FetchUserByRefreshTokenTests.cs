@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;

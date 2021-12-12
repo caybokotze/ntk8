@@ -23,14 +23,10 @@ namespace Ntk8.Data.Queries
             {
                 var roles = new List<Role>();
                 var sql = @"
-                    SELECT u.*, rt.*, r.* FROM users u
+                    SELECT u.*, rt.*, r.*
+                    FROM refresh_tokens rt
+                    LEFT JOIN users u on rt.user_id = u.id
                     LEFT JOIN user_roles ur on u.id = ur.user_id
-                    LEFT JOIN refresh_tokens rt on rt.id = (
-                        SELECT refresh_tokens.id
-                        FROM refresh_tokens
-                        WHERE refresh_tokens.user_id = u.id
-                        ORDER BY refresh_tokens.date_created
-                        DESC LIMIT 1)
                     LEFT JOIN roles r on ur.role_id = r.id
                     WHERE rt.token = @Token;";
 

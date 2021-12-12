@@ -75,7 +75,7 @@ namespace Ntk8.Services
             
             if (user is null)
             {
-                throw new InvalidTokenException("The refresh token does not exist.");
+                throw new InvalidRefreshTokenException();
             }
 
             var refreshToken = user
@@ -91,7 +91,7 @@ namespace Ntk8.Services
 
             if (!isActive)
             {
-                throw new InvalidTokenException("The refresh token has expired.");
+                throw new InvalidRefreshTokenException();
             }
             
             var jwtToken = GenerateJwtToken(userId, roles);
@@ -140,7 +140,6 @@ namespace Ntk8.Services
 
         public RefreshToken GenerateRefreshToken()
         {
-            // TODO: Should revoke refresh token for current user.
             return new RefreshToken
             {
                 Token = RandomTokenString(),
@@ -196,7 +195,7 @@ namespace Ntk8.Services
             }
             catch (Exception)
             {
-                throw new InvalidTokenException("The token has expired.");
+                throw new InvalidJwtTokenException();
             }
 
             return validatedToken;

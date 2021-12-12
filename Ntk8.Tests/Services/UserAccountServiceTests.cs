@@ -57,7 +57,7 @@ namespace Ntk8.Tests.Services
                 var user = GetRandom<BaseUser>();
                 var validJwtToken = TokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
-                var token = new ResetTokenResponse()
+                var token = new ResetTokenResponse
                 {
                     Token = TokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
