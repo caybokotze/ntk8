@@ -9,16 +9,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using Ntk8.Helpers;
-using Ntk8.Models;
-using Ntk8.Services;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
-using PeanutButter.RandomGenerators;
 
 namespace Ntk8.Tests
 {
@@ -26,6 +22,7 @@ namespace Ntk8.Tests
     public class TestFixtureWithServiceProvider
     {
         public IServiceProvider ServiceProvider { get; set; }
+        public HttpContext HttpContext { get; set; }
 
         [SetUp]
         public async Task SetupHostEnvironment()
@@ -39,9 +36,15 @@ namespace Ntk8.Tests
                 webHost.UseTestServer();
                 webHost.Configure(app =>
                 {
-                    app.Run(handle => handle
-                        .Response
-                        .StartAsync());
+                    app.Run(handle =>
+                    {
+                        HttpContext = handle;
+                        return handle
+                            .Response
+                            .StartAsync();
+                    });
+
+                    app.Build();
                 });
 
                 webHost.ConfigureServices(config =>
@@ -60,7 +63,7 @@ namespace Ntk8.Tests
 
             var host = await hostBuilder.StartAsync();
             var serviceProvider = host.Services;
-            
+
             ServiceProvider = serviceProvider;
         }
         

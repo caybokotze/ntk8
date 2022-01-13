@@ -25,7 +25,7 @@ namespace Ntk8.Tests.Data.Commands.RefreshToken
             {
                 // arrange
                 // act
-                var refreshToken = TokenHelpers.CreateRandomRefreshToken();
+                var refreshToken = TokenHelpers.CreateRefreshToken();
                 // assert
                 Expect(refreshToken.IsExpired).To.Be.False();
                 Expect(refreshToken.IsActive).To.Be.True();
@@ -44,7 +44,7 @@ namespace Ntk8.Tests.Data.Commands.RefreshToken
                     
                     var userId = commandExecutor.Execute(new InsertUser(user));
                     
-                    var refreshToken = TokenHelpers.CreateRandomRefreshToken();
+                    var refreshToken = TokenHelpers.CreateRefreshToken();
                     refreshToken.UserId = userId;
                     user.Id = userId;
 
