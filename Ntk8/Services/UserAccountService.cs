@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Dapper.CQRS;
-using Ntk8.Constants;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
@@ -99,8 +98,7 @@ namespace Ntk8.Services
                 {
                     throw new UserAlreadyExistsException();
                 }
-
-                existingUser.VerificationToken = _tokenService.RandomTokenString();
+                
                 existingUser.DateModified = DateTime.UtcNow;
                 existingUser.DateResetTokenExpires = DateTime.UtcNow
                     .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
@@ -199,6 +197,17 @@ namespace Ntk8.Services
                 throw new UserNotFoundException();
             }
 
+            if (user.ResetToken is not null)
+            {
+                user.DateResetTokenExpires = DateTime.UtcNow
+                    .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
+                        ? RESET_TOKEN_TTL
+                        : _authSettings.PasswordResetTokenTTL);
+                
+                _commandExecutor.Execute(new UpdateUser(user));
+                return user.ResetToken;
+            }
+            
             user.ResetToken = _tokenService.RandomTokenString();
             user.DateResetTokenExpires = DateTime.UtcNow
                 .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
@@ -206,6 +215,7 @@ namespace Ntk8.Services
                     : _authSettings.PasswordResetTokenTTL);
 
             _commandExecutor.Execute(new UpdateUser(user));
+
             return user.ResetToken;
         }
         
