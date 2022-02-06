@@ -11,5 +11,6 @@ namespace Ntk8.Dto
         public string Email { get; set; }
         public Role[] Roles { get; set; }
         public string JwtToken { get; set; }
+        public string TelNumber { get; set; }
     }
 }
