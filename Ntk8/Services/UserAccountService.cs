@@ -157,7 +157,7 @@ namespace Ntk8.Services
 
             if (user is null)
             {
-                throw new UserNotFoundException();
+                throw new InvalidValidationTokenException();
             }
 
             if (user.DateResetTokenExpires != null

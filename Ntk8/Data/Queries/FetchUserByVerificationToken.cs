@@ -1,4 +1,5 @@
-﻿using Dapper.CQRS;
+﻿using System;
+using Dapper.CQRS;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -14,8 +15,15 @@ namespace Ntk8.Data.Queries
         
         public override void Execute()
         {
-            Result = QueryFirst<BaseUser>(@"SELECT * FROM users 
-            WHERE verification_token = @Token", new { Token });
+            try
+            {
+                Result = QueryFirst<BaseUser>(@"SELECT * FROM users 
+                WHERE verification_token = @Token", new { Token });
+            }
+            catch (Exception)
+            {
+                Result = null;
+            }
         }
     }
 }

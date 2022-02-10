@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +13,22 @@ using static ScopeFunction.Utils.AppSettingsBuilder;
 
 namespace Ntk8.Demo
 {
+    public static class WebApplicationExtensions
+    {
+        public static WebApplication Extend<T>(this WebApplication webApplication, Action<T> members) where T : class
+        {
+            return webApplication;
+        }
+    }
+
+    public class DemoController
+    {
+        public void DoStuff()
+        {
+            
+        }
+    }
+    
     class Program
     {
         static void Main(string[] args)
@@ -29,6 +46,8 @@ namespace Ntk8.Demo
             app.UseNtk8ExceptionMiddleware();
             app.Run();
         }
+        
+        
         
         // TODO: See if we can leverage the existing dotnet Authorise Attribute to use within the Ntk8 package.
         // TODO: When saving new users, isActive should be set to true.
