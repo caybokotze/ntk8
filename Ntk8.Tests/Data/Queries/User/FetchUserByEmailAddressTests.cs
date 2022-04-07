@@ -123,7 +123,7 @@ namespace Ntk8.Tests.Data.Queries.User
                         .Execute(new FetchUserByEmailAddress<TestUser>(user.Email));
 
                     // assert
-                    Expect(result.RefreshToken.Expires).To.Approximately.Equal(refreshToken.Expires);
+                    Expect(result.RefreshToken.Expires).To.Approximately.Equal((DateTime)refreshToken.Expires!);
                     Expect(result.RefreshToken.DateCreated).To.Approximately.Equal(refreshToken.DateCreated);
                     Expect(result.RefreshToken.DateRevoked).To.Approximately.Equal(refreshToken.DateRevoked ?? default);
                     result.RefreshToken.Expires = refreshToken.Expires;

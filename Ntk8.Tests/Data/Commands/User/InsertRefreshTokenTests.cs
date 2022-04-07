@@ -31,7 +31,7 @@ namespace Ntk8.Tests.Data.Commands.User
                     refreshToken.UserId = userId;
                     // act
                     commandExecutor.Execute(new InsertRefreshToken(refreshToken));
-                    var baseUser = queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token));
+                    var baseUser = queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token));
                     // assert
                     Expect(baseUser).Not.To.Be.Null();
                 }

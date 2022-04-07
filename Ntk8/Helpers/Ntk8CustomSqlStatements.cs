@@ -5,6 +5,7 @@ namespace Ntk8.Helpers;
 
 public class Ntk8CustomSqlStatements
 {
+    public string? FetchUserByVerificationTokenStatement { get; set; }
     public string? FetchUserByEmailAddressStatement { get; set; }
     public string? FetchUserByIdStatement { get; set; }
     public string? FetchUserByRefreshTokenStatement { get; set; }

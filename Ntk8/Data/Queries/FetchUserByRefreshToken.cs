@@ -8,9 +8,10 @@ namespace Ntk8.Data.Queries
     /// <summary>
     /// Will return the user and the refresh token on the user object.
     /// </summary>
-    public class FetchUserByRefreshToken : Query<IBaseUser>
+    public class FetchUserByRefreshToken<T> : Query<T?> where T : class, IBaseUser, new()
     {
         public string Token { get; }
+        public string? Sql { get; set; }
 
         public FetchUserByRefreshToken(string token)
         {
@@ -22,7 +23,7 @@ namespace Ntk8.Data.Queries
             try
             {
                 var roles = new List<Role>();
-                var sql = @"
+                Sql ??= @"
                     SELECT u.*, rt.*, r.*
                     FROM refresh_tokens rt
                     LEFT JOIN users u on rt.user_id = u.id
@@ -30,8 +31,8 @@ namespace Ntk8.Data.Queries
                     LEFT JOIN roles r on ur.role_id = r.id
                     WHERE rt.token = @Token;";
 
-                var result = Query<IBaseUser, RefreshToken, Role, IBaseUser>(
-                    sql,
+                var result = Query<T, RefreshToken, Role, T>(
+                    Sql,
                     (user, token, role) =>
                     {
                         if (token is not null)

@@ -23,22 +23,22 @@ namespace Ntk8.Demo
 
             builder.Services.ConfigureNtk8CustomSql(c =>
             {
-                c.FetchUserByEmailAddressStatement = new SqlBuilder().Select<User>(s =>
-                {
-                    s.UsePropertyCase(Casing.SnakeCase);
-                }).Build();
+                
             });
             
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
+            app.UseRouting();
+            app.UseNtk8JwtMiddleware<User>();
+            app.UseNtk8ExceptionMiddleware();
+            
             var _ = new AuthHandler(app, app.Resolve<IUserAccountService>(),
                 app.Resolve<IAuthenticationContextService>(),
                 app.Resolve<IQueryExecutor>(),
                 app.Resolve<ICommandExecutor>(),
                 app.Resolve<ITokenService>(),
                 app.Resolve<IHttpContextAccessor>());
-            app.UseNtk8JwtMiddleware<User>();
-            app.UseNtk8ExceptionMiddleware();
+           
             app.Run();
         }
 

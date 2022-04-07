@@ -1,3 +1,4 @@
+using System;
 using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
@@ -78,11 +79,11 @@ namespace Ntk8.Tests.Data.Queries.User
                     refreshToken.Id = refreshTokenId;
                     // assert
                     var expectedToken = expectedUser.RefreshToken;
-                    Expect(expectedToken.Expires)
-                        .To.Approximately.Equal(refreshToken.Expires);
-                    Expect(expectedToken.DateCreated)
+                    Expect(expectedToken?.Expires)
+                        .To.Approximately.Equal((DateTime)refreshToken.Expires!);
+                    Expect(expectedToken?.DateCreated)
                         .To.Approximately.Equal(refreshToken.DateCreated);
-                    Expect(expectedToken.DateRevoked)
+                    Expect(expectedToken?.DateRevoked)
                         .To.Approximately.Equal(refreshToken.DateRevoked ?? default);
                     expectedToken.Expires = refreshToken.Expires;
                     expectedToken.DateCreated = refreshToken.DateCreated;

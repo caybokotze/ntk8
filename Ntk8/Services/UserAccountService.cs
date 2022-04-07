@@ -90,7 +90,7 @@ namespace Ntk8.Services
             var existingUser = _queryExecutor
                 .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty)
                 {
-                    Sql = _statements.FetchUserByEmailAddressStatement
+                    Sql = _statements?.FetchUserByEmailAddressStatement
                 });
             
             if (existingUser is not null)
@@ -148,7 +148,10 @@ namespace Ntk8.Services
         public void VerifyUserByVerificationToken(string token)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByVerificationToken(token));
+                .Execute(new FetchUserByVerificationToken<T>(token)
+                {
+                    Sql = _statements?.FetchUserByVerificationTokenStatement
+                });
 
             if (user is null)
             {
@@ -217,7 +220,7 @@ namespace Ntk8.Services
         public void ResetUserPassword(ResetPasswordRequest model)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByResetToken(model.Token));
+                .Execute(new FetchUserByResetToken<T>(model.Token ?? string.Empty));
 
             if (user is null)
             {
@@ -235,7 +238,10 @@ namespace Ntk8.Services
         public UserAccountResponse GetUserById(int id)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserById<T>(id));
+                .Execute(new FetchUserById<T>(id)
+                {
+                    Sql = _statements?.FetchUserByIdStatement
+                });
             
             if (user is null)
             {
@@ -247,7 +253,16 @@ namespace Ntk8.Services
 
         public UserAccountResponse UpdateUser(int id, UpdateRequest model)
         {
-            var user = _queryExecutor.Execute(new FetchUserById<T>(id));
+            var user = _queryExecutor
+                .Execute(new FetchUserById<T>(id)
+                {
+                    Sql = _statements?.FetchUserByIdStatement
+                });
+            
+            if (user is null)
+            {
+                throw new UserNotFoundException();
+            }
 
             if (!string.IsNullOrEmpty(model.Password))
             {

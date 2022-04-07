@@ -61,7 +61,7 @@ namespace Ntk8.Helpers
             serviceCollection.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             serviceCollection.TryAddSingleton<JwtMiddleware<T>, JwtMiddleware<T>>();
             serviceCollection.AddTransient<IUserAccountService, UserAccountService<T>>();
-            serviceCollection.AddTransient<ITokenService, TokenService>();
+            serviceCollection.AddTransient<ITokenService, TokenService<T>>();
         }
 
         public static void RegisterAndConfigureNtk8AuthenticationSettings(this IServiceCollection serviceCollection,
@@ -76,7 +76,7 @@ namespace Ntk8.Helpers
                 throw new KeyNotFoundException("The authentication settings can not be found in the specified appsettings.json file.");
             }
 
-            if (authSettings.RefreshTokenSecret.Length < 32)
+            if (authSettings.RefreshTokenSecret?.Length < 32)
             {
                 throw new InvalidTokenLengthException();
             }

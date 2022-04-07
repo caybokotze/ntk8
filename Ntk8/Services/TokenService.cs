@@ -20,7 +20,7 @@ namespace Ntk8.Services
     public interface ITokenService
     {
         ResetTokenResponse GenerateJwtToken(long userId, Role[]? roles);
-        (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token);
+        (bool isActive, long userId, Role[]? roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken();
         ResetTokenResponse GenerateJwtToken(string refreshToken);
         void SetRefreshTokenCookie(string token);
@@ -30,7 +30,7 @@ namespace Ntk8.Services
         string GetRefreshToken();
     }
 
-    public class TokenService : ITokenService
+    public class TokenService<T> : ITokenService where T : class, IBaseUser, new()
     {
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
@@ -64,10 +64,10 @@ namespace Ntk8.Services
             _commandExecutor.Execute(new UpdateRefreshToken(token));
         }
 
-        public (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token)
+        public (bool isActive, long userId, Role[]? roles) IsRefreshTokenActive(string token)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByRefreshToken(token));
+                .Execute(new FetchUserByRefreshToken<T>(token));
 
             if (user is null)
             {
@@ -75,6 +75,11 @@ namespace Ntk8.Services
             }
 
             var refreshToken = user.RefreshToken;
+
+            if (refreshToken is null)
+            {
+                throw new InvalidRefreshTokenException();
+            }
 
             return (refreshToken.IsActive, user.Id, user.Roles);
         }
@@ -98,13 +103,14 @@ namespace Ntk8.Services
 
         public ResetTokenResponse GenerateJwtToken(long userId, Role[]? roles)
         {
-            if (_authSettings.RefreshTokenSecret.Length < 32)
+            if (_authSettings.RefreshTokenSecret?.Length < 32)
             {
                 throw new InvalidTokenLengthException();
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_authSettings.RefreshTokenSecret);
+            var key = Encoding.UTF8.GetBytes(_authSettings.RefreshTokenSecret
+                                             ?? throw new RefreshTokenNotIncludedException("The refresh token does not seem to exist in your user settings in the appsettings.json file"));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

@@ -109,14 +109,14 @@ namespace Ntk8.Tests.Services
                 randomUser.RefreshToken = refreshToken;
 
                 queryExecutor
-                    .Execute(Arg.Any<FetchUserByRefreshToken>())
+                    .Execute(Arg.Any<FetchUserByRefreshToken<TestUser>>())
                     .Returns(randomUser);
                 
                 var _ = tokenService
                     .IsRefreshTokenActive(refreshToken.Token);
                 // act
                 // assert
-                Expect(queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token)))
+                Expect(queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token)))
                     .To
                     .Equal(randomUser);
             }
@@ -131,7 +131,7 @@ namespace Ntk8.Tests.Services
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
                 var randomUser = GetRandom<IBaseUser>();
                 queryExecutor
-                    .Execute(Arg.Any<FetchUserByRefreshToken>())
+                    .Execute(Arg.Any<FetchUserByRefreshToken<TestUser>>())
                     .Returns(randomUser);
                 // act
                 // assert
@@ -141,13 +141,13 @@ namespace Ntk8.Tests.Services
             }
         }
         
-        private static TokenService Create(
-            IQueryExecutor queryExecutor = null,
-            ICommandExecutor commandExecutor = null,
-            AuthSettings authSettings = null,
-            IHttpContextAccessor httpContextAccessor = null)
+        private static TokenService<TestUser> Create(
+            IQueryExecutor? queryExecutor = null,
+            ICommandExecutor? commandExecutor = null,
+            AuthSettings? authSettings = null,
+            IHttpContextAccessor? httpContextAccessor = null)
         {
-            return new TokenService(
+            return new TokenService<TestUser>(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 authSettings ?? CreateAuthSettings(),

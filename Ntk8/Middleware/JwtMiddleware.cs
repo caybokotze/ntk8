@@ -13,7 +13,7 @@ using Ntk8.Services;
 
 namespace Ntk8.Middleware
 {
-    public class JwtMiddleware<T> : IMiddleware where T : IBaseUser
+    public class JwtMiddleware<T> : IMiddleware where T : class, IBaseUser, new()
     {
         private readonly IAuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;

@@ -131,7 +131,7 @@ namespace Ntk8.Demo
             
             ValidateModel(resetTokenRequest);
 
-            var user = _queryExecutor.Execute(new FetchUserByRefreshToken(resetTokenRequest.Token));
+            var user = _queryExecutor.Execute(new FetchUserByRefreshToken<User>(resetTokenRequest.Token));
             var response = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
             await context.SerialiseResponseBody(response);
         }

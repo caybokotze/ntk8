@@ -48,12 +48,12 @@ namespace Ntk8.Tests.Data.Commands.RefreshToken
                     commandExecutor.Execute(new InsertRefreshToken(refreshToken));
                 
                     // act
-                    user = queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token));
+                    user = queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token));
                     var retrievedRefreshToken = user?.RefreshToken;
 
                     commandExecutor.Execute(new InvalidateRefreshToken(refreshToken.Token));
 
-                    user = queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token));
+                    user = queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token));
                     var retrievedRefreshTokenAfterInvalidation = user?.RefreshToken;
                     
                     // assert

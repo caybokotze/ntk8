@@ -8,5 +8,10 @@ namespace Ntk8.Exceptions
         {
             
         }
+
+        public RefreshTokenNotIncludedException(string message) : base(message)
+        {
+            
+        }
     }
 }

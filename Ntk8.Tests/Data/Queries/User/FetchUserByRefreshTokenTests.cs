@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
@@ -36,15 +37,16 @@ namespace Ntk8.Tests.Data.Queries.User
                 }));
                 // act
                 var retrievedUser = queryExecutor
-                    .Execute(new FetchUserByRefreshToken(user.RefreshToken.Token));
+                    .Execute(new FetchUserByRefreshToken<TestUser>(user.RefreshToken?.Token!));
                 // assert
                 Expect(retrievedUser).Not.To.Be.Null();
-                Expect(retrievedUser.Roles.First().RoleName).To.Equal(nameof(Roles.Admin));
-                Expect(retrievedUser.RefreshToken.DateCreated).To.Approximately
+                Expect(retrievedUser?.Roles?.First().RoleName).To.Equal(nameof(Roles.Admin));
+                Expect(retrievedUser?.RefreshToken?.DateCreated).To.Approximately
                     .Equal(refreshToken.DateCreated);
-                Expect(retrievedUser.RefreshToken.DateRevoked).To.Approximately
+                Expect(retrievedUser?.RefreshToken?.DateRevoked).To.Approximately
                     .Equal(refreshToken.DateRevoked ?? default);
-                Expect(retrievedUser.RefreshToken.Expires).To.Approximately.Equal(refreshToken.Expires);
+                Expect(retrievedUser?.RefreshToken?.Expires)
+                    .To.Approximately.Equal((DateTime)refreshToken.Expires!);
             }
         }
     }

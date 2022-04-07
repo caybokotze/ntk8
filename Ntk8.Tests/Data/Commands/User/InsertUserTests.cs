@@ -31,13 +31,13 @@ namespace Ntk8.Tests.Data.Commands.User
                 // assert
                 Expect(id)
                     .To.Be.Greater.Than(1);
-                Expect(expectedUser.DateCreated).To.Approximately.Equal(user.DateCreated);
-                Expect(expectedUser.DateModified).To.Approximately.Equal(user.DateModified);
-                Expect(expectedUser.DateVerified).To.Approximately.Equal((DateTime)user.DateVerified);
-                Expect(expectedUser.DateOfPasswordReset).To.Approximately
-                    .Equal((DateTime) user.DateOfPasswordReset);
-                Expect(expectedUser.DateResetTokenExpires).To.Approximately
-                    .Equal((DateTime) user.DateResetTokenExpires);
+                Expect(expectedUser?.DateCreated).To.Approximately.Equal(user.DateCreated);
+                Expect(expectedUser?.DateModified).To.Approximately.Equal(user.DateModified);
+                Expect(expectedUser?.DateVerified).To.Approximately.Equal((DateTime)user.DateVerified!);
+                Expect(expectedUser?.DateOfPasswordReset).To.Approximately
+                    .Equal((DateTime) user.DateOfPasswordReset!);
+                Expect(expectedUser?.DateResetTokenExpires).To.Approximately
+                    .Equal((DateTime) user.DateResetTokenExpires!);
                 expectedUser.DateCreated = user.DateCreated;
                 expectedUser.DateModified = user.DateModified;
                 expectedUser.DateVerified = user.DateVerified;
@@ -46,6 +46,7 @@ namespace Ntk8.Tests.Data.Commands.User
                 expectedUser.RefreshToken = null;
                 user.RefreshToken = null;
                 user.Id = id;
+                user.Roles = Array.Empty<Role>();
                 Expect(expectedUser)
                     .To.Deep.Equal(user);
             }

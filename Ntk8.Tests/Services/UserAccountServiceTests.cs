@@ -310,32 +310,80 @@ namespace Ntk8.Tests.Services
         [TestFixture]
         public class ResetUserPassword
         {
+            [Test]
+            public void ShouldResetUserPassword()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
         }
 
         [TestFixture]
         public class GetUserById
         {
+            [Test]
+            public void ShouldGetUserById()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
         }
 
         [TestFixture]
         public class UpdateUserTests
         {
+            [Test]
+            public void ShouldUpdateUserDetails()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
         }
 
         [TestFixture]
         public class DeleteUser
         {
+            [Test]
+            public void ShouldDeleteUser()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
         }
 
         [TestFixture]
         public class AutoVerifyUser
         {
+            [Test]
+            public void ShouldVerifyUser()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
         }
 
 
         [TestFixture]
         public class ForgotPassword
         {
+            [Test]
+            public void ShouldGenerateResetTokenForUser()
+            {
+                // arrange
+                
+                // act
+                // assert
+            }
         }
 
         [TestFixture]
@@ -353,44 +401,23 @@ namespace Ntk8.Tests.Services
 
 
         private static IUserAccountService Create(
-            IQueryExecutor queryExecutor = null,
-            ICommandExecutor commandExecutor = null,
-            ITokenService tokenService = null,
-            IAuthSettings authSettings = null,
+            IQueryExecutor? queryExecutor = null,
+            ICommandExecutor? commandExecutor = null,
+            ITokenService? tokenService = null,
+            IAuthSettings? authSettings = null,
             Ntk8CustomSqlStatements? statements = null)
         {
             return new UserAccountService<TestUser>(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),
-                authSettings ?? Substitute.For<IAuthSettings>(),
+                authSettings ?? CreateAuthSettings(),
                 GetRandom<IBaseUser>(), statements);
-        }
-
-        private static List<RefreshToken> CreateRefreshTokens(int amount = 3, RefreshToken addTokenToList = null)
-        {
-            var list = new List<RefreshToken>();
-            if (addTokenToList is not null)
-            {
-                list.Add(addTokenToList);
-            }
-
-            amount.Times(() => list.Add(CreateRefreshToken()));
-            return list;
-        }
-
-        private static RefreshToken CreateRefreshToken(ITokenService tokenService = null)
-        {
-            tokenService ??= Substitute
-                .For<TokenService>(Substitute.For<IQueryExecutor>(),
-                    CreateAuthSettings());
-
-            return tokenService.GenerateRefreshToken();
         }
 
         private static AuthSettings CreateAuthSettings()
         {
-            return new()
+            return new AuthSettings
             {
                 RefreshTokenSecret = GetRandomAlphaString(40),
                 RefreshTokenTTL = 604800,

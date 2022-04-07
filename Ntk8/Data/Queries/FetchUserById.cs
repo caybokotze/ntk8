@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserById<T> : Query<T> where T : IBaseUser
+    public class FetchUserById<T> : Query<T?> where T : class, IBaseUser, new()
     {
         public long Id { get; }
+        public string? Sql { get; set; }
 
         public FetchUserById(long id)
         {
@@ -19,8 +21,8 @@ namespace Ntk8.Data.Queries
             try
             {
                 var roles = new List<Role>();
-                var result = Query<T, RefreshToken, Role, T>(
-                    @"SELECT u.*, rt.*, r.* FROM users u
+
+                Sql ??= @"SELECT u.*, rt.*, r.* FROM users u
                         LEFT JOIN user_roles ur on u.id = ur.user_id
                         LEFT JOIN refresh_tokens rt on rt.id = (
                             SELECT refresh_tokens.id
@@ -29,17 +31,21 @@ namespace Ntk8.Data.Queries
                             ORDER BY refresh_tokens.date_created
                             DESC LIMIT 1)
                         LEFT JOIN roles r on ur.role_id = r.id
-                        WHERE u.id = @Id",
+                        WHERE u.id = @Id;";
+
+                var result = Query<T, RefreshToken, Role, T>(Sql,
                     (user, token, role) =>
                     {
                         if (token is not null)
                         {
                             user.RefreshToken = token;
                         }
+
                         if (role is not null)
                         {
                             roles.Add(role);
                         }
+
                         return user;
                     }, new
                     {
@@ -53,7 +59,7 @@ namespace Ntk8.Data.Queries
             }
             catch
             {
-                Result = default;
+                Result = null;
             }
         }
     }
