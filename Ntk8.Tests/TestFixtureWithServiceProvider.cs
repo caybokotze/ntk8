@@ -18,7 +18,6 @@ using NUnit.Framework;
 
 namespace Ntk8.Tests
 {
-    [TestFixture]
     public class TestFixtureWithServiceProvider
     {
         public IServiceProvider ServiceProvider { get; set; }

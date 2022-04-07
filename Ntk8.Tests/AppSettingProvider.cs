@@ -13,9 +13,7 @@ namespace Ntk8.Tests
     {
         public static IAppSettings CreateAppSettings()
         {
-            return GetSettingsFrom(
-                CreateConfigurationRoot()
-            );
+            return GetSettingsFrom(CreateConfigurationRoot());
         }
 
         public static IConfigurationRoot CreateConfigurationRoot()
@@ -23,6 +21,7 @@ namespace Ntk8.Tests
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json");
+            
             const string deployConfig = "appsettings.deploy.json";
             if (CanLoad(deployConfig))
             {

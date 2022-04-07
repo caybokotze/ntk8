@@ -7,16 +7,16 @@ namespace Ntk8.Dto
 {
     public class RegisterRequest : IUserPrimaryProperties
     {
-        public string Title { get; set; }
+        public string? Title { get; set; }
         [Required]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
         
         [Required]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         public string TelNumber { get; set; }
 

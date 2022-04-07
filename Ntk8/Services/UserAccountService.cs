@@ -11,7 +11,7 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
 {
-    public class UserAccountService : IUserAccountService
+    public class UserAccountService<T> : IUserAccountService where T : class, IBaseUser, new()
     {
         public static int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
         public static int RESET_TOKEN_TTL = 43200; // in seconds
@@ -20,17 +20,23 @@ namespace Ntk8.Services
         private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
+        private readonly IBaseUser _baseUser;
+        private readonly Ntk8CustomSqlStatements _statements;
 
         public UserAccountService(
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
             ITokenService tokenService,
-            IAuthSettings authSettings)
+            IAuthSettings authSettings,
+            IBaseUser baseUser,
+            Ntk8CustomSqlStatements statements)
         {
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
             _authSettings = authSettings;
+            _baseUser = baseUser;
+            _statements = statements;
         }
         
         //todo: Add testing around this...
@@ -52,7 +58,7 @@ namespace Ntk8.Services
         public AuthenticatedResponse AuthenticateUser(AuthenticateRequest model)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress(model.Email));
+                .Execute(new FetchUserByEmailAddress<T>(model.Email));
             
             if (user is null)
             {
@@ -73,14 +79,14 @@ namespace Ntk8.Services
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
 
-            if (user.RefreshTokens.Count > 0)
+            if (user.RefreshToken is not null)
             {
-                _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshTokens.First().Token));
+                _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshToken.Token));
             }
             
             _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
 
-            var response = user.MapFromTo<BaseUser, AuthenticatedResponse>();
+            var response = user.MapFromTo(new AuthenticatedResponse());
             
             response.JwtToken = jwtToken.Token;
             _tokenService.SetRefreshTokenCookie(refreshToken.Token);
@@ -90,7 +96,10 @@ namespace Ntk8.Services
         public void RegisterUser(RegisterRequest model)
         {
             var existingUser = _queryExecutor
-                .Execute(new FetchUserByEmailAddress(model.Email));
+                .Execute(new FetchUserByEmailAddress<T>(model.Email)
+                {
+                    Sql = _statements.FetchUserByEmailAddressStatement
+                });
             
             if (existingUser is not null)
             {
@@ -109,7 +118,8 @@ namespace Ntk8.Services
                 return;
             }
 
-            var user = model.MapFromTo<RegisterRequest, BaseUser>();
+            var user = model.MapFromTo((T)_baseUser);
+            
             user.IsActive = true;
             user.VerificationToken = _tokenService.RandomTokenString();
             user.DateCreated = DateTime.UtcNow;
@@ -124,20 +134,10 @@ namespace Ntk8.Services
                 .Execute(new InsertUser(user));
         }
 
-        public void UpdateAccount(RegisterRequest request)
-        {
-            
-        }
-        
-        public void DeleteAccount(long userId)
-        {
-            
-        }
-
         public void AutoVerifyUser(RegisterRequest model)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress(model.Email));
+                .Execute(new FetchUserByEmailAddress<T>(model.Email));
 
             if (user.IsVerified)
             {
@@ -190,7 +190,7 @@ namespace Ntk8.Services
         public string ForgotUserPassword(ForgotPasswordRequest model)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress(model.Email));
+                .Execute(new FetchUserByEmailAddress<T>(model.Email));
             
             if (user == null)
             {
@@ -240,19 +240,19 @@ namespace Ntk8.Services
         public UserAccountResponse GetUserById(int id)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserById(id));
+                .Execute(new FetchUserById<T>(id));
             
             if (user is null)
             {
                 throw new UserNotFoundException();
             }
 
-            return user.MapFromTo<BaseUser, UserAccountResponse>();
+            return user.MapFromTo(new UserAccountResponse());
         }
 
         public UserAccountResponse UpdateUser(int id, UpdateRequest model)
         {
-            var user = _queryExecutor.Execute(new FetchUserById(id));
+            var user = _queryExecutor.Execute(new FetchUserById<T>(id));
 
             if (!string.IsNullOrEmpty(model.Password))
             {
@@ -263,7 +263,7 @@ namespace Ntk8.Services
 
             _commandExecutor.Execute(new UpdateUser(user));
 
-            var response = user.MapFromTo<BaseUser, UserAccountResponse>();
+            var response = user.MapFromTo(new UserAccountResponse());
             return response;
         }
 

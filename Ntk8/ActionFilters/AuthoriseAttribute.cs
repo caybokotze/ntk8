@@ -18,7 +18,7 @@ namespace Ntk8.ActionFilters
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (BaseUser) context
+            var user = (IBaseUser) context
                 .HttpContext
                 .Items[AuthenticationConstants.ContextAccount];
 

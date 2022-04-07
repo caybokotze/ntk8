@@ -5,7 +5,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserById : Query<BaseUser>
+    public class FetchUserById<T> : Query<T> where T : IBaseUser
     {
         public long Id { get; }
 
@@ -19,7 +19,7 @@ namespace Ntk8.Data.Queries
             try
             {
                 var roles = new List<Role>();
-                var result = Query<BaseUser, RefreshToken, Role, BaseUser>(
+                var result = Query<T, RefreshToken, Role, T>(
                     @"SELECT u.*, rt.*, r.* FROM users u
                         LEFT JOIN user_roles ur on u.id = ur.user_id
                         LEFT JOIN refresh_tokens rt on rt.id = (
@@ -34,7 +34,7 @@ namespace Ntk8.Data.Queries
                     {
                         if (token is not null)
                         {
-                            user.RefreshTokens.Add(token);
+                            user.RefreshToken = token;
                         }
                         if (role is not null)
                         {
@@ -53,7 +53,7 @@ namespace Ntk8.Data.Queries
             }
             catch
             {
-                Result = null;
+                Result = default;
             }
         }
     }

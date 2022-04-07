@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -9,6 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="GenericSqlBuilder" Version="1.1.1" />
       <PackageReference Include="MySql.Data" Version="8.0.26" />
       <PackageReference Include="PeanutButter.Utils" Version="2.0.40" />
       <PackageReference Include="ScopeFunction.Utils" Version="1.0.0" />

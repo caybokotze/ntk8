@@ -4,14 +4,15 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertUser : Command<long>
+    public class InsertUser : Command<int>
     {
-        public BaseUser BaseUser { get; }
+        private IBaseUser BaseUser { get; }
 
-        public InsertUser(BaseUser baseUser)
+        public InsertUser(IBaseUser baseUser)
         {
             BaseUser = baseUser;
-            BaseUser.Email = baseUser.Email.ToLowerInvariant();
+            baseUser.Guid ??= Guid.NewGuid();
+            BaseUser.Email = baseUser.Email?.ToLowerInvariant() ?? string.Empty;
             BaseUser.DateModified = DateTime.UtcNow;
             BaseUser.DateCreated = DateTime.UtcNow;
         }

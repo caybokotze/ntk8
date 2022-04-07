@@ -6,6 +6,7 @@ using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -26,10 +27,10 @@ namespace Ntk8.Tests.Data.Queries.User
                     // arrange
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var commandExecutor = Resolve<ICommandExecutor>();
-                    var user = GetRandom<BaseUser>();
+                    var user = GetRandom<IBaseUser>();
                     // act
                     var userId = commandExecutor.Execute(new InsertUser(user));
-                    var expectedUser = queryExecutor.Execute(new FetchUserByEmailAddress(user.Email));
+                    var expectedUser = queryExecutor.Execute(new FetchUserByEmailAddress<TestUser>(user.Email));
                     user.Id = userId;
                     // assert
                     Expect(user.DateCreated).To.Approximately.Equal(expectedUser.DateCreated);
@@ -46,11 +47,11 @@ namespace Ntk8.Tests.Data.Queries.User
                     user.DateOfPasswordReset = expectedUser.DateOfPasswordReset;
                     user.DateResetTokenExpires = expectedUser.DateResetTokenExpires;
                     user.Roles = null;
-                    user.RefreshTokens = null;
-                    user.UserRoles = null;
+                    user.RefreshToken = null;
+                    user.Roles = null;
                     expectedUser.Roles = null;
-                    expectedUser.RefreshTokens = null;
-                    expectedUser.UserRoles = null;
+                    expectedUser.RefreshToken = null;
+                    expectedUser.Roles = null;
                     Expect(user)
                         .To.Deep.Equal(expectedUser);
                 }
@@ -64,7 +65,7 @@ namespace Ntk8.Tests.Data.Queries.User
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<BaseUser>();
+                    var user = GetRandom<IBaseUser>();
                     var userRoles = GetRandomArray<UserRole>();
                     var roles = new Role[userRoles.Length];
                     var i = 0;
@@ -89,7 +90,7 @@ namespace Ntk8.Tests.Data.Queries.User
 
                     // act
                     var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress(user.Email));
+                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email));
 
                     foreach (var role in roles)
                     {
@@ -110,7 +111,7 @@ namespace Ntk8.Tests.Data.Queries.User
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<BaseUser>();
+                    var user = GetRandom<IBaseUser>();
                     var userId = commandExecutor.Execute(new InsertUser(user));
 
                     var refreshToken = GetRandom<Ntk8.Models.RefreshToken>();
@@ -120,17 +121,17 @@ namespace Ntk8.Tests.Data.Queries.User
                     refreshToken.Id = refreshId;
                     // act
                     var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress(user.Email));
+                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email));
 
                     // assert
-                    Expect(result.RefreshTokens.First().Expires).To.Approximately.Equal(refreshToken.Expires);
-                    Expect(result.RefreshTokens.First().DateCreated).To.Approximately.Equal(refreshToken.DateCreated);
-                    Expect(result.RefreshTokens.First().DateRevoked).To.Approximately.Equal(refreshToken.DateRevoked ?? default);
-                    result.RefreshTokens.First().Expires = refreshToken.Expires;
-                    result.RefreshTokens.First().DateCreated = refreshToken.DateCreated;
-                    result.RefreshTokens.First().DateRevoked = refreshToken.DateRevoked;
+                    Expect(result.RefreshToken.Expires).To.Approximately.Equal(refreshToken.Expires);
+                    Expect(result.RefreshToken.DateCreated).To.Approximately.Equal(refreshToken.DateCreated);
+                    Expect(result.RefreshToken.DateRevoked).To.Approximately.Equal(refreshToken.DateRevoked ?? default);
+                    result.RefreshToken.Expires = refreshToken.Expires;
+                    result.RefreshToken.DateCreated = refreshToken.DateCreated;
+                    result.RefreshToken.DateRevoked = refreshToken.DateRevoked;
                     Expect(result).Not.To.Be.Null();
-                    Expect(result.RefreshTokens.First()).To.Deep.Equal(refreshToken);
+                    Expect(result.RefreshToken).To.Deep.Equal(refreshToken);
                 }
             }
 
@@ -142,17 +143,17 @@ namespace Ntk8.Tests.Data.Queries.User
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<BaseUser>();
+                    var user = GetRandom<IBaseUser>();
                    
                     commandExecutor.Execute(new InsertUser(user));
 
                     // act
                     var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress(user.Email));
+                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email));
 
                     // assert
                     Expect(result).Not.To.Be.Null();
-                    Expect(result.RefreshTokens.Count).To.Equal(0);
+                    Expect(result.RefreshToken).To.Be.Null();
                     Expect(result.Roles.Length).To.Equal(0);
                 }
             }

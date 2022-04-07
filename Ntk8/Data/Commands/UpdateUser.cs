@@ -6,9 +6,9 @@ namespace Ntk8.Data.Commands
 {
     public class UpdateUser : Command<int>
     {
-        public BaseUser BaseUser { get; }
+        public IBaseUser BaseUser { get; }
 
-        public UpdateUser(BaseUser baseUserModel)
+        public UpdateUser(IBaseUser baseUserModel)
         {
             BaseUser = baseUserModel;
             BaseUser.DateModified = DateTime.UtcNow;

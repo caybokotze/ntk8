@@ -68,7 +68,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 // arrange
                 var authSettings = GetRandom<AuthSettings>();
                 var secret = GetRandomString(35);
-                var user = GetRandom<BaseUser>();
+                var user = GetRandom<IBaseUser>();
                 authSettings.RefreshTokenSecret = secret;
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Substitute.For<ITokenService>();
@@ -117,7 +117,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var secret = GetRandomString(40);
-                var user = GetRandom<BaseUser>();
+                var user = GetRandom<IBaseUser>();
                 var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var tokenService = Substitute.For<ITokenService>();
                 tokenService
@@ -138,7 +138,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     .WithItems(new Dictionary<object, object>())
                     .Build();
                 // act
-                httpContext = middleware
+                middleware
                     .MountUserToContext(httpContext, TokenHelpers.CreateValidJwtTokenAsString(token));
                 // assert
                 Expect(httpContext.Items[AuthenticationConstants.ContextAccount])

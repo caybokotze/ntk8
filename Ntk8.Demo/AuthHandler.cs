@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper.CQRS;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Ntk8.ActionFilters;
+using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
@@ -22,6 +24,7 @@ namespace Ntk8.Demo
         private readonly IUserAccountService _userAccountService;
         private readonly IAuthenticationContextService _authenticationContextService;
         private readonly IQueryExecutor _queryExecutor;
+        private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _contextAccessor;
 
@@ -30,20 +33,35 @@ namespace Ntk8.Demo
             IUserAccountService userAccountService,
             IAuthenticationContextService authenticationContextService,
             IQueryExecutor queryExecutor,
+            ICommandExecutor commandExecutor,
             ITokenService tokenService,
             IHttpContextAccessor contextAccessor)
         {
             _userAccountService = userAccountService;
             _authenticationContextService = authenticationContextService;
             _queryExecutor = queryExecutor;
+            _commandExecutor = commandExecutor;
             _tokenService = tokenService;
             _contextAccessor = contextAccessor;
             builder.MapPost("/login", Login);
             builder.MapPost("/register", Register);
-            builder.MapGet("/verify", VerifyByUrl);
+            // builder.MapGet("/verify", VerifyByUrl);
             builder.MapPost("/verify", Verify);
             builder.MapPost("/secure", SecureEndpoint);
             builder.MapPost("/new-token", NewToken);
+            builder.MapPost("/update", Update);
+        }
+
+        public async Task Update(HttpContext context)
+        {
+            var currentUser = _authenticationContextService.CurrentUser;
+            
+            var updateRequest = await context.DeserializeRequestBody<UpdateRequest>();
+
+            var user = _queryExecutor.Execute(new FetchUserByEmailAddress<User>(updateRequest.Email));
+            user.TelNumber = updateRequest.TelNumber;
+
+            _commandExecutor.Execute(new UpdateUser(user));
         }
 
         public async Task Verify(HttpContext context)
@@ -52,7 +70,7 @@ namespace Ntk8.Demo
                 .DeserializeRequestBody<VerifyEmailRequest>();
             
             var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress(verifyRequest.Email));
+                .Execute(new FetchUserByEmailAddress<User>(verifyRequest.Email));
             
             _userAccountService
                 .VerifyUserByVerificationToken(user.VerificationToken);
@@ -80,9 +98,16 @@ namespace Ntk8.Demo
             
             ValidateModel(registerRequest);
 
-            _userAccountService
-                .RegisterUser(registerRequest);
-            
+            try
+            {
+                _userAccountService
+                    .RegisterUser(registerRequest);
+            }
+            catch (Exception e)
+            {
+                // ignore
+            }
+
             // todo: send email or something...
         }
         

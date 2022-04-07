@@ -14,7 +14,7 @@ namespace Ntk8.Helpers
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static T2 MapFromTo<T1, T2>(this T1 map, T2 instance = null) where T2 : class, new()
+        public static T2 MapFromTo<T1, T2>(this T1 map, T2 instance)
         {
             var config = new MapperConfiguration(cfg =>
             {
@@ -23,7 +23,7 @@ namespace Ntk8.Helpers
 
             var mapper = new Mapper(config);
 
-            return mapper.Map(map, instance ?? new T2());
+            return mapper.Map(map, instance);
         }
     }
 }

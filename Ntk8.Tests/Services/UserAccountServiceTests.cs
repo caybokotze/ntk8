@@ -54,19 +54,19 @@ namespace Ntk8.Tests.Services
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Substitute.For<ITokenService>();
-                var user = GetRandom<BaseUser>();
+                var user = GetRandom<IBaseUser>();
                 var validJwtToken = TokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
                 var token = new ResetTokenResponse
                 {
                     Token = TokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
-                var authenticateRequest = user.MapFromTo<BaseUser, AuthenticateRequest>();
+                var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
                 authenticateRequest.Password = GetRandomString();
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
 
                 queryExecutor
-                    .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                    .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
                     .Returns(user);
 
                 tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray())
@@ -78,7 +78,7 @@ namespace Ntk8.Tests.Services
                 var commandExecutor = Substitute.For<ICommandExecutor>();
                 var accountService = Create(queryExecutor, commandExecutor, tokenService);
                 // act
-                var authenticatedResponse = accountService.AuthenticateUser(authenticateRequest);
+                var authenticatedResponse = accountService.AuthenticateUser<TestUser>(authenticateRequest);
                 // assert
                 Expect(authenticatedResponse.JwtToken).Not.To.Be.Null();
                 Expect(authenticatedResponse.JwtToken).To.Equal(token.Token);
@@ -95,14 +95,14 @@ namespace Ntk8.Tests.Services
                     var user = TestUser.Create();
                     user.DateVerified = null;
                     user.DateOfPasswordReset = null;
-                    queryExecutor.Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                    queryExecutor.Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
                         .Returns(user);
                     var tokenService = Substitute.For<ITokenService>();
-                    var authenticateRequest = user.MapFromTo<BaseUser, AuthenticateRequest>();
+                    var authenticateRequest = user.MapFromTo<IBaseUser, AuthenticateRequest>(new AuthenticateRequest());
                     var sut = Create(queryExecutor, null, tokenService);
                     // act
                     // assert
-                    Expect(() => sut.AuthenticateUser(authenticateRequest))
+                    Expect(() => sut.AuthenticateUser<TestUser>(authenticateRequest))
                         .To.Throw<UserIsNotVerifiedException>();
                 }
             }
@@ -182,16 +182,16 @@ namespace Ntk8.Tests.Services
                 {
                     // arrange
                     var queryExecutor = Substitute.For<IQueryExecutor>();
-                    var user = GetRandom<BaseUser>();
-                    var registerRequest = user.MapFromTo<BaseUser, RegisterRequest>();
+                    var user = GetRandom<IBaseUser>();
+                    var registerRequest = user.MapFromTo(new RegisterRequest());
                     queryExecutor
-                        .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                        .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
                         .Returns(user);
                     var commandExecutor = Substitute.For<ICommandExecutor>();
                     var accountService = Create(queryExecutor, commandExecutor);
                     // act
                     // assert
-                    Expect(() => accountService.RegisterUser(registerRequest))
+                    Expect(() => accountService.RegisterUser<TestUser>(registerRequest))
                         .To.Throw<UserAlreadyExistsException>()
                         .With.Message.Containing("User already exists");
                 }
@@ -205,16 +205,16 @@ namespace Ntk8.Tests.Services
                         // arrange
                         var queryExecutor = Substitute.For<IQueryExecutor>();
                         var commandExecutor = Substitute.For<ICommandExecutor>();
-                        var user = GetRandom<BaseUser>();
+                        var user = GetRandom<IBaseUser>();
                         user.DateVerified = null;
                         user.DateOfPasswordReset = null;
-                        var registerRequest = user.MapFromTo<BaseUser, RegisterRequest>();
+                        var registerRequest = user.MapFromTo(new RegisterRequest());
                         queryExecutor
-                            .Execute(Arg.Is<FetchUserByEmailAddress>(u => u.EmailAddress == user.Email))
+                            .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
                             .Returns(user);
                         var ipAddress = GetRandomIPv4Address();
                         var accountService = Create(queryExecutor, commandExecutor);
-                        accountService.RegisterUser(registerRequest);
+                        accountService.RegisterUser<TestUser>(registerRequest);
                         // act
                         // assert
                         Expect(commandExecutor)
@@ -362,7 +362,8 @@ namespace Ntk8.Tests.Services
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),
-                authSettings ?? Substitute.For<IAuthSettings>());
+                authSettings ?? Substitute.For<IAuthSettings>(),
+                GetRandom<IBaseUser>());
         }
 
         private static List<RefreshToken> CreateRefreshTokens(int amount = 3, RefreshToken addTokenToList = null)

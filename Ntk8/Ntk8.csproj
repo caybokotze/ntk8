@@ -14,9 +14,10 @@
         <Company>Merge Digital</Company>
         <PackageReleaseNotes>Pre-release of version 2.0.0.</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>2.0.0.13-beta</PackageVersion>
+        <PackageVersion>2.0.0.14-beta</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

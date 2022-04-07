@@ -40,7 +40,7 @@ namespace Ntk8.Tests.Data.Commands.RefreshToken
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
 
-                    var user = RandomValueGen.GetRandom<BaseUser>();
+                    var user = RandomValueGen.GetRandom<IBaseUser>();
                     
                     var userId = commandExecutor.Execute(new InsertUser(user));
                     
@@ -52,12 +52,12 @@ namespace Ntk8.Tests.Data.Commands.RefreshToken
                 
                     // act
                     user = queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token));
-                    var retrievedRefreshToken = user?.RefreshTokens.First();
+                    var retrievedRefreshToken = user?.RefreshToken;
 
                     commandExecutor.Execute(new InvalidateRefreshToken(refreshToken.Token));
 
                     user = queryExecutor.Execute(new FetchUserByRefreshToken(refreshToken.Token));
-                    var retrievedRefreshTokenAfterInvalidation = user?.RefreshTokens.First();
+                    var retrievedRefreshTokenAfterInvalidation = user?.RefreshToken;
                     
                     // assert
                     Expect(retrievedRefreshToken?.IsExpired).To.Be.False();

@@ -13,9 +13,9 @@ namespace Ntk8.Helpers
 {
     public static class MiddlewareExtensions
     {
-        public static void UseNtk8JwtMiddleware(this IApplicationBuilder builder)
+        public static void UseNtk8JwtMiddleware<T>(this IApplicationBuilder builder) where T : class, IBaseUser, new()
         {
-            builder.UseMiddleware<JwtMiddleware>();
+            builder.UseMiddleware<JwtMiddleware<T>>();
         }
 
         public static void UseNtk8ExceptionMiddleware(this IApplicationBuilder builder)
@@ -56,12 +56,12 @@ namespace Ntk8.Helpers
             serviceCollection.AddSingleton<InvalidJwtTokenExceptionMiddleware, InvalidJwtTokenExceptionMiddleware>();
         }
 
-        public static void RegisterNtk8AuthenticationServices(this IServiceCollection serviceCollection)
+        public static void RegisterNtk8AuthenticationServices<T>(this IServiceCollection serviceCollection) where T : class, IBaseUser, new()
         {
             serviceCollection.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
-            serviceCollection.AddTransient<IUserAccountService, UserAccountService>();
+            serviceCollection.TryAddSingleton<JwtMiddleware<T>, JwtMiddleware<T>>();
+            serviceCollection.AddTransient<IUserAccountService, UserAccountService<T>>();
             serviceCollection.AddTransient<ITokenService, TokenService>();
-            serviceCollection.AddTransient<JwtMiddleware>();
         }
 
         public static void RegisterAndConfigureNtk8AuthenticationSettings(this IServiceCollection serviceCollection,

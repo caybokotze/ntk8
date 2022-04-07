@@ -106,12 +106,9 @@ namespace Ntk8.Tests.Services
                 var tokenService = Create(queryExecutor);
                 var randomUser = TestUser.Create();
                 var refreshToken = tokenService.GenerateRefreshToken();
-                
-                randomUser.RefreshTokens = new List<RefreshToken>()
-                {
-                    refreshToken
-                };
-                
+
+                randomUser.RefreshToken = refreshToken;
+
                 queryExecutor
                     .Execute(Arg.Any<FetchUserByRefreshToken>())
                     .Returns(randomUser);
@@ -133,7 +130,7 @@ namespace Ntk8.Tests.Services
                 var tokenService = Create(queryExecutor);
                 var user = TestUser.Create();
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
-                var randomUser = GetRandom<BaseUser>();
+                var randomUser = GetRandom<IBaseUser>();
                 queryExecutor
                     .Execute(Arg.Any<FetchUserByRefreshToken>())
                     .Returns(randomUser);

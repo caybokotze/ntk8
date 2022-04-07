@@ -11,7 +11,6 @@ namespace Ntk8.Models
         public string Token { get; set; }
         public DateTime Expires { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;
-        // [Column(TypeName = "dim")]
         public DateTime DateCreated { get; set; }
         public string CreatedByIp { get; set; }
         public DateTime? DateRevoked { get; set; }
@@ -19,6 +18,6 @@ namespace Ntk8.Models
         public string ReplacedByToken { get; set; }
         public bool IsActive => DateRevoked == null && !IsExpired;
         
-        public virtual BaseUser BaseUser { get; set; }
+        public virtual IBaseUser BaseUser { get; set; }
     }
 }

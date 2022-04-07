@@ -11,7 +11,7 @@
   },
   "sql-migrator-config": {
     "sqlUser": "sqltracking",
-    "sqlPassword": "sqltracking",
+    "sqlPassword": "SqlTracking#1234",
     "sqlHost": "localhost",
     "sqlPort": "3306",
     "sqlDatabase": "ntk8_tests",

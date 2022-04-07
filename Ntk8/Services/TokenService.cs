@@ -79,8 +79,7 @@ namespace Ntk8.Services
             }
 
             var refreshToken = user
-                .RefreshTokens
-                .First();
+                .RefreshToken;
 
             return (refreshToken.IsActive, user.Id, user.Roles.ToArray());
         }

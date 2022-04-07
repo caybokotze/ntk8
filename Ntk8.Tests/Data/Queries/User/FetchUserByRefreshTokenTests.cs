@@ -23,9 +23,9 @@ namespace Ntk8.Tests.Data.Queries.User
                 var queryExecutor = Resolve<IQueryExecutor>();
                 var commandExecutor = Resolve<ICommandExecutor>();
                 var user = TestUser.Create();
-                var refreshToken = user.RefreshTokens.First();
+                var refreshToken = user.RefreshToken;
                 var userId = commandExecutor.Execute(new InsertUser(user));
-                refreshToken.UserId = userId;
+                refreshToken!.UserId = userId;
                 refreshToken.BaseUser = null;
                 refreshToken.Id = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
                 commandExecutor.Execute(new InsertUserRole(
@@ -36,15 +36,15 @@ namespace Ntk8.Tests.Data.Queries.User
                 }));
                 // act
                 var retrievedUser = queryExecutor
-                    .Execute(new FetchUserByRefreshToken(user.RefreshTokens.First().Token));
+                    .Execute(new FetchUserByRefreshToken(user.RefreshToken.Token));
                 // assert
                 Expect(retrievedUser).Not.To.Be.Null();
                 Expect(retrievedUser.Roles.First().RoleName).To.Equal(nameof(Roles.Admin));
-                Expect(retrievedUser.RefreshTokens.First().DateCreated).To.Approximately
+                Expect(retrievedUser.RefreshToken.DateCreated).To.Approximately
                     .Equal(refreshToken.DateCreated);
-                Expect(retrievedUser.RefreshTokens.First().DateRevoked).To.Approximately
+                Expect(retrievedUser.RefreshToken.DateRevoked).To.Approximately
                     .Equal(refreshToken.DateRevoked ?? default);
-                Expect(retrievedUser.RefreshTokens.First().Expires).To.Approximately.Equal(refreshToken.Expires);
+                Expect(retrievedUser.RefreshToken.Expires).To.Approximately.Equal(refreshToken.Expires);
             }
         }
     }

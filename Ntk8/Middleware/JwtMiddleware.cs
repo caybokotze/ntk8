@@ -13,7 +13,7 @@ using Ntk8.Services;
 
 namespace Ntk8.Middleware
 {
-    public class JwtMiddleware : IMiddleware
+    public class JwtMiddleware<T> : IMiddleware where T : IBaseUser
     {
         private readonly IAuthSettings _authSettings;
         private readonly IQueryExecutor _queryExecutor;
@@ -43,7 +43,7 @@ namespace Ntk8.Middleware
 
                 if (token is not null)
                 {
-                    context = MountUserToContext(context, token);
+                    MountUserToContext(context, token);
                 }
 
                 if (!context.Response.HasStarted)
@@ -65,23 +65,16 @@ namespace Ntk8.Middleware
                     await MessageGenerator(context, ex, 401);
                 }
             }
-            catch (Exception ex)
-            {
-                if (!context.Response.HasStarted)
-                {
-                    await MessageGenerator(context, ex, 500);
-                }
-            }
         }
 
-        private async Task MessageGenerator(HttpContext context, Exception ex, int statusCode)
+        private static async Task MessageGenerator(HttpContext context, Exception ex, int statusCode)
         {
             context.Response.StatusCode = statusCode;
             var bytes = Encoding.UTF8.GetBytes(ex.Message);
             await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 
-        public HttpContext MountUserToContext(
+        public void MountUserToContext(
             HttpContext context,
             string token)
         {
@@ -94,16 +87,19 @@ namespace Ntk8.Middleware
                 .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                 .Value);
 
-            var user = _queryExecutor.Execute(new FetchUserById(accountId));
+            var user = _queryExecutor.Execute(new FetchUserById<T>(accountId));
 
-            if (user.RefreshTokens.First().IsExpired || !user.RefreshTokens.First().IsActive)
+            if (string.IsNullOrEmpty(user.RefreshToken.Token))
+            {
+                throw new InvalidRefreshTokenException();
+            }
+
+            if (user.RefreshToken.IsExpired || !user.RefreshToken.IsActive)
             {
                 throw new InvalidRefreshTokenException();
             }
 
             context.Items[AuthenticationConstants.ContextAccount] = user;
-
-            return context;
         }
     }
 }

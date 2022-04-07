@@ -19,12 +19,12 @@ namespace Ntk8.Tests.Data.Commands.User
             using (Transactions.UncommittedRead())
             {
                 // arrange
-                var user = GetRandom<BaseUser>();
+                var user = GetRandom<IBaseUser>();
                 var commandExecutor = Resolve<ICommandExecutor>();
                 var queryExecutor = Resolve<IQueryExecutor>();
                 // act
                 var id = commandExecutor.Execute(new InsertUser(user));
-                var updatedUser = GetRandom<BaseUser>();
+                var updatedUser = GetRandom<IBaseUser>();
                 updatedUser.Id = id;
                 commandExecutor.Execute(new UpdateUser(updatedUser));
                 var expected = queryExecutor.Execute(new FetchUserById(id));
@@ -39,8 +39,8 @@ namespace Ntk8.Tests.Data.Commands.User
                 updatedUser.DateVerified = expected.DateVerified;
                 updatedUser.DateOfPasswordReset = expected.DateOfPasswordReset;
                 updatedUser.DateResetTokenExpires = expected.DateResetTokenExpires;
-                updatedUser.RefreshTokens = null;
-                expected.RefreshTokens = null;
+                updatedUser.RefreshToken = null;
+                expected.RefreshToken = null;
                 // assert
                 Expect(updatedUser).To.Deep.Equal(expected);
             }

@@ -5,11 +5,11 @@ namespace Ntk8.Data.Commands
 {
     public class InsertUserAndRole : Command<long>
     {
-        private BaseUser BaseUser { get; }
+        private IBaseUser BaseUser { get; }
         private UserRole UserRole { get; }
 
         public InsertUserAndRole(
-             BaseUser baseUser,
+             IBaseUser baseUser,
              UserRole userRole)
         {
             BaseUser = baseUser;

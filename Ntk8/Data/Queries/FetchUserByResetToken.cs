@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserByResetToken : Query<BaseUser>
+    public class FetchUserByResetToken : Query<IBaseUser>
     {
         public string Token { get; }
 
@@ -14,7 +14,7 @@ namespace Ntk8.Data.Queries
 
         public override void Execute()
         {
-            Result = QueryFirst<BaseUser>(@"SELECT * FROM users 
+            Result = QueryFirst<IBaseUser>(@"SELECT * FROM users 
             WHERE reset_token = @ResetToken;", new
             {
                 ResetToken = Token
