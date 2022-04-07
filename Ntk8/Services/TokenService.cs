@@ -19,7 +19,7 @@ namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        ResetTokenResponse GenerateJwtToken(long userId, Role[] roles);
+        ResetTokenResponse GenerateJwtToken(long userId, Role[]? roles);
         (bool isActive, long userId, Role[] roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken();
         ResetTokenResponse GenerateJwtToken(string refreshToken);
@@ -69,19 +69,14 @@ namespace Ntk8.Services
             var user = _queryExecutor
                 .Execute(new FetchUserByRefreshToken(token));
 
-            // todo: build fetching of roles into fetchingUserByRefreshTokens;
-            var roles = _queryExecutor.Execute(new FetchUserRolesByUserId(user.Id));
-            user.Roles = roles.ToArray();
-            
             if (user is null)
             {
                 throw new InvalidRefreshTokenException();
             }
 
-            var refreshToken = user
-                .RefreshToken;
+            var refreshToken = user.RefreshToken;
 
-            return (refreshToken.IsActive, user.Id, user.Roles.ToArray());
+            return (refreshToken.IsActive, user.Id, user.Roles);
         }
         
         public ResetTokenResponse GenerateJwtToken(string refreshToken)
@@ -101,7 +96,7 @@ namespace Ntk8.Services
             };
         }
 
-        public ResetTokenResponse GenerateJwtToken(long userId, Role[] roles)
+        public ResetTokenResponse GenerateJwtToken(long userId, Role[]? roles)
         {
             if (_authSettings.RefreshTokenSecret.Length < 32)
             {

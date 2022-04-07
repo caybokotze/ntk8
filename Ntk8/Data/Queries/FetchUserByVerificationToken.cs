@@ -4,7 +4,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserByVerificationToken : Query<IBaseUser>
+    public class FetchUserByVerificationToken : Query<IBaseUser?>
     {
         public string Token { get; }
 

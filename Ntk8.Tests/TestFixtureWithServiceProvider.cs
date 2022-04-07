@@ -55,7 +55,7 @@ namespace Ntk8.Tests
                     config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                     config.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(appSettings.GetDefaultConnection()));
                     config.RegisterAndConfigureNtk8AuthenticationSettings(appSettings);
-                    config.RegisterNtk8AuthenticationServices();
+                    config.RegisterNtk8AuthenticationServices<TestUser>();
                     config.RegisterNtk8MiddlewareExceptionHandlers();
                 });
             });

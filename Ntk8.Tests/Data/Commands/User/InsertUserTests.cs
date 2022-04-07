@@ -27,7 +27,7 @@ namespace Ntk8.Tests.Data.Commands.User
                 var id = commandExecutor
                     .Execute(new InsertUser(user));
                 var expectedUser = queryExecutor
-                    .Execute(new FetchUserById(id)); 
+                    .Execute(new FetchUserById<TestUser>(id)); 
                 // assert
                 Expect(id)
                     .To.Be.Greater.Than(1);
@@ -65,7 +65,7 @@ namespace Ntk8.Tests.Data.Commands.User
                     .Execute(new InsertUser(user));
 
                 var expectedUser = queryExecutor
-                    .Execute(new FetchUserById(id));
+                    .Execute(new FetchUserById<TestUser>(id));
                 // assert
                 Expect(expectedUser.DateCreated)
                     .To.Approximately.Equal(user.DateCreated);

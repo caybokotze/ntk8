@@ -17,6 +17,7 @@ using Ntk8.Helpers;
 using Ntk8.Middleware;
 using Ntk8.Models;
 using Ntk8.Services;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using static NExpect.Expectations;
@@ -55,7 +56,7 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(IQueryExecutor))]
             [TestCase(typeof(ICommandExecutor))]
             [TestCase(typeof(IDbConnection))]
-            [TestCase(typeof(JwtMiddleware))]
+            [TestCase(typeof(JwtMiddleware<TestUser>))]
             [TestCase(typeof(IUserAccountService))]
             [TestCase(typeof(ITokenService))]
             public void ShouldResolveAsTransient(Type type)
@@ -160,8 +161,8 @@ namespace Ntk8.Tests.MiddlewareTests
             {
                 // arrange
                 // act
-                var firstResolve = ServiceProvider.GetRequiredService<JwtMiddleware>();
-                var secondResolve = ServiceProvider.GetRequiredService<JwtMiddleware>();
+                var firstResolve = ServiceProvider.GetRequiredService<JwtMiddleware<TestUser>>();
+                var secondResolve = ServiceProvider.GetRequiredService<JwtMiddleware<TestUser>>();
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();

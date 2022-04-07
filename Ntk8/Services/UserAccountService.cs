@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Dapper.CQRS;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
@@ -21,32 +20,24 @@ namespace Ntk8.Services
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
         private readonly IBaseUser _baseUser;
-        private readonly Ntk8CustomSqlStatements _statements;
+        private readonly Ntk8CustomSqlStatements? _statements;
 
         public UserAccountService(
-            IQueryExecutor queryExecutor,
-            ICommandExecutor commandExecutor,
-            ITokenService tokenService,
-            IAuthSettings authSettings,
-            IBaseUser baseUser,
-            Ntk8CustomSqlStatements statements)
+            IQueryExecutor? queryExecutor,
+            ICommandExecutor? commandExecutor,
+            ITokenService? tokenService,
+            IAuthSettings? authSettings,
+            IBaseUser? baseUser,
+            Ntk8CustomSqlStatements? statements)
         {
-            _queryExecutor = queryExecutor;
-            _commandExecutor = commandExecutor;
-            _tokenService = tokenService;
-            _authSettings = authSettings;
-            _baseUser = baseUser;
+            _queryExecutor = queryExecutor ?? throw new ArgumentNullException();
+            _commandExecutor = commandExecutor ?? throw new ArgumentNullException();
+            _tokenService = tokenService ?? throw new ArgumentNullException();
+            _authSettings = authSettings ?? throw new ArgumentNullException();
+            _baseUser = baseUser ?? throw new ArgumentNullException();
             _statements = statements;
         }
-        
-        //todo: Add testing around this...
-        // - Should throw if user is null.
-        // - Should throw if user is not verified.
-        // - Should throw if the password doesn't match.
-        // - Should not invalidate token if no refresh tokens exist.
-        // - Should insert new refresh token.
-        // - Should set the refresh token cookie on context.
-        
+
         /// <summary>
         /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.
         /// A refresh and JWT token is also generated for the user and send back to the caller.
@@ -74,8 +65,9 @@ namespace Ntk8.Services
             {
                 throw new InvalidPasswordException();
             }
-            
-            var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
+
+            var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles);
+
             var refreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.UserId = user.Id;
 
@@ -96,7 +88,7 @@ namespace Ntk8.Services
         public void RegisterUser(RegisterRequest model)
         {
             var existingUser = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email)
+                .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty)
                 {
                     Sql = _statements.FetchUserByEmailAddressStatement
                 });
@@ -129,15 +121,18 @@ namespace Ntk8.Services
                     ? VERIFICATION_TOKEN_TTL
                     : _authSettings.UserVerificationTokenTTL);
             user.PasswordHash = BC.HashPassword(model.Password);
-            
+
             _commandExecutor
-                .Execute(new InsertUser(user));
+                .Execute(new InsertUser(user)
+                {
+                    Sql = _statements.InsertUserStatement
+                });
         }
 
         public void AutoVerifyUser(RegisterRequest model)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email));
+                .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty));
 
             if (user.IsVerified)
             {
@@ -192,7 +187,7 @@ namespace Ntk8.Services
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress<T>(model.Email));
             
-            if (user == null)
+            if (user is null)
             {
                 throw new UserNotFoundException();
             }

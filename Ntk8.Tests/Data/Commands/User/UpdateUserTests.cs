@@ -4,6 +4,7 @@ using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -27,7 +28,7 @@ namespace Ntk8.Tests.Data.Commands.User
                 var updatedUser = GetRandom<IBaseUser>();
                 updatedUser.Id = id;
                 commandExecutor.Execute(new UpdateUser(updatedUser));
-                var expected = queryExecutor.Execute(new FetchUserById(id));
+                var expected = queryExecutor.Execute(new FetchUserById<TestUser>(id));
                 Expect(updatedUser.DateModified).To.Approximately.Equal(expected.DateModified);
                 Expect(updatedUser.DateCreated).To.Approximately.Equal(expected.DateCreated);
                 Expect(updatedUser.DateVerified).To.Approximately.Equal((DateTime) expected.DateVerified);

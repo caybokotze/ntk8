@@ -10,12 +10,12 @@ namespace Ntk8.Models
         public long UserId { get; set; }
 
         [JsonIgnore]
-        public virtual IBaseUser BaseUser { get; set; }
+        public virtual IBaseUser? BaseUser { get; set; }
         
         [ForeignKey(nameof(Role))]
         public int RoleId { get; set; }
         
         [JsonIgnore]
-        public virtual Role Role { get; set; }
+        public virtual Role? Role { get; set; }
     }
 }

@@ -1,12 +1,9 @@
-using System.ComponentModel;
-using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
-using Ntk8.Services;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;

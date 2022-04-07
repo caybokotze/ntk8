@@ -65,7 +65,7 @@ namespace Ntk8.Helpers
         }
 
         public static void RegisterAndConfigureNtk8AuthenticationSettings(this IServiceCollection serviceCollection,
-            IConfiguration configuration, string jsonSettingName = null)
+            IConfiguration configuration, string? jsonSettingName = null)
         {
             var authSettings = configuration
                 .GetSection(jsonSettingName ?? "AuthSettings")

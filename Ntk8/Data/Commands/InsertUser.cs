@@ -7,6 +7,7 @@ namespace Ntk8.Data.Commands
     public class InsertUser : Command<int>
     {
         private IBaseUser BaseUser { get; }
+        public string? Sql { get; set; }
 
         public InsertUser(IBaseUser baseUser)
         {
@@ -19,8 +20,7 @@ namespace Ntk8.Data.Commands
 
         public override void Execute()
         {
-            Result = QueryFirst<int>(@"
-            INSERT INTO users (
+            Sql ??= @"INSERT INTO users (
             first_name, 
             last_name, 
             guid, 
@@ -60,7 +60,10 @@ namespace Ntk8.Data.Commands
                     @DateResetTokenExpires,
                     @DateModified,
                     @DateCreated,
-                    @IsActive); SELECT last_insert_id();", 
+                    @IsActive); 
+            SELECT last_insert_id();";
+
+            Result = QueryFirst<int>(Sql,
                 BaseUser);
         }
     }

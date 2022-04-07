@@ -89,7 +89,7 @@ namespace Ntk8.Middleware
 
             var user = _queryExecutor.Execute(new FetchUserById<T>(accountId));
 
-            if (string.IsNullOrEmpty(user.RefreshToken.Token))
+            if (string.IsNullOrEmpty(user?.RefreshToken?.Token))
             {
                 throw new InvalidRefreshTokenException();
             }

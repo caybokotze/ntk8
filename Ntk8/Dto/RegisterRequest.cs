@@ -18,15 +18,15 @@ namespace Ntk8.Dto
         [EmailAddress]
         public string? Email { get; set; }
 
-        public string TelNumber { get; set; }
+        public string? TelNumber { get; set; }
 
         [Required]
         [MinLength(8)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [NotMapped]
         [Compare(nameof(Password))]
-        public string ConfirmPassword { get; set; }
+        public string? ConfirmPassword { get; set; }
         
         [Range(typeof(bool), "true", "true")]
         public bool AcceptedTerms { get; set; }

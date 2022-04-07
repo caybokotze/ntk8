@@ -1,10 +1,8 @@
 using System.Transactions;
 using Dapper.CQRS;
-using Microsoft.IdentityModel.Tokens;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
-using Ntk8.Models;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;

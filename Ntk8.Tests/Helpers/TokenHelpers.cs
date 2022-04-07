@@ -61,7 +61,7 @@ namespace Ntk8.Tests.Helpers
             return new RefreshToken
             {
                 Token = token,
-                Expires = DateTime.UtcNow.AddSeconds(UserAccountService.RESET_TOKEN_TTL),
+                Expires = DateTime.UtcNow.AddSeconds(UserAccountService<TestUser>.RESET_TOKEN_TTL),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = GetRandomIPv4Address()
             };

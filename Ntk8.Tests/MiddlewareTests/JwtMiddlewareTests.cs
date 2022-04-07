@@ -29,7 +29,7 @@ namespace Ntk8.Tests.MiddlewareTests
             // arrange
             // act
             // assert
-            Expect(typeof(JwtMiddleware)
+            Expect(typeof(JwtMiddleware<TestUser>)
                 .Implements(typeof(IMiddleware)))
                 .To
                 .Be
@@ -77,10 +77,10 @@ namespace Ntk8.Tests.MiddlewareTests
                 tokenService
                     .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret)
                     .Returns(validToken);
-                queryExecutor.Execute(Arg.Is<FetchUserById>(
+                queryExecutor.Execute(Arg.Is<FetchUserById<TestUser>>(
                         u => u.Id == user.Id))
                     .Returns(user);
-                var middleware = Substitute.For<JwtMiddleware>(authSettings, queryExecutor, tokenService);
+                var middleware = Substitute.For<JwtMiddleware<TestUser>>(authSettings, queryExecutor, tokenService);
                 var httpContext = new HttpContextBuilder()
                     .WithRequest(new HttpRequestBuilder()
                         .WithHeaders(new HeaderDictionary
@@ -132,7 +132,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     tokenService);
                 
                 queryExecutor
-                    .Execute(Arg.Is<FetchUserById>(f => f.Id == user.Id))
+                    .Execute(Arg.Is<FetchUserById<TestUser>>(f => f.Id == user.Id))
                     .Returns(user);
                 var httpContext = new HttpContextBuilder()
                     .WithItems(new Dictionary<object, object>())
@@ -147,12 +147,12 @@ namespace Ntk8.Tests.MiddlewareTests
             }
         }
 
-        public static JwtMiddleware Create(
-            IAuthSettings authSettings = null, 
-            IQueryExecutor queryExecutor = null,
-            ITokenService tokenService = null)
+        public static JwtMiddleware<TestUser> Create(
+            IAuthSettings? authSettings = null, 
+            IQueryExecutor? queryExecutor = null,
+            ITokenService? tokenService = null)
         {
-            return new JwtMiddleware(
+            return new JwtMiddleware<TestUser>(
                 authSettings ?? new AuthSettings
                 {
                     RefreshTokenSecret = GetRandomString(40),

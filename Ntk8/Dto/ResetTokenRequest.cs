@@ -5,7 +5,7 @@ namespace Ntk8.Dto
     public class ResetTokenRequest
     {
         [Required]
-        public string Token { get; set; }
+        public string? Token { get; set; }
     }
 
     public class ResetTokenResponse : ResetTokenRequest

@@ -78,7 +78,7 @@ namespace Ntk8.Tests.Services
                 var commandExecutor = Substitute.For<ICommandExecutor>();
                 var accountService = Create(queryExecutor, commandExecutor, tokenService);
                 // act
-                var authenticatedResponse = accountService.AuthenticateUser<TestUser>(authenticateRequest);
+                var authenticatedResponse = accountService.AuthenticateUser(authenticateRequest);
                 // assert
                 Expect(authenticatedResponse.JwtToken).Not.To.Be.Null();
                 Expect(authenticatedResponse.JwtToken).To.Equal(token.Token);
@@ -102,7 +102,7 @@ namespace Ntk8.Tests.Services
                     var sut = Create(queryExecutor, null, tokenService);
                     // act
                     // assert
-                    Expect(() => sut.AuthenticateUser<TestUser>(authenticateRequest))
+                    Expect(() => sut.AuthenticateUser(authenticateRequest))
                         .To.Throw<UserIsNotVerifiedException>();
                 }
             }
@@ -191,7 +191,7 @@ namespace Ntk8.Tests.Services
                     var accountService = Create(queryExecutor, commandExecutor);
                     // act
                     // assert
-                    Expect(() => accountService.RegisterUser<TestUser>(registerRequest))
+                    Expect(() => accountService.RegisterUser(registerRequest))
                         .To.Throw<UserAlreadyExistsException>()
                         .With.Message.Containing("User already exists");
                 }
@@ -214,7 +214,7 @@ namespace Ntk8.Tests.Services
                             .Returns(user);
                         var ipAddress = GetRandomIPv4Address();
                         var accountService = Create(queryExecutor, commandExecutor);
-                        accountService.RegisterUser<TestUser>(registerRequest);
+                        accountService.RegisterUser(registerRequest);
                         // act
                         // assert
                         Expect(commandExecutor)
@@ -356,14 +356,15 @@ namespace Ntk8.Tests.Services
             IQueryExecutor queryExecutor = null,
             ICommandExecutor commandExecutor = null,
             ITokenService tokenService = null,
-            IAuthSettings authSettings = null)
+            IAuthSettings authSettings = null,
+            Ntk8CustomSqlStatements? statements = null)
         {
-            return new UserAccountService(
+            return new UserAccountService<TestUser>(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),
                 authSettings ?? Substitute.For<IAuthSettings>(),
-                GetRandom<IBaseUser>());
+                GetRandom<IBaseUser>(), statements);
         }
 
         private static List<RefreshToken> CreateRefreshTokens(int amount = 3, RefreshToken addTokenToList = null)

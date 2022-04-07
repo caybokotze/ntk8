@@ -1,11 +1,10 @@
-using System;
-using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
+using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -30,7 +29,7 @@ namespace Ntk8.Tests.Data.Queries.User
                     var expectedUser = GetRandom<IBaseUser>();
                     expectedUser.RefreshToken = null;
                     var userId = commandExecutor.Execute(new InsertUser(expectedUser));
-                    var actualUser = queryExecutor.Execute(new FetchUserById(userId));
+                    var actualUser = queryExecutor.Execute(new FetchUserById<TestUser>(userId));
                     expectedUser.Id = userId;
                     actualUser.RefreshToken = null;
                     // assert
@@ -75,7 +74,7 @@ namespace Ntk8.Tests.Data.Queries.User
                     var refreshTokenId = commandExecutor
                         .Execute(new InsertRefreshToken(refreshToken));
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById(userId));
+                        .Execute(new FetchUserById<TestUser>(userId));
                     refreshToken.Id = refreshTokenId;
                     // assert
                     var expectedToken = expectedUser.RefreshToken;
@@ -126,7 +125,7 @@ namespace Ntk8.Tests.Data.Queries.User
                             UserId = userId
                         }));
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById(userId));
+                        .Execute(new FetchUserById<TestUser>(userId));
                     // assert
                     Expect(expectedUser.Roles)
                         .To.Contain.Exactly(1)
@@ -177,7 +176,7 @@ namespace Ntk8.Tests.Data.Queries.User
                     }
                     
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById(userId));
+                        .Execute(new FetchUserById<TestUser>(userId));
                     // assert
                     Expect(expectedUser.Roles)
                         .To.Deep.Equal(roles);
@@ -201,7 +200,7 @@ namespace Ntk8.Tests.Data.Queries.User
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById(userId));
+                        .Execute(new FetchUserById<TestUser>(userId));
                     // assert
                     Expect(expectedUser.Roles.Length).To.Equal(0);
                     Expect(expectedUser.RefreshToken).To.Be.Null();

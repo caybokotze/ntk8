@@ -1,6 +1,3 @@
-using System;
-using GenericSqlBuilder;
-using Ntk8.Models;
 using NUnit.Framework;
 
 namespace Ntk8.Tests.Helpers.SqlGenericBuilder;
