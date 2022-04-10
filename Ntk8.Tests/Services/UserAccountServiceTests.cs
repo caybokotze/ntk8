@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
@@ -128,15 +126,6 @@ namespace Ntk8.Tests.Services
 
             [Test]
             public void ShouldAttachUserRolesToUserResponse()
-            {
-                // arrange
-
-                // act
-                // assert
-            }
-
-            [Test]
-            public void ShouldNotAttachUserToHttpContext()
             {
                 // arrange
 

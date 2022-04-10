@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Data.Common;
 using Dapper.CQRS;
-using GenericSqlBuilder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;

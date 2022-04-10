@@ -60,9 +60,9 @@ namespace Ntk8.Helpers
         {
             serviceCollection.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             serviceCollection.TryAddSingleton<JwtMiddleware<T>, JwtMiddleware<T>>();
+            serviceCollection.TryAddSingleton<IBaseUser, T>();
             serviceCollection.AddTransient<IUserAccountService, UserAccountService<T>>();
             serviceCollection.AddTransient<ITokenService, TokenService<T>>();
-            serviceCollection.AddTransient<IBaseUser, T>();
         }
 
         public static void RegisterAndConfigureNtk8AuthenticationSettings(this IServiceCollection serviceCollection,
@@ -83,7 +83,7 @@ namespace Ntk8.Helpers
             }
             
             serviceCollection
-                .AddSingleton<IAuthSettings, AuthSettings>(sp => authSettings);
+                .AddSingleton<IAuthSettings, AuthSettings>(_ => authSettings);
         }
     }
 }

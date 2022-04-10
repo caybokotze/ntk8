@@ -3,10 +3,8 @@ using Dapper.CQRS;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
-using Ntk8.Models;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
-using PeanutButter.RandomGenerators;
 using static NExpect.Expectations;
 
 namespace Ntk8.Tests.Data.Commands.RefreshToken

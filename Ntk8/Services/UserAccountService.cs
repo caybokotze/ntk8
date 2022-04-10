@@ -12,8 +12,8 @@ namespace Ntk8.Services
 {
     public class UserAccountService<T> : IUserAccountService where T : class, IBaseUser, new()
     {
-        public static int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
-        public static int RESET_TOKEN_TTL = 43200; // in seconds
+        public static readonly int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
+        public static readonly int RESET_TOKEN_TTL = 43200; // in seconds
         
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
@@ -30,11 +30,11 @@ namespace Ntk8.Services
             IBaseUser? baseUser,
             Ntk8CustomSqlStatements? statements)
         {
-            _queryExecutor = queryExecutor ?? throw new ArgumentNullException();
-            _commandExecutor = commandExecutor ?? throw new ArgumentNullException();
-            _tokenService = tokenService ?? throw new ArgumentNullException();
-            _authSettings = authSettings ?? throw new ArgumentNullException();
-            _baseUser = baseUser ?? throw new ArgumentNullException();
+            _queryExecutor = queryExecutor ?? throw new ArgumentNullException(nameof(queryExecutor));
+            _commandExecutor = commandExecutor ?? throw new ArgumentNullException(nameof(commandExecutor));
+            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+            _authSettings = authSettings ?? throw new ArgumentNullException(nameof(authSettings));
+            _baseUser = baseUser ?? throw new ArgumentNullException(nameof(baseUser));
             _statements = statements;
         }
 
