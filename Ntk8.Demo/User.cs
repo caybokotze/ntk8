@@ -28,5 +28,5 @@ public class User : IBaseUser
     public DateTime? DateOfPasswordReset { get; set; }
     public DateTime? DateResetTokenExpires { get; set; }
     public RefreshToken? RefreshToken { get; set; }
-    public Role[]? Roles { get; set; }
+    public Role?[]? Roles { get; set; }
 }

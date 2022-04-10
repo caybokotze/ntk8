@@ -33,19 +33,21 @@ namespace Ntk8.Tests.Data.Queries.User
                     new UserRole
                 {
                     UserId = userId,
-                    RoleId = (int)Roles.Admin
+                    RoleId = (int) Roles.Administrator
                 }));
                 // act
-                var retrievedUser = queryExecutor
+                var expectedUser = queryExecutor
                     .Execute(new FetchUserByRefreshToken<TestUser>(user.RefreshToken?.Token!));
                 // assert
-                Expect(retrievedUser).Not.To.Be.Null();
-                Expect(retrievedUser?.Roles?.First().RoleName).To.Equal(nameof(Roles.Admin));
-                Expect(retrievedUser?.RefreshToken?.DateCreated).To.Approximately
+                Expect(expectedUser)
+                    .Not.To.Be.Null();
+                Expect(expectedUser?.Roles?.First()!.RoleName)
+                    .To.Equal(nameof(Roles.Administrator));
+                Expect(expectedUser?.RefreshToken?.DateCreated)
+                    .To.Approximately
                     .Equal(refreshToken.DateCreated);
-                Expect(retrievedUser?.RefreshToken?.DateRevoked).To.Approximately
-                    .Equal(refreshToken.DateRevoked ?? default);
-                Expect(retrievedUser?.RefreshToken?.Expires)
+                Expect(expectedUser?.RefreshToken?.DateRevoked).To.Be.Null();
+                Expect(expectedUser?.RefreshToken?.Expires)
                     .To.Approximately.Equal((DateTime)refreshToken.Expires!);
             }
         }

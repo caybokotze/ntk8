@@ -49,9 +49,8 @@ SELECT u.id,
        rt.date_revoked,
        rt.revoked_by_ip,
        rt.replaced_by_token,
-       ur.id,
-       ur.user_id,
-       ur.role_id
+       r.id,
+       r.role_name
 FROM users u
          LEFT JOIN user_roles ur ON u.id = ur.user_id
          LEFT JOIN refresh_tokens rt ON rt.id = (SELECT refresh_tokens.id

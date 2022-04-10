@@ -40,12 +40,13 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]
             [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]
             [TestCase(typeof(VerificationTokenExpiredExceptionMiddleware))]
+            [TestCase(typeof(Ntk8CustomSqlStatements))]
             public void ShouldResolveAsSingleton(Type type)
             {
                 // arrange
                 // act
-                var firstResolve = ServiceProvider.GetService(type);
-                var secondResolve = ServiceProvider.GetService(type);
+                var firstResolve = ServiceProvider?.GetService(type);
+                var secondResolve = ServiceProvider?.GetService(type);
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();
@@ -56,15 +57,15 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(IQueryExecutor))]
             [TestCase(typeof(ICommandExecutor))]
             [TestCase(typeof(IDbConnection))]
-            [TestCase(typeof(JwtMiddleware<TestUser>))]
             [TestCase(typeof(IUserAccountService))]
             [TestCase(typeof(ITokenService))]
+            [TestCase(typeof(IBaseUser))]
             public void ShouldResolveAsTransient(Type type)
             {
                 // arrange
                 // act
-                var firstResolve = ServiceProvider.GetService(type);
-                var secondResolve = ServiceProvider.GetService(type);
+                var firstResolve = ServiceProvider?.GetService(type);
+                var secondResolve = ServiceProvider?.GetService(type);
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();
@@ -157,17 +158,17 @@ namespace Ntk8.Tests.MiddlewareTests
         public class WhenResolvingForJwtMiddleware : TestFixtureWithServiceProvider
         {
             [Test]
-            public void ShouldResolveAsTransient()
+            public void ShouldResolveAsSingleton()
             {
                 // arrange
                 // act
-                var firstResolve = ServiceProvider.GetRequiredService<JwtMiddleware<TestUser>>();
-                var secondResolve = ServiceProvider.GetRequiredService<JwtMiddleware<TestUser>>();
+                var firstResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUser>>();
+                var secondResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUser>>();
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();
-                Expect(firstResolve.GetHashCode()).To.Not.Equal(secondResolve.GetHashCode());
-                Expect(firstResolve).To.Not.Equal(secondResolve);
+                Expect(firstResolve!.GetHashCode()).To.Equal(secondResolve?.GetHashCode());
+                Expect(firstResolve).To!.Equal(secondResolve);
             }
         }
     }

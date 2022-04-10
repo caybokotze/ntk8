@@ -63,24 +63,28 @@ namespace Ntk8.Tests.MiddlewareTests
             }
 
             [Test]
-            public async Task ShouldAddAuthenticationRequestHeader()
+            public async Task ShouldAddUserToTheHttpContext()
             {
                 // arrange
                 var authSettings = GetRandom<AuthSettings>();
                 var secret = GetRandomString(35);
-                var user = GetRandom<IBaseUser>();
+                var user = TestUser.Create();
                 authSettings.RefreshTokenSecret = secret;
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Substitute.For<ITokenService>();
                 var validToken = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var validTokenAsString = TokenHelpers.CreateValidJwtTokenAsString(secret, user.Id);
+                
                 tokenService
                     .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret)
                     .Returns(validToken);
+                
                 queryExecutor.Execute(Arg.Is<FetchUserById<TestUser>>(
                         u => u.Id == user.Id))
                     .Returns(user);
+                
                 var middleware = Substitute.For<JwtMiddleware<TestUser>>(authSettings, queryExecutor, tokenService);
+                
                 var httpContext = new HttpContextBuilder()
                     .WithRequest(new HttpRequestBuilder()
                         .WithHeaders(new HeaderDictionary
@@ -96,15 +100,20 @@ namespace Ntk8.Tests.MiddlewareTests
                         .HasStarted(false)
                         .Build())
                     .Build();
+                
                 var requestDelegate = Substitute.For<RequestDelegate>();
+                
                 // act
+                
                 await middleware
                     .InvokeAsync(httpContext, requestDelegate);
+                
                 // assert
+                
                 Expect(middleware)
                     .To
                     .Have
-                    .Received()
+                    .Received(1)
                     .MountUserToContext(httpContext, validTokenAsString);
             }
         }
@@ -117,7 +126,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 // arrange
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var secret = GetRandomString(40);
-                var user = GetRandom<IBaseUser>();
+                var user = TestUser.Create();
                 var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var tokenService = Substitute.For<ITokenService>();
                 tokenService

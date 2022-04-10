@@ -16,6 +16,11 @@ public class Ntk8CustomSqlStatements
 
 public static class Ntk8ConfigurationHelpers
 {
+    public static void ConfigureNtk8CustomSql(this IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddSingleton<Ntk8CustomSqlStatements, Ntk8CustomSqlStatements>();
+    }
+    
     public static void ConfigureNtk8CustomSql(this IServiceCollection serviceCollection, Action<Ntk8CustomSqlStatements> configuration)
     {
         var ntk8Configuration = new Ntk8CustomSqlStatements();

@@ -20,8 +20,8 @@ namespace Ntk8.Tests
 {
     public class TestFixtureWithServiceProvider
     {
-        public IServiceProvider ServiceProvider { get; set; }
-        public HttpContext HttpContext { get; set; }
+        protected IServiceProvider? ServiceProvider { get; set; }
+        private HttpContext? HttpContext { get; set; }
 
         [SetUp]
         public async Task SetupHostEnvironment()
@@ -57,6 +57,7 @@ namespace Ntk8.Tests
                     config.RegisterAndConfigureNtk8AuthenticationSettings(appSettings);
                     config.RegisterNtk8AuthenticationServices<TestUser>();
                     config.RegisterNtk8MiddlewareExceptionHandlers();
+                    config.ConfigureNtk8CustomSql();
                 });
             });
 
@@ -65,8 +66,8 @@ namespace Ntk8.Tests
 
             ServiceProvider = serviceProvider;
         }
-        
-        public T Resolve<T>()
+
+        protected T Resolve<T>() where T : notnull
         {
             if (Transaction.Current is null)
             {

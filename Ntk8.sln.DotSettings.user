@@ -23,7 +23,20 @@
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Infrastructure.TokenServiceDependencyLifecycleTests+WhenResolvingForTokenService.ShouldResolveAsScoped&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d56d7fa9_002Ddd9a_002D414c_002Db2b2_002D58df3406e70b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TokenServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=88ad6b4c_002D3445_002D42e6_002Dadd9_002D65918956e98b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldAttachUserRolesToFirstResult #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachUserRolesToFirstResult&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=8bd8a7f0_002D0c4b_002D431c_002D9074_002D87d7bf017f88/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldAddAuthenticationRequestHeader #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="C:\code\personal\ntk8\Ntk8.Tests" Presentation="&amp;lt;Ntk8.Tests&amp;gt;" /&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d0c22442_002D9be8_002D4dac_002Db476_002Db4aaefda7b17/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldAddAuthenticationRequestHeader" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMiddlewareIsInvoked.ShouldAddAuthenticationRequestHeader&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d56d7fa9_002Ddd9a_002D414c_002Db2b2_002D58df3406e70b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TokenServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="C:\code\personal\Ntk8\Ntk8.Tests" Presentation="&amp;lt;Ntk8.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	
@@ -31,26 +44,5 @@
 	
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e599877a_002Dee94_002D4e60_002D8e8d_002D2e71dda0f937/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateNewRefreshToken #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Services.UserAccountServiceTests+DependencyInjection.ShouldNotBeNull&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachUserRolesToFirstResult&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldFetchAllUserProperties&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachRefreshTokenToUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Services.UserAccountServiceTests+AuthenticateUser.ShouldGenerateNewJwtToken&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Services.UserAccountServiceTests+AuthenticateUser+WhenUserIsNotVerified.ShouldThrow&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.InfrastructureTests+AuthSettingsTests.ShouldContainAllSpecifiedProperties&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.InfrastructureTests+AuthSettingsTests.ShouldResolveForAllAppSettings&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByIdTests+WhenFetchingUser.ShouldFetchAllProperties&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+WhenResolvingForApplicationSettings+WhenTokenLengthIsInvalid.ShouldThrowException&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+WhenResolvingForApplicationSettings.ShouldResolveForAppSettingsAsSingleton&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+WhenResolvingForJwtMiddleware.ShouldResolveAsTransient&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+InjectionScopeTests.ShouldResolveAsSingleton&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests+InjectionScopeTests.ShouldResolveAsTransient&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.MiddlewareExtensionTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Queries.User.FetchUserByRefreshTokenTests.ShouldFetchUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Data.Commands.User.InsertRefreshTokenTests+WhenInsertingNewRefreshTokens.ShouldReturnWithBaseUser&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Infrastructure.TokenServiceDependencyLifecycleTests+WhenResolvingForTokenService.ShouldResolveAsScoped&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Project Location="C:\code\personal\ntk8\Ntk8.Tests" Presentation="&amp;lt;Ntk8.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

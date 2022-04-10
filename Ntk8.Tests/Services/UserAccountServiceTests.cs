@@ -68,14 +68,15 @@ namespace Ntk8.Tests.Services
                 queryExecutor
                     .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
                     .Returns(user);
-
-                tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray())
+                
+                tokenService.GenerateJwtToken(user.Id, user.Roles)
                     .Returns(token);
 
                 tokenService.GenerateRefreshToken()
                     .Returns(TokenHelpers.CreateRefreshToken());
                 
                 var commandExecutor = Substitute.For<ICommandExecutor>();
+                
                 var accountService = Create(queryExecutor, commandExecutor, tokenService);
                 // act
                 var authenticatedResponse = accountService.AuthenticateUser(authenticateRequest);

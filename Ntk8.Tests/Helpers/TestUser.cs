@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ntk8.Models;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
@@ -17,25 +18,40 @@ namespace Ntk8.Tests.Helpers
         public static TestUser Create()
         {
             var user = GetRandom<TestUser>();
-            user.Roles = GetRandomArray<Role>();
+            user.UserRoles = CreateRandomUserRoles(user);
+            user.Roles = user.UserRoles.Select(s => s.Role).ToArray();
             user.RefreshToken = GetRandom<RefreshToken>();
+            user.RefreshToken.Expires = DateTime.UtcNow.AddDays(1);
+            user.RefreshToken.DateRevoked = null;
             return user;
         }
 
-        public static UserRole[] CreateRandomUserRoles(IBaseUser baseUser)
+        private static UserRole[] CreateRandomUserRoles(IBaseUser user)
         {
-            var userRoles = new List<UserRole>();
-            for (var i = 0; i < 5; i++)
+            var roleId = GetRandomInt(100);
+            var userRoles = new List<UserRole>
             {
-                userRoles.Add(new UserRole()
+                new()
                 {
-                    Role = GetRandom<Role>(),
-                    Id = GetRandomInt(),
-                    BaseUser = baseUser,
-                    UserId = baseUser.Id
-                });
-            }
-
+                    Role = new Role
+                    {
+                        Id = roleId,
+                        RoleName = GetRandomString()
+                    },
+                    RoleId = roleId,
+                    UserId = user.Id
+                },
+                new()
+                {
+                    Role = new Role
+                    {
+                        Id = roleId + 1,
+                        RoleName = GetRandomString()
+                    },
+                    RoleId = roleId + 1,
+                    UserId = user.Id
+                }
+            };
             return userRoles.ToArray();
         }
 
@@ -61,6 +77,7 @@ namespace Ntk8.Tests.Helpers
         public DateTime? DateOfPasswordReset { get; set; }
         public DateTime? DateResetTokenExpires { get; set; }
         public RefreshToken? RefreshToken { get; set; }
-        public Role[]? Roles { get; set; }
+        public Role?[]? Roles { get; set; }
+        public UserRole[]? UserRoles { get; set; }
     }
 }

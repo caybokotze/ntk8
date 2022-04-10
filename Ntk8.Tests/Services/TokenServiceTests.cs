@@ -128,16 +128,17 @@ namespace Ntk8.Tests.Services
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Create(queryExecutor);
                 var user = TestUser.Create();
-                var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
-                var randomUser = GetRandom<IBaseUser>();
+                var token = tokenService.GenerateJwtToken(user.Id, user.Roles!);
+                var randomUser = TestUser.Create();
+                randomUser.RefreshToken = null;
                 queryExecutor
                     .Execute(Arg.Any<FetchUserByRefreshToken<TestUser>>())
                     .Returns(randomUser);
                 // act
                 // assert
                 Expect(() => tokenService
-                        .IsRefreshTokenActive(token.Token))
-                    .To.Throw<InvalidOperationException>();
+                        .IsRefreshTokenActive(token.Token ?? string.Empty))
+                    .To.Throw<InvalidRefreshTokenException>();
             }
         }
         

@@ -62,6 +62,7 @@ namespace Ntk8.Helpers
             serviceCollection.TryAddSingleton<JwtMiddleware<T>, JwtMiddleware<T>>();
             serviceCollection.AddTransient<IUserAccountService, UserAccountService<T>>();
             serviceCollection.AddTransient<ITokenService, TokenService<T>>();
+            serviceCollection.AddTransient<IBaseUser, T>();
         }
 
         public static void RegisterAndConfigureNtk8AuthenticationSettings(this IServiceCollection serviceCollection,
