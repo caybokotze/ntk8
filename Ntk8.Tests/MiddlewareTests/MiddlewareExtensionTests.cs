@@ -41,6 +41,7 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(UserIsVerifiedExceptionMiddleware))]
             [TestCase(typeof(VerificationTokenExpiredExceptionMiddleware))]
             [TestCase(typeof(Ntk8CustomSqlStatements))]
+            [TestCase(typeof(IBaseUser))]
             public void ShouldResolveAsSingleton(Type type)
             {
                 // arrange
@@ -59,7 +60,6 @@ namespace Ntk8.Tests.MiddlewareTests
             [TestCase(typeof(IDbConnection))]
             [TestCase(typeof(IUserAccountService))]
             [TestCase(typeof(ITokenService))]
-            [TestCase(typeof(IBaseUser))]
             public void ShouldResolveAsTransient(Type type)
             {
                 // arrange

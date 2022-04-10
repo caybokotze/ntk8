@@ -23,13 +23,45 @@ namespace Ntk8.Data.Queries
             try
             {
                 var roles = new List<Role>();
+
                 Sql ??= @"
-                    SELECT u.*, rt.*, r.*
-                    FROM refresh_tokens rt
-                    LEFT JOIN users u on rt.user_id = u.id
-                    LEFT JOIN user_roles ur on u.id = ur.user_id
-                    LEFT JOIN roles r on ur.role_id = r.id
-                    WHERE rt.token = @Token;";
+SELECT u.id,
+       u.title,
+       u.first_name,
+       u.last_name,
+       u.email,
+       u.is_active,
+       u.guid,
+       u.tel_number,
+       u.username,
+       u.access_failed_count,
+       u.lockout_enabled,
+       u.password_hash,
+       u.password_salt,
+       u.accepted_terms,
+       u.reset_token,
+       u.verification_token,
+       u.date_created,
+       u.date_modified,
+       u.date_verified,
+       u.date_of_password_reset,
+       u.date_reset_token_expires,
+       rt.id,
+       rt.user_id,
+       rt.token,
+       rt.expires,
+       rt.date_created,
+       rt.created_by_ip,
+       rt.date_revoked,
+       rt.revoked_by_ip,
+       rt.replaced_by_token,
+       r.id,
+       r.role_name
+FROM refresh_tokens rt
+LEFT JOIN users u on rt.user_id = u.id
+LEFT JOIN user_roles ur on u.id = ur.user_id
+LEFT JOIN roles r on ur.role_id = r.id
+WHERE rt.token = @Token;";
 
                 var result = Query<T, RefreshToken, Role, T>(
                     Sql,
