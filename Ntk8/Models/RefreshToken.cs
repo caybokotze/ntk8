@@ -22,6 +22,5 @@ namespace Ntk8.Models
         public string? RevokedByIp { get; set; }
         public string? ReplacedByToken { get; set; }
         public bool IsActive => DateRevoked == null && !IsExpired;
-        public virtual IBaseUser? BaseUser { get; set; }
     }
 }

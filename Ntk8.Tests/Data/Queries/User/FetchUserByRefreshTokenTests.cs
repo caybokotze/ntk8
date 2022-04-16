@@ -27,7 +27,6 @@ namespace Ntk8.Tests.Data.Queries.User
                 var refreshToken = user.RefreshToken;
                 var userId = commandExecutor.Execute(new InsertUser(user));
                 refreshToken!.UserId = userId;
-                refreshToken.BaseUser = null;
                 refreshToken.Id = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
                 commandExecutor.Execute(new InsertUserRole(
                     new UserRole

@@ -71,7 +71,6 @@ namespace Ntk8.Tests.Data.Queries.User
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var user = GetRandom<IBaseUser>();
                     var refreshToken = GetRandom<RefreshToken>();
-                    refreshToken.BaseUser = null;
                     // act
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));
@@ -111,7 +110,6 @@ namespace Ntk8.Tests.Data.Queries.User
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var user = GetRandom<IBaseUser>();
                     var refreshToken = GetRandom<Ntk8.Models.RefreshToken>();
-                    refreshToken.BaseUser = null;
                     // act
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));
@@ -148,7 +146,6 @@ namespace Ntk8.Tests.Data.Queries.User
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var user = GetRandom<IBaseUser>();
                     var refreshToken = GetRandom<Ntk8.Models.RefreshToken>();
-                    refreshToken.BaseUser = null;
                     // act
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));

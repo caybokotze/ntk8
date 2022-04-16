@@ -136,7 +136,6 @@ namespace Ntk8.Tests.Data.Queries.User
                     var refreshToken = GetRandom<RefreshToken>();
                     refreshToken.UserId = userId;
                     var refreshId = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
-                    refreshToken.BaseUser = null;
                     refreshToken.Id = refreshId;
                     
                     // act
@@ -183,8 +182,6 @@ namespace Ntk8.Tests.Data.Queries.User
                         refreshToken2.DateCreated = DateTime.UtcNow.AddMinutes(30);
                         var refreshId = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
                         var refreshId2 = commandExecutor.Execute(new InsertRefreshToken(refreshToken2));
-                        refreshToken.BaseUser = null;
-                        refreshToken2.BaseUser = null;
                         refreshToken.Id = refreshId;
                         refreshToken2.Id = refreshId2;
                     
