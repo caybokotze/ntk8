@@ -58,9 +58,9 @@ namespace Ntk8.Helpers
 
         public static void RegisterNtk8AuthenticationServices<T>(this IServiceCollection serviceCollection) where T : class, IBaseUser, new()
         {
-            serviceCollection.TryAddSingleton<IAuthenticationContextService, AuthenticationContextService>();
             serviceCollection.TryAddSingleton<JwtMiddleware<T>, JwtMiddleware<T>>();
-            serviceCollection.TryAddSingleton<IBaseUser, T>();
+            serviceCollection.AddTransient<IAuthenticationContextService, AuthenticationContextService>();
+            serviceCollection.AddTransient<IBaseUser, T>();
             serviceCollection.AddTransient<IUserAccountService, UserAccountService<T>>();
             serviceCollection.AddTransient<ITokenService, TokenService<T>>();
         }
