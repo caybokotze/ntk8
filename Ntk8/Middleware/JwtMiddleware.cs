@@ -15,23 +15,22 @@ namespace Ntk8.Middleware
 {
     public class JwtMiddleware<T> : IMiddleware where T : class, IBaseUser, new()
     {
-        private readonly IAuthSettings _authSettings;
-        private readonly IQueryExecutor _queryExecutor;
-        private readonly ITokenService _tokenService;
+        private readonly IAuthSettings? _authSettings;
+        private readonly IQueryExecutor? _queryExecutor;
+        private readonly ITokenService? _tokenService;
 
-        public JwtMiddleware(
-            IAuthSettings authSettings,
-            IQueryExecutor queryExecutor,
-            ITokenService tokenService)
+        public JwtMiddleware(IAuthSettings authSettings, IQueryExecutor queryExecutor, ITokenService tokenService)
         {
             _authSettings = authSettings;
-            _queryExecutor = queryExecutor;
             _tokenService = tokenService;
+            _queryExecutor = queryExecutor;
         }
 
         public async Task InvokeAsync(
-            HttpContext context, RequestDelegate next)
+            HttpContext context, 
+            RequestDelegate next)
         {
+
             try
             {
                 var token = context
@@ -79,15 +78,20 @@ namespace Ntk8.Middleware
             string token)
         {
             var validatedToken = _tokenService
-                .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret);
+                ?.ValidateJwtSecurityToken(token, _authSettings?.RefreshTokenSecret ?? string.Empty);
 
-            var jwtToken = (JwtSecurityToken)validatedToken;
+            if (validatedToken == null)
+            {
+                throw new InvalidJwtTokenException();
+            }
+            
+            var jwtToken = (JwtSecurityToken) validatedToken;
 
             var accountId = int.Parse(jwtToken.Claims
                 .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
-                .Value);
+                .Value ?? string.Empty);
 
-            var user = _queryExecutor.Execute(new FetchUserById<T>(accountId));
+            var user = _queryExecutor?.Execute(new FetchUserById<T>(accountId));
 
             if (string.IsNullOrEmpty(user?.RefreshToken?.Token))
             {

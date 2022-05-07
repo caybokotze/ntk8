@@ -51,7 +51,6 @@ namespace Ntk8.Demo
 
         private static void ConfigureDependencies(WebApplicationBuilder builder)
         {
-            builder.Services.AddTransient<IBaseUser, User>();
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
