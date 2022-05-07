@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Ntk8.Dto
@@ -10,6 +11,6 @@ namespace Ntk8.Dto
 
     public class ResetTokenResponse : ResetTokenRequest
     {
-
+        public DateTime ExpiryDate { get; set; }
     }
 }

@@ -12,9 +12,9 @@
         <RepositoryType>github</RepositoryType>
         <Authors>Caybo Kotze</Authors>
         <Company>Merge Digital</Company>
-        <PackageReleaseNotes>Pre-release of version 2.0.0.</PackageReleaseNotes>
+        <PackageReleaseNotes>Add expirtyDate to new token response</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>3.0.4</PackageVersion>
+        <PackageVersion>3.0.5</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>

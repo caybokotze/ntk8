@@ -133,7 +133,8 @@ namespace Ntk8.Services
             
             return new ResetTokenResponse
             {
-                Token = tokenHandler.WriteToken(token)
+                Token = tokenHandler.WriteToken(token),
+                ExpiryDate = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL)
             };
         }
 
