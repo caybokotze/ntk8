@@ -10,7 +10,7 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
 {
-    public class UserAccountService<T> : IUserAccountService where T : class, IBaseUser, new()
+    public class AccountService<T> : IAccountService where T : class, IBaseUser, new()
     {
         public static readonly int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
         public static readonly int RESET_TOKEN_TTL = 43200; // in seconds
@@ -21,22 +21,27 @@ namespace Ntk8.Services
         private readonly IAuthSettings _authSettings;
         private readonly IBaseUser _baseUser;
         private readonly Ntk8CustomSqlStatements? _statements;
+        private readonly IAccountState _accountState;
 
-        public UserAccountService(
-            IQueryExecutor? queryExecutor,
-            ICommandExecutor? commandExecutor,
-            ITokenService? tokenService,
-            IAuthSettings? authSettings,
-            IBaseUser? baseUser,
-            Ntk8CustomSqlStatements? statements)
+        public AccountService(
+            IQueryExecutor queryExecutor,
+            ICommandExecutor commandExecutor,
+            ITokenService tokenService,
+            IAuthSettings authSettings,
+            IBaseUser baseUser,
+            Ntk8CustomSqlStatements statements,
+            IAccountState accountState)
         {
-            _queryExecutor = queryExecutor ?? throw new ArgumentNullException(nameof(queryExecutor));
-            _commandExecutor = commandExecutor ?? throw new ArgumentNullException(nameof(commandExecutor));
-            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
-            _authSettings = authSettings ?? throw new ArgumentNullException(nameof(authSettings));
-            _baseUser = baseUser ?? throw new ArgumentNullException(nameof(baseUser));
+            _queryExecutor = queryExecutor;
+            _commandExecutor = commandExecutor;
+            _tokenService = tokenService;
+            _authSettings = authSettings;
+            _baseUser = baseUser;
             _statements = statements;
+            _accountState = accountState;
         }
+
+        public bool IsUserAuthenticated => _accountState.CurrentJwtToken is not null;
 
         /// <summary>
         /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.
@@ -185,7 +190,7 @@ namespace Ntk8.Services
         /// </summary>
         /// <param name="model"></param>
         /// <para>Tip: Catch the UserNotFoundException to prevent email enumeration attacks.</para>
-        public string ForgotUserPassword(ForgotPasswordRequest model)
+        public string GetPasswordResetToken(ForgotPasswordRequest model)
         {
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress<T>(model.Email));

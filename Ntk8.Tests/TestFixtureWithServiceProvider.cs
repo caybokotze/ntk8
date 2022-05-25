@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using Ntk8.Helpers;
+using Ntk8.Infrastructure;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 
@@ -54,8 +55,8 @@ namespace Ntk8.Tests
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                     config.AddTransient<IDbConnection, DbConnection>(_ => new MySqlConnection(appSettings.GetDefaultConnection()));
-                    config.RegisterAndConfigureNtk8AuthenticationSettings(appSettings);
-                    config.RegisterNtk8AuthenticationServices<TestUser>();
+                    config.ConfigureNkt8Settings(appSettings);
+                    config.RegisterNtk8Services<TestUser>();
                     config.RegisterNtk8MiddlewareExceptionHandlers();
                     config.ConfigureNtk8CustomSql();
                 });

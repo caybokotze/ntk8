@@ -3,7 +3,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
@@ -15,22 +14,27 @@ namespace Ntk8.Middleware
 {
     public class JwtMiddleware<T> : IMiddleware where T : class, IBaseUser, new()
     {
-        private readonly IAuthSettings? _authSettings;
-        private readonly IQueryExecutor? _queryExecutor;
-        private readonly ITokenService? _tokenService;
+        private readonly IAuthSettings _authSettings;
+        private readonly IQueryCachedExecutor _queryCachedExecutor;
+        private readonly ITokenService _tokenService;
+        private readonly IAccountState _accountState;
 
-        public JwtMiddleware(IAuthSettings authSettings, IQueryExecutor queryExecutor, ITokenService tokenService)
+        public JwtMiddleware(
+            IAuthSettings authSettings, 
+            IQueryCachedExecutor queryCachedExecutor, 
+            ITokenService tokenService,
+            IAccountState accountState)
         {
             _authSettings = authSettings;
             _tokenService = tokenService;
-            _queryExecutor = queryExecutor;
+            _accountState = accountState;
+            _queryCachedExecutor = queryCachedExecutor;
         }
 
         public async Task InvokeAsync(
             HttpContext context, 
             RequestDelegate next)
         {
-
             try
             {
                 var token = context
@@ -78,7 +82,7 @@ namespace Ntk8.Middleware
             string token)
         {
             var validatedToken = _tokenService
-                ?.ValidateJwtSecurityToken(token, _authSettings?.RefreshTokenSecret ?? string.Empty);
+                .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret ?? string.Empty);
 
             if (validatedToken == null)
             {
@@ -91,7 +95,10 @@ namespace Ntk8.Middleware
                 .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                 .Value ?? string.Empty);
 
-            var user = _queryExecutor?.Execute(new FetchUserById<T>(accountId));
+            var user = _queryCachedExecutor
+                .GetAndSet(new FetchUserById<T>(accountId),
+                    $"{nameof(FetchUserById<T>)}--{accountId}",
+                    TimeSpan.FromSeconds(_authSettings.UserCacheTTL));
 
             if (string.IsNullOrEmpty(user?.RefreshToken?.Token))
             {
@@ -104,6 +111,7 @@ namespace Ntk8.Middleware
             }
 
             context.Items[AuthenticationConstants.ContextAccount] = user;
+            _accountState.SetCurrentUser(user);
         }
     }
 }

@@ -134,7 +134,7 @@ namespace Ntk8.Services
             return new ResetTokenResponse
             {
                 Token = tokenHandler.WriteToken(token),
-                ExpiryDate = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL)
+                ExpiryDate = DateTime.UtcNow.AddSeconds(_authSettings.JwtTTL)
             };
         }
 
@@ -201,14 +201,13 @@ namespace Ntk8.Services
             return validatedToken;
         }
         
-        private string GetRemoteIpAddress()
+        private string? GetRemoteIpAddress()
         {
             return _contextAccessor
                 .HttpContext
                 .Connection
                 .RemoteIpAddress
-                ?.MapToIPv4()
-                .ToString();
+                ?.MapToIPv4().ToString();
         }
 
         private IHeaderDictionary GetRequestHeaders()

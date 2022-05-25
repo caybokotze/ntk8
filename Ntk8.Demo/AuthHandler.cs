@@ -21,7 +21,7 @@ namespace Ntk8.Demo
 {
     public class AuthHandler
     {
-        private readonly IUserAccountService _userAccountService;
+        private readonly IAccountService _accountService;
         private readonly IAuthenticationContextService _authenticationContextService;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
@@ -30,14 +30,14 @@ namespace Ntk8.Demo
 
         public AuthHandler(
             IEndpointRouteBuilder builder,
-            IUserAccountService userAccountService,
+            IAccountService accountService,
             IAuthenticationContextService authenticationContextService,
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
             ITokenService tokenService,
             IHttpContextAccessor contextAccessor)
         {
-            _userAccountService = userAccountService;
+            _accountService = accountService;
             _authenticationContextService = authenticationContextService;
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
@@ -72,7 +72,7 @@ namespace Ntk8.Demo
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress<User>(verifyRequest.Email));
             
-            _userAccountService
+            _accountService
                 .VerifyUserByVerificationToken(user.VerificationToken);
         }
 
@@ -84,7 +84,7 @@ namespace Ntk8.Demo
 
             if (!string.IsNullOrEmpty(verifyRequest))
             {
-                _userAccountService
+                _accountService
                     .VerifyUserByVerificationToken(verifyRequest);
             }
             
@@ -100,7 +100,7 @@ namespace Ntk8.Demo
 
             try
             {
-                _userAccountService
+                _accountService
                     .RegisterUser(registerRequest);
             }
             catch (Exception e)
@@ -118,7 +118,7 @@ namespace Ntk8.Demo
             
             ValidateModel(authRequest);
             
-            var response = _userAccountService
+            var response = _accountService
                 .AuthenticateUser(authRequest);
             
             await context.SerialiseResponseBody(response);

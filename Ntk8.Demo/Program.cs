@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using Ntk8.Helpers;
+using Ntk8.Infrastructure;
 using Ntk8.Models;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
@@ -31,7 +32,7 @@ namespace Ntk8.Demo
             app.UseNtk8JwtMiddleware<User>();
             app.UseNtk8ExceptionMiddleware();
             
-            var _ = new AuthHandler(app, app.Resolve<IUserAccountService>(),
+            var _ = new AuthHandler(app, app.Resolve<IAccountService>(),
                 app.Resolve<IAuthenticationContextService>(),
                 app.Resolve<IQueryExecutor>(),
                 app.Resolve<ICommandExecutor>(),
@@ -56,8 +57,8 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
             builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
-            builder.Services.RegisterNtk8AuthenticationServices<User>();
-            builder.Services.RegisterAndConfigureNtk8AuthenticationSettings(CreateConfigurationRoot());
+            builder.Services.RegisterNtk8Services<User>();
+            builder.Services.ConfigureNkt8Settings(CreateConfigurationRoot());
         }
 
         public static string GetConnectionString()

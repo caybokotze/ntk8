@@ -1,13 +1,15 @@
 ﻿using Ntk8.Dto;
+using Ntk8.Models;
 
 namespace Ntk8.Services
 {
-    public interface IUserAccountService
+    public interface IAccountService
     {
+        bool IsUserAuthenticated { get; }
         AuthenticatedResponse AuthenticateUser(AuthenticateRequest model);
         void RegisterUser(RegisterRequest model);
         void VerifyUserByVerificationToken(string token);
-        string ForgotUserPassword(ForgotPasswordRequest model);
+        string GetPasswordResetToken(ForgotPasswordRequest model);
         void ResetUserPassword(ResetPasswordRequest model);
         UserAccountResponse GetUserById(int id);
         UserAccountResponse UpdateUser(int id, UpdateRequest model);

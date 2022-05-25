@@ -7,10 +7,10 @@ namespace Ntk8.Data.Queries
 {
     public class FetchUserById<T> : Query<T?> where T : class, IBaseUser, new()
     {
-        public long Id { get; }
+        public int Id { get; }
         public string? Sql { get; set; }
 
-        public FetchUserById(long id)
+        public FetchUserById(int id)
         {
             Id = id;
         }

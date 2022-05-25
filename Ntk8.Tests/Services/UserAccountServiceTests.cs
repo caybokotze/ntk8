@@ -29,7 +29,7 @@ namespace Ntk8.Tests.Services
                 using (new TransactionScope())
                 {
                     // arrange
-                    var accountService = Resolve<IUserAccountService>();
+                    var accountService = Resolve<IAccountService>();
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var tokenService = Resolve<ITokenService>();
@@ -390,14 +390,14 @@ namespace Ntk8.Tests.Services
         }
 
 
-        private static IUserAccountService Create(
+        private static IAccountService Create(
             IQueryExecutor? queryExecutor = null,
             ICommandExecutor? commandExecutor = null,
             ITokenService? tokenService = null,
             IAuthSettings? authSettings = null,
             Ntk8CustomSqlStatements? statements = null)
         {
-            return new UserAccountService<TestUser>(
+            return new AccountService<TestUser>(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),

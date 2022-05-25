@@ -28,7 +28,7 @@ namespace Ntk8.ActionFilters
             }
 
             if (_roles
-                .Any(role => user.Roles
+                .Any(role => (user.Roles ?? Array.Empty<Role>())
                     .All(a => !string.Equals(a.RoleName, role, StringComparison.InvariantCultureIgnoreCase))))
             {
                 throw new UserNotAuthorisedException();
