@@ -11,6 +11,7 @@ namespace Ntk8.Data.Commands
         public UpdateUser(IBaseUser baseUserModel)
         {
             BaseUser = baseUserModel;
+            BaseUser.Email = baseUserModel.Email?.ToLowerInvariant();
             BaseUser.DateModified = DateTime.UtcNow;
         }
 

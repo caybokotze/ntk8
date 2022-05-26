@@ -2,7 +2,7 @@ using Dapper.CQRS;
 using NExpect;
 using NSubstitute;
 using Ntk8.Data.Queries;
-using Ntk8.Tests.DatabaseServices;
+using Ntk8.DatabaseServices;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 using static NExpect.Expectations;

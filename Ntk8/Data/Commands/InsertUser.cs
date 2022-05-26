@@ -13,7 +13,7 @@ namespace Ntk8.Data.Commands
         {
             BaseUser = baseUser;
             baseUser.Guid ??= Guid.NewGuid();
-            BaseUser.Email = baseUser.Email?.ToLowerInvariant() ?? string.Empty;
+            BaseUser.Email = baseUser.Email?.ToLowerInvariant();
             BaseUser.DateModified = DateTime.UtcNow;
             BaseUser.DateCreated = DateTime.UtcNow;
         }
