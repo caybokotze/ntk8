@@ -124,7 +124,7 @@ namespace Ntk8.Tests.MiddlewareTests
             public void ShouldAttachAccountToHttpContext()
             {
                 // arrange
-                var queryExecutor = Substitute.For<IQueryExecutor>();
+                var queryExecutor = Substitute.For<IQueryCachedExecutor>();
                 var secret = GetRandomString(40);
                 var user = TestUser.Create();
                 var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
@@ -141,7 +141,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     tokenService);
                 
                 queryExecutor
-                    .Execute(Arg.Is<FetchUserById<TestUser>>(f => f.Id == user.Id))
+                    .GetAndSet(Arg.Is<FetchUserById<TestUser>>(f => f.Id == user.Id), Arg.Any<string>(), Arg.Any<TimeSpan>())
                     .Returns(user);
                 var httpContext = new HttpContextBuilder()
                     .WithItems(new Dictionary<object, object>())
@@ -158,7 +158,7 @@ namespace Ntk8.Tests.MiddlewareTests
 
         public static JwtMiddleware<TestUser> Create(
             IAuthSettings? authSettings = null, 
-            IQueryExecutor? queryExecutor = null,
+            IQueryCachedExecutor? queryExecutor = null,
             ITokenService? tokenService = null)
         {
             return new JwtMiddleware<TestUser>(
@@ -168,8 +168,9 @@ namespace Ntk8.Tests.MiddlewareTests
                     RefreshTokenTTL = 3600,
                     JwtTTL = 1000
                 },
-                queryExecutor ?? Substitute.For<IQueryExecutor>(),
-                tokenService ?? Substitute.For<ITokenService>());
+                queryExecutor ?? Substitute.For<IQueryCachedExecutor>(),
+                tokenService ?? Substitute.For<ITokenService>(),
+                Substitute.For<IAccountState>());
         }
     }
 }

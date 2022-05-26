@@ -13,7 +13,6 @@ using Microsoft.Extensions.Hosting;
 using NExpect;
 using Ntk8.Exceptions;
 using Ntk8.Exceptions.Middleware;
-using Ntk8.Helpers;
 using Ntk8.Infrastructure;
 using Ntk8.Middleware;
 using Ntk8.Models;
@@ -28,7 +27,7 @@ namespace Ntk8.Tests.Infrastructure;
 public class DependencyResolutionTests
 {
      [TestFixture]
-        public class ScopeResolutionTests : TestFixtureWithServiceProvider
+        public class ScopeResolutionTests : TestFixtureRequiringServiceProvider
         {
             [TestFixture]
             public class Dependencies
@@ -38,7 +37,7 @@ public class DependencyResolutionTests
 
             
             [TestFixture]
-            public class Middleware : TestFixtureWithServiceProvider
+            public class Middleware : TestFixtureRequiringServiceProvider
             {
                 [TestCase(typeof(UserNotAuthorisedExceptionMiddleware))]
                 [TestCase(typeof(UserNotAuthenticatedExceptionMiddleware))]
@@ -179,7 +178,7 @@ public class DependencyResolutionTests
         }
 
         [TestFixture]
-        public class WhenResolvingForJwtMiddleware : TestFixtureWithServiceProvider
+        public class WhenResolvingForJwtMiddleware : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldResolveAsSingleton()

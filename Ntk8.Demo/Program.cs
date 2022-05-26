@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
-using Ntk8.Helpers;
 using Ntk8.Infrastructure;
 using Ntk8.Models;
 using Ntk8.Services;
@@ -32,8 +31,8 @@ namespace Ntk8.Demo
             app.UseNtk8JwtMiddleware<User>();
             app.UseNtk8ExceptionMiddleware();
             
-            var _ = new AuthHandler(app, app.Resolve<IAccountService>(),
-                app.Resolve<IAuthenticationContextService>(),
+            var _ = new AuthHandler(app, 
+                app.Resolve<IAccountService>(),
                 app.Resolve<IQueryExecutor>(),
                 app.Resolve<ICommandExecutor>(),
                 app.Resolve<ITokenService>(),

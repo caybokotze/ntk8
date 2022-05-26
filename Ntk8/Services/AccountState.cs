@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Models;
@@ -9,6 +10,7 @@ public interface IAccountState
     IBaseUser? CurrentUser { get; }
     string? CurrentRefreshToken { get; }
     string? CurrentJwtToken { get; }
+
     void SetCurrentUser(IBaseUser user);
 }
 
@@ -21,12 +23,15 @@ public class AccountState : IAccountState
         _contextAccessor = contextAccessor;
     }
 
-    public string? CurrentJwtToken { get; }
-
     public void SetCurrentUser(IBaseUser user)
     {
         CurrentUser = user;
     }
+
+    public string? CurrentJwtToken => _contextAccessor
+        .HttpContext
+        .Request
+        .Headers[AuthenticationConstants.DefaultJwtHeader];
 
     public IBaseUser? CurrentUser { get; private set; }
 

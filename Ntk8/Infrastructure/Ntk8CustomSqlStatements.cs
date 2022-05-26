@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ntk8.Helpers;
+namespace Ntk8.Infrastructure;
 
 public class Ntk8CustomSqlStatements
 {

@@ -13,7 +13,7 @@ namespace Ntk8.Tests.Data.Commands.User
     public class InsertRefreshTokenTests
     {
         [TestFixture]
-        public class WhenInsertingNewRefreshTokens : TestFixtureWithServiceProvider
+        public class WhenInsertingNewRefreshTokens : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldReturnWithBaseUser()

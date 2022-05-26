@@ -13,7 +13,7 @@ using static NExpect.Expectations;
 namespace Ntk8.Tests.Data.Queries.User
 {
     [TestFixture]
-    public class FetchUserByRefreshTokenTests : TestFixtureWithServiceProvider
+    public class FetchUserByRefreshTokenTests : TestFixtureRequiringServiceProvider
     {
         [Test]
         public void ShouldFetchUser()

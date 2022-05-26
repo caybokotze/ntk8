@@ -1,7 +1,7 @@
 using NExpect;
 using Ntk8.Dto;
-using Ntk8.Helpers;
 using Ntk8.Models;
+using Ntk8.Utilities;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;

@@ -8,8 +8,7 @@ namespace Ntk8.Data.Queries
 {
     public class FetchUserByVerificationToken<T> : Query<T?> where T : class, IBaseUser, new()
     {
-        private string Token { get; }
-        public string? Sql { get; set; }
+        public string Token { get; }
 
         public FetchUserByVerificationToken(string token)
         {
@@ -22,7 +21,7 @@ namespace Ntk8.Data.Queries
             {
                 var roles = new List<Role>();
 
-                Sql ??= @"
+                const string sql = @"
 SELECT u.id,
        u.title,
        u.first_name,
@@ -65,7 +64,7 @@ FROM users u
          LEFT JOIN roles r on ur.role_id = r.id
 WHERE u.verification_token = @Token;";
 
-                var result = Query<T, RefreshToken, Role, T>(Sql,
+                var result = Query<T, RefreshToken, Role, T>(sql,
                     (user, token, role) =>
                     {
                         if (token is not null)

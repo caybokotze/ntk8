@@ -12,14 +12,13 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
-using Ntk8.Helpers;
 using Ntk8.Infrastructure;
 using Ntk8.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Ntk8.Tests
 {
-    public class TestFixtureWithServiceProvider
+    public class TestFixtureRequiringServiceProvider
     {
         protected IServiceProvider? ServiceProvider { get; set; }
         private HttpContext? HttpContext { get; set; }

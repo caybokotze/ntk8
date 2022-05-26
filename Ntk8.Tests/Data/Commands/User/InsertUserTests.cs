@@ -12,7 +12,7 @@ using static NExpect.Expectations;
 namespace Ntk8.Tests.Data.Commands.User
 {
     [TestFixture]
-    public class InsertUserTests : TestFixtureWithServiceProvider
+    public class InsertUserTests : TestFixtureRequiringServiceProvider
     {
         [Test]
         public void ShouldInsertUser()

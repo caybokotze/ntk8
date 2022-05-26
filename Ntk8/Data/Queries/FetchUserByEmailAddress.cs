@@ -6,7 +6,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserByEmailAddress<T> : Query<IBaseUser?> where T : class, IBaseUser, new()
+    public class FetchUserByEmailAddress<T> : Query<T?> where T : class, IBaseUser, new()
     {
         public string EmailAddress { get; }
         public string? Sql { get; set; }

@@ -22,7 +22,6 @@ namespace Ntk8.Demo
     public class AuthHandler
     {
         private readonly IAccountService _accountService;
-        private readonly IAuthenticationContextService _authenticationContextService;
         private readonly IQueryExecutor _queryExecutor;
         private readonly ICommandExecutor _commandExecutor;
         private readonly ITokenService _tokenService;
@@ -31,14 +30,12 @@ namespace Ntk8.Demo
         public AuthHandler(
             IEndpointRouteBuilder builder,
             IAccountService accountService,
-            IAuthenticationContextService authenticationContextService,
             IQueryExecutor queryExecutor,
             ICommandExecutor commandExecutor,
             ITokenService tokenService,
             IHttpContextAccessor contextAccessor)
         {
             _accountService = accountService;
-            _authenticationContextService = authenticationContextService;
             _queryExecutor = queryExecutor;
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
@@ -54,8 +51,7 @@ namespace Ntk8.Demo
 
         public async Task Update(HttpContext context)
         {
-            var currentUser = _authenticationContextService.CurrentUser;
-            
+
             var updateRequest = await context.DeserializeRequestBody<UpdateRequest>();
 
             var user = _queryExecutor.Execute(new FetchUserByEmailAddress<User>(updateRequest.Email));
@@ -141,13 +137,12 @@ namespace Ntk8.Demo
             new AuthoriseAttribute("admin").OnAuthorization(
                 new AuthorizationFilterContext(new ActionContext(_contextAccessor.HttpContext, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>()));
             
-            if (!_authenticationContextService
-                .IsUserAuthenticated())
+            if (!_accountService.IsUserAuthenticated)
             {
                 throw new UserNotAuthenticatedException();
             }
             
-            await context.SerialiseResponseBody($"Hi there {_authenticationContextService.CurrentUser.FirstName}. You have these roles: {_authenticationContextService.CurrentUser.Roles.Select(s => s.RoleName)}");
+            await context.SerialiseResponseBody($"Hi there {_accountService.CurrentUser?.FirstName}. You have these roles: {_accountService.CurrentUser?.Roles?.Select(s => s.RoleName)}");
         }
     }
 }

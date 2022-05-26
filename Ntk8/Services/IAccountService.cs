@@ -5,6 +5,7 @@ namespace Ntk8.Services
 {
     public interface IAccountService
     {
+        IBaseUser? CurrentUser { get; }
         bool IsUserAuthenticated { get; }
         AuthenticatedResponse AuthenticateUser(AuthenticateRequest model);
         void RegisterUser(RegisterRequest model);

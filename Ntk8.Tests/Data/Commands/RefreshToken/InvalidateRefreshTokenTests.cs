@@ -13,7 +13,7 @@ namespace Ntk8.Tests.Data.Commands.RefreshToken
     public class InvalidateRefreshTokenTests
     {
         [TestFixture]
-        public class WhenInvalidatingRefreshToken : TestFixtureWithServiceProvider
+        public class WhenInvalidatingRefreshToken : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldBeValidBeforeInvalidation()

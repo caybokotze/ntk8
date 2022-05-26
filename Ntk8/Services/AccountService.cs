@@ -4,8 +4,9 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
-using Ntk8.Helpers;
+using Ntk8.Infrastructure;
 using Ntk8.Models;
+using Ntk8.Utilities;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
@@ -20,7 +21,6 @@ namespace Ntk8.Services
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
         private readonly IBaseUser _baseUser;
-        private readonly Ntk8CustomSqlStatements? _statements;
         private readonly IAccountState _accountState;
 
         public AccountService(
@@ -29,7 +29,6 @@ namespace Ntk8.Services
             ITokenService tokenService,
             IAuthSettings authSettings,
             IBaseUser baseUser,
-            Ntk8CustomSqlStatements statements,
             IAccountState accountState)
         {
             _queryExecutor = queryExecutor;
@@ -37,10 +36,10 @@ namespace Ntk8.Services
             _tokenService = tokenService;
             _authSettings = authSettings;
             _baseUser = baseUser;
-            _statements = statements;
             _accountState = accountState;
         }
 
+        public IBaseUser? CurrentUser => _accountState.CurrentUser;
         public bool IsUserAuthenticated => _accountState.CurrentJwtToken is not null;
 
         /// <summary>
@@ -93,10 +92,7 @@ namespace Ntk8.Services
         public void RegisterUser(RegisterRequest model)
         {
             var existingUser = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty)
-                {
-                    Sql = _statements?.FetchUserByEmailAddressStatement
-                });
+                .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty));
             
             if (existingUser is not null)
             {
@@ -128,10 +124,7 @@ namespace Ntk8.Services
             user.PasswordHash = BC.HashPassword(model.Password);
 
             _commandExecutor
-                .Execute(new InsertUser(user)
-                {
-                    Sql = _statements.InsertUserStatement
-                });
+                .Execute(new InsertUser(user));
         }
 
         public void AutoVerifyUser(RegisterRequest model)
@@ -153,10 +146,7 @@ namespace Ntk8.Services
         public void VerifyUserByVerificationToken(string token)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserByVerificationToken<T>(token)
-                {
-                    Sql = _statements?.FetchUserByVerificationTokenStatement
-                });
+                .Execute(new FetchUserByVerificationToken<T>(token));
 
             if (user is null)
             {
@@ -243,10 +233,7 @@ namespace Ntk8.Services
         public UserAccountResponse GetUserById(int id)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserById<T>(id)
-                {
-                    Sql = _statements?.FetchUserByIdStatement
-                });
+                .Execute(new FetchUserById<T>(id));
             
             if (user is null)
             {
@@ -259,10 +246,7 @@ namespace Ntk8.Services
         public UserAccountResponse UpdateUser(int id, UpdateRequest model)
         {
             var user = _queryExecutor
-                .Execute(new FetchUserById<T>(id)
-                {
-                    Sql = _statements?.FetchUserByIdStatement
-                });
+                .Execute(new FetchUserById<T>(id));
             
             if (user is null)
             {

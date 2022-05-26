@@ -18,7 +18,7 @@ namespace Ntk8.Tests.Data.Queries.User
     public class FetchUserByEmailAddressTests
     {
         [TestFixture]
-        public class Behaviour : TestFixtureWithServiceProvider
+        public class Behaviour : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldFetchAllUserProperties()
@@ -159,7 +159,7 @@ namespace Ntk8.Tests.Data.Queries.User
             }
 
             [TestFixture]
-            public class WhenMultipleRefreshTokensExist : TestFixtureWithServiceProvider
+            public class WhenMultipleRefreshTokensExist : TestFixtureRequiringServiceProvider
             {
                 [Test]
                 public void ShouldAttachMostRecentRefreshTokenToUser()

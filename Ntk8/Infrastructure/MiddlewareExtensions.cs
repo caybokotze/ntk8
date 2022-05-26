@@ -1,15 +1,9 @@
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Ntk8.Exceptions;
 using Ntk8.Exceptions.Middleware;
 using Ntk8.Middleware;
 using Ntk8.Models;
-using Ntk8.Services;
 
-namespace Ntk8.Helpers
+namespace Ntk8.Infrastructure
 {
     public static class MiddlewareExtensions
     {

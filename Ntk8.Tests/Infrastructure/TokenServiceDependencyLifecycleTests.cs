@@ -10,7 +10,7 @@ namespace Ntk8.Tests.Infrastructure
     public class TokenServiceDependencyLifecycleTests
     {
         [TestFixture]
-        public class WhenResolvingForTokenService : TestFixtureWithServiceProvider
+        public class WhenResolvingForTokenService : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldResolveAsTransient()

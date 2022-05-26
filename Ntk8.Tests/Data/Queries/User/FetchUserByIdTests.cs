@@ -16,7 +16,7 @@ namespace Ntk8.Tests.Data.Queries.User
     public class FetchUserByIdTests
     {
         [TestFixture]
-        public class WhenFetchingUser : TestFixtureWithServiceProvider
+        public class WhenFetchingUser : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldFetchAllProperties()
@@ -59,7 +59,7 @@ namespace Ntk8.Tests.Data.Queries.User
         }
 
         [TestFixture]
-        public class WhenUserHasRefreshToken : TestFixtureWithServiceProvider
+        public class WhenUserHasRefreshToken : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldFetchUserAndAddRefreshToken()
@@ -98,7 +98,7 @@ namespace Ntk8.Tests.Data.Queries.User
         }
 
         [TestFixture]
-        public class WhenUserHasRoles : TestFixtureWithServiceProvider
+        public class WhenUserHasRoles : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldAddSingleRole()
@@ -187,7 +187,7 @@ namespace Ntk8.Tests.Data.Queries.User
         }
 
         [TestFixture]
-        public class WhenUserDoesNotHaveRolesOrRefreshTokens : TestFixtureWithServiceProvider
+        public class WhenUserDoesNotHaveRolesOrRefreshTokens : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldNotContainAListOfNulls()

@@ -10,7 +10,7 @@ using static NExpect.Expectations;
 namespace Ntk8.Tests.Data.Commands.User
 {
     [TestFixture]
-    public class UpdateUserTests : TestFixtureWithServiceProvider
+    public class UpdateUserTests : TestFixtureRequiringServiceProvider
     {
         [Test]
         public void UpdateUserShouldUpdateUser()

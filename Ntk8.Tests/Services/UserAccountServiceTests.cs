@@ -7,10 +7,11 @@ using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
-using Ntk8.Helpers;
+using Ntk8.Infrastructure;
 using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.Helpers;
+using Ntk8.Utilities;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -21,7 +22,7 @@ namespace Ntk8.Tests.Services
     public class UserAccountServiceTests
     {
         [TestFixture]
-        public class DependencyInjection : TestFixtureWithServiceProvider
+        public class DependencyInjection : TestFixtureRequiringServiceProvider
         {
             [Test]
             public void ShouldNotBeNull()
@@ -162,7 +163,7 @@ namespace Ntk8.Tests.Services
         }
 
         [TestFixture]
-        public class RegisterUser : TestFixtureWithServiceProvider
+        public class RegisterUser : TestFixtureRequiringServiceProvider
         {
             [TestFixture]
             public class WhenUserDoesExist
@@ -395,14 +396,15 @@ namespace Ntk8.Tests.Services
             ICommandExecutor? commandExecutor = null,
             ITokenService? tokenService = null,
             IAuthSettings? authSettings = null,
-            Ntk8CustomSqlStatements? statements = null)
+            IAccountState? accountState = null)
         {
             return new AccountService<TestUser>(
                 queryExecutor ?? Substitute.For<IQueryExecutor>(),
                 commandExecutor ?? Substitute.For<ICommandExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),
                 authSettings ?? CreateAuthSettings(),
-                GetRandom<IBaseUser>(), statements);
+                GetRandom<IBaseUser>(), 
+                accountState ?? Substitute.For<IAccountState>());
         }
 
         private static AuthSettings CreateAuthSettings()

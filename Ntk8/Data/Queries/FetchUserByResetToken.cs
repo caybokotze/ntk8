@@ -5,7 +5,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserByResetToken<T> : Query<T> where T : class, IBaseUser, new()
+    public class FetchUserByResetToken<T> : Query<T?> where T : class, IBaseUser, new()
     {
         public string Token { get; }
         public string? Sql { get; set; }

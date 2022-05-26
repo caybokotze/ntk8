@@ -2,7 +2,7 @@
 using System.Linq;
 using AutoMapper;
 
-namespace Ntk8.Helpers
+namespace Ntk8.Utilities
 {
     public static class Utils
     {
