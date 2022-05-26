@@ -5,6 +5,7 @@ using NExpect;
 using NSubstitute;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Infrastructure;
@@ -51,7 +52,7 @@ namespace Ntk8.Tests.Services
             public void ShouldGenerateNewJwtToken()
             {
                 // arrange
-                var queryExecutor = Substitute.For<IQueryExecutor>();
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IBaseUser>();
                 var validJwtToken = TokenHelpers
@@ -64,19 +65,15 @@ namespace Ntk8.Tests.Services
                 authenticateRequest.Password = GetRandomString();
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
 
-                queryExecutor
-                    .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
-                    .Returns(user);
+                ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>()).Returns(user);
                 
                 tokenService.GenerateJwtToken(user.Id, user.Roles)
                     .Returns(token);
 
                 tokenService.GenerateRefreshToken()
                     .Returns(TokenHelpers.CreateRefreshToken());
-                
-                var commandExecutor = Substitute.For<ICommandExecutor>();
-                
-                var accountService = Create(queryExecutor, commandExecutor, tokenService);
+
+                var accountService = Create(ntk8Queries, null, tokenService);
                 // act
                 var authenticatedResponse = accountService.AuthenticateUser(authenticateRequest);
                 // assert
@@ -91,15 +88,15 @@ namespace Ntk8.Tests.Services
                 public void ShouldThrow()
                 {
                     // arrange
-                    var queryExecutor = Substitute.For<IQueryExecutor>();
+                    var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
                     var user = TestUser.Create();
                     user.DateVerified = null;
                     user.DateOfPasswordReset = null;
-                    queryExecutor.Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
+                    ntk8Queries.FetchUserByEmailAddress(user.Email ?? string.Empty)
                         .Returns(user);
                     var tokenService = Substitute.For<ITokenService>();
                     var authenticateRequest = user.MapFromTo<IBaseUser, AuthenticateRequest>(new AuthenticateRequest());
-                    var sut = Create(queryExecutor, null, tokenService);
+                    var sut = Create(ntk8Queries, null, tokenService);
                     // act
                     // assert
                     Expect(() => sut.AuthenticateUser(authenticateRequest))
@@ -172,14 +169,12 @@ namespace Ntk8.Tests.Services
                 public void ShouldThrowIfUserIsVerifiedAndExists()
                 {
                     // arrange
-                    var queryExecutor = Substitute.For<IQueryExecutor>();
+                    var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
                     var user = GetRandom<IBaseUser>();
                     var registerRequest = user.MapFromTo(new RegisterRequest());
-                    queryExecutor
-                        .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
-                        .Returns(user);
-                    var commandExecutor = Substitute.For<ICommandExecutor>();
-                    var accountService = Create(queryExecutor, commandExecutor);
+                    ntk8Queries.FetchUserByEmailAddress(user.Email ?? string.Empty).Returns(user);
+                    
+                    var accountService = Create(ntk8Queries);
                     // act
                     // assert
                     Expect(() => accountService.RegisterUser(registerRequest))
@@ -194,24 +189,22 @@ namespace Ntk8.Tests.Services
                     public void ShouldUpdateVerificationToken()
                     {
                         // arrange
-                        var queryExecutor = Substitute.For<IQueryExecutor>();
-                        var commandExecutor = Substitute.For<ICommandExecutor>();
+                        var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                        var ntk8Commands = Substitute.For<INtk8Commands>();
                         var user = GetRandom<IBaseUser>();
                         user.DateVerified = null;
                         user.DateOfPasswordReset = null;
                         var registerRequest = user.MapFromTo(new RegisterRequest());
-                        queryExecutor
-                            .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(u => u.EmailAddress == user.Email))
-                            .Returns(user);
-                        var ipAddress = GetRandomIPv4Address();
-                        var accountService = Create(queryExecutor, commandExecutor);
+
+                        ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>()).Returns(user);
+
+                        var accountService = Create(ntk8Queries, ntk8Commands);
                         accountService.RegisterUser(registerRequest);
                         // act
                         // assert
-                        Expect(commandExecutor)
+                        Expect(ntk8Commands)
                             .To.Have.Received(1)
-                            .Execute(Arg.Is<UpdateUser>(u => u.BaseUser.DateModified.Truncate(TimeSpan.FromMinutes(1))
-                                .Equals(DateTime.UtcNow.Truncate(TimeSpan.FromMinutes(1)))));
+                            .UpdateUser(Arg.Is(user));
                     }
                 }
             }
@@ -392,15 +385,15 @@ namespace Ntk8.Tests.Services
 
 
         private static IAccountService Create(
-            IQueryExecutor? queryExecutor = null,
-            ICommandExecutor? commandExecutor = null,
+            INtk8Queries<TestUser>? ntk8Queries = null,
+            INtk8Commands? ntk8Commands = null,
             ITokenService? tokenService = null,
             IAuthSettings? authSettings = null,
             IAccountState? accountState = null)
         {
             return new AccountService<TestUser>(
-                queryExecutor ?? Substitute.For<IQueryExecutor>(),
-                commandExecutor ?? Substitute.For<ICommandExecutor>(),
+                ntk8Commands ?? Substitute.For<INtk8Commands>(),
+                ntk8Queries ?? Substitute.For<INtk8Queries<TestUser>>(),
                 tokenService ?? Substitute.For<ITokenService>(),
                 authSettings ?? CreateAuthSettings(),
                 GetRandom<IBaseUser>(), 

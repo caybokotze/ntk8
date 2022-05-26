@@ -8,6 +8,7 @@ using NExpect;
 using NSubstitute;
 using Ntk8.Constants;
 using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Middleware;
 using Ntk8.Models;
 using Ntk8.Services;
@@ -124,7 +125,7 @@ namespace Ntk8.Tests.MiddlewareTests
             public void ShouldAttachAccountToHttpContext()
             {
                 // arrange
-                var queryExecutor = Substitute.For<IQueryCachedExecutor>();
+                var ntk8Query = Substitute.For<INtk8Queries<TestUser>>();
                 var secret = GetRandomString(40);
                 var user = TestUser.Create();
                 var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
@@ -137,12 +138,11 @@ namespace Ntk8.Tests.MiddlewareTests
                 {
                     RefreshTokenSecret = secret
                 },
-                    queryExecutor,
+                    ntk8Query,
                     tokenService);
-                
-                queryExecutor
-                    .GetAndSet(Arg.Is<FetchUserById<TestUser>>(f => f.Id == user.Id), Arg.Any<string>(), Arg.Any<TimeSpan>())
-                    .Returns(user);
+
+                ntk8Query.FetchUserById(user.Id).Returns(user);
+              
                 var httpContext = new HttpContextBuilder()
                     .WithItems(new Dictionary<object, object>())
                     .Build();
@@ -158,17 +158,17 @@ namespace Ntk8.Tests.MiddlewareTests
 
         public static JwtMiddleware<TestUser> Create(
             IAuthSettings? authSettings = null, 
-            IQueryCachedExecutor? queryExecutor = null,
+            INtk8Queries<TestUser>? ntk8Queries = null,
             ITokenService? tokenService = null)
         {
             return new JwtMiddleware<TestUser>(
+                ntk8Queries ?? Substitute.For<INtk8Queries<TestUser>>(),
                 authSettings ?? new AuthSettings
                 {
                     RefreshTokenSecret = GetRandomString(40),
                     RefreshTokenTTL = 3600,
                     JwtTTL = 1000
                 },
-                queryExecutor ?? Substitute.For<IQueryCachedExecutor>(),
                 tokenService ?? Substitute.For<ITokenService>(),
                 Substitute.For<IAccountState>());
         }

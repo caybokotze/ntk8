@@ -27,15 +27,46 @@ namespace Ntk8.Tests.Infrastructure;
 public class DependencyResolutionTests
 {
      [TestFixture]
-        public class ScopeResolutionTests : TestFixtureRequiringServiceProvider
+        public class ScopeResolutionTests
         {
             [TestFixture]
-            public class Dependencies
+            public class Dependencies : TestFixtureRequiringServiceProvider
             {
-                
+                [TestCase(typeof(IHttpContextAccessor))]
+                [TestCase(typeof(IAuthSettings))]
+                [TestCase(typeof(IBaseUser))]
+                public void ShouldResolveAsSingleton(Type type)
+                {
+                    // arrange
+                    // act
+                    var firstResolve = ServiceProvider?.GetService(type);
+                    var secondResolve = ServiceProvider?.GetService(type);
+                    // assert
+                    Expect(firstResolve).To.Not.Be.Null();
+                    Expect(secondResolve).To.Not.Be.Null();
+                    Expect(firstResolve).To.Equal(secondResolve);
+                    Expect(firstResolve?.GetHashCode()).To.Equal(secondResolve?.GetHashCode());
+                }
+            
+                [TestCase(typeof(IQueryExecutor))]
+                [TestCase(typeof(ICommandExecutor))]
+                [TestCase(typeof(IDbConnection))]
+                [TestCase(typeof(IAccountService))]
+                [TestCase(typeof(ITokenService))]
+                public void ShouldResolveAsTransient(Type type)
+                {
+                    // arrange
+                    // act
+                    var firstResolve = ServiceProvider?.GetService(type);
+                    var secondResolve = ServiceProvider?.GetService(type);
+                    // assert
+                    Expect(firstResolve).To.Not.Be.Null();
+                    Expect(secondResolve).To.Not.Be.Null();
+                    Expect(firstResolve).Not.To.Equal(secondResolve);
+                    Expect(firstResolve?.GetHashCode()).Not.To.Equal(secondResolve?.GetHashCode());
+                }
             }
 
-            
             [TestFixture]
             public class Middleware : TestFixtureRequiringServiceProvider
             {
@@ -59,49 +90,13 @@ public class DependencyResolutionTests
                     Expect(firstResolve?.GetHashCode()).To.Equal(secondResolve?.GetHashCode());
                 }
             }
-            
-            [TestCase(typeof(IHttpContextAccessor))]
-            [TestCase(typeof(IAuthSettings))]
-            
-            [TestCase(typeof(Ntk8CustomSqlStatements))]
-            [TestCase(typeof(IBaseUser))]
-            public void ShouldResolveAsSingleton(Type type)
-            {
-                // arrange
-                // act
-                var firstResolve = ServiceProvider?.GetService(type);
-                var secondResolve = ServiceProvider?.GetService(type);
-                // assert
-                Expect(firstResolve).To.Not.Be.Null();
-                Expect(secondResolve).To.Not.Be.Null();
-                Expect(firstResolve).To.Equal(secondResolve);
-                Expect(firstResolve?.GetHashCode()).To.Equal(secondResolve?.GetHashCode());
-            }
-            
-            [TestCase(typeof(IQueryExecutor))]
-            [TestCase(typeof(ICommandExecutor))]
-            [TestCase(typeof(IDbConnection))]
-            [TestCase(typeof(IAccountService))]
-            [TestCase(typeof(ITokenService))]
-            public void ShouldResolveAsTransient(Type type)
-            {
-                // arrange
-                // act
-                var firstResolve = ServiceProvider?.GetService(type);
-                var secondResolve = ServiceProvider?.GetService(type);
-                // assert
-                Expect(firstResolve).To.Not.Be.Null();
-                Expect(secondResolve).To.Not.Be.Null();
-                Expect(firstResolve).Not.To.Equal(secondResolve);
-                Expect(firstResolve?.GetHashCode()).Not.To.Equal(secondResolve?.GetHashCode());
-            }
         }
         
         [TestFixture]
         public class WhenResolvingForApplicationSettings
         {
             [TestFixture]
-            public class WhenTokenLengthIsInvalid
+            public class AndTokenLengthIsInvalid
             {
                 [Test]
                 public void ShouldThrowException()
@@ -181,7 +176,7 @@ public class DependencyResolutionTests
         public class WhenResolvingForJwtMiddleware : TestFixtureRequiringServiceProvider
         {
             [Test]
-            public void ShouldResolveAsSingleton()
+            public void ShouldResolveAsTransient()
             {
                 // arrange
                 // act
@@ -190,8 +185,7 @@ public class DependencyResolutionTests
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();
-                Expect(firstResolve!.GetHashCode()).To.Equal(secondResolve?.GetHashCode());
-                Expect(firstResolve).To!.Equal(secondResolve);
+                Expect(firstResolve).Not.To.Equal(secondResolve);
             }
         }
 }

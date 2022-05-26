@@ -35,14 +35,10 @@ namespace Ntk8.Demo
            
             app.Run();
         }
-
-        // TODO: See if we can leverage the existing dotnet Authorise Attribute to use within the Ntk8 package.
-        // TODO: When saving new users, isActive should be set to true.
-        // TODO: When deleting a user, isActive should be set to false.
+        
         // TODO: When fetching users, isActive results set to false, should be ignored.
         // TODO: Salt the password before storing.
         // TODO: Fix the authenticated response to not contain dates.
-        // TODO: The UserContextService needs to return the current logged in user.
 
         private static void ConfigureDependencies(WebApplicationBuilder builder)
         {
@@ -53,6 +49,7 @@ namespace Ntk8.Demo
             builder.Services.RegisterNtk8ExceptionHandlers();
             builder.Services.RegisterNtk8Services<User>();
             builder.Services.ConfigureNkt8Settings(CreateConfigurationRoot());
+            builder.Services.RegisterNkt8DatabaseServices<User>();
         }
 
         public static string GetConnectionString()

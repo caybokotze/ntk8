@@ -1,12 +1,11 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using NExpect;
 using NSubstitute;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
@@ -101,22 +100,21 @@ namespace Ntk8.Tests.Services
             public void ShouldGetSingleRefreshTokenAndUser()
             {
                 // arrange
-                var queryExecutor = Substitute.For<IQueryExecutor>();
-                var tokenService = Create(queryExecutor);
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Create(ntk8Queries);
                 var randomUser = TestUser.Create();
                 var refreshToken = tokenService.GenerateRefreshToken();
 
                 randomUser.RefreshToken = refreshToken;
-
-                queryExecutor
-                    .Execute(Arg.Any<FetchUserByRefreshToken<TestUser>>())
-                    .Returns(randomUser);
                 
+                ntk8Queries.FetchUserByRefreshToken(Arg.Any<string>())
+                    .Returns(randomUser);
+
                 var _ = tokenService
                     .IsRefreshTokenActive(refreshToken.Token);
                 // act
                 // assert
-                Expect(queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token)))
+                Expect(ntk8Queries.FetchUserByRefreshToken(refreshToken.Token))
                     .To
                     .Equal(randomUser);
             }
@@ -125,15 +123,16 @@ namespace Ntk8.Tests.Services
             public void ShouldThrowWhenNoTokensAreFound()
             {
                 // arrange
-                var queryExecutor = Substitute.For<IQueryExecutor>();
-                var tokenService = Create(queryExecutor);
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Create(ntk8Queries);
                 var user = TestUser.Create();
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles!);
                 var randomUser = TestUser.Create();
                 randomUser.RefreshToken = null;
-                queryExecutor
-                    .Execute(Arg.Any<FetchUserByRefreshToken<TestUser>>())
+
+                ntk8Queries.FetchUserByRefreshToken(Arg.Any<string>())
                     .Returns(randomUser);
+                
                 // act
                 // assert
                 Expect(() => tokenService
@@ -143,14 +142,14 @@ namespace Ntk8.Tests.Services
         }
         
         private static TokenService<TestUser> Create(
-            IQueryExecutor? queryExecutor = null,
-            ICommandExecutor? commandExecutor = null,
+            INtk8Queries<TestUser>? ntk8Queries = null,
+            INtk8Commands? ntk8Commands = null,
             AuthSettings? authSettings = null,
             IHttpContextAccessor? httpContextAccessor = null)
         {
             return new TokenService<TestUser>(
-                queryExecutor ?? Substitute.For<IQueryExecutor>(),
-                commandExecutor ?? Substitute.For<ICommandExecutor>(),
+                ntk8Commands ?? Substitute.For<Ntk8Commands>(),
+                ntk8Queries ?? Substitute.For<Ntk8Queries<TestUser>>(),
                 authSettings ?? CreateAuthSettings(),
                 httpContextAccessor ?? Substitute.For<IHttpContextAccessor>());
         }

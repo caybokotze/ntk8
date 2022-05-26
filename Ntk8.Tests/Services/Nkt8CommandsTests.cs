@@ -111,24 +111,6 @@ public class Nkt8CommandsTests
         }
     }
 
-    public class InsertUserAndRoleTests
-    {
-        [Test]
-        public void CommandShouldReceiveExpectedParameters()
-        {
-            // arrange
-            var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
-            var user = GetRandom<TestUser>();
-            var userRole = GetRandom<UserRole>();
-            // act
-            sut.InsertUserAndRole(user, userRole);
-            // assert
-            Expect(commandExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<InsertUserAndRole>(s => s.BaseUser == user && s.UserRole == userRole));
-        }
-    }
-
     public class InsertUserRoleTests
     {
         [Test]
