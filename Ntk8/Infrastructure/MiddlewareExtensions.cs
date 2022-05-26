@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Ntk8.Exceptions;
 using Ntk8.Exceptions.Middleware;
 using Ntk8.Middleware;
 using Ntk8.Models;
@@ -24,6 +25,7 @@ namespace Ntk8.Infrastructure
             builder.UseMiddleware<VerificationTokenExpiredExceptionMiddleware>();
             builder.UseMiddleware<InvalidRefreshTokenExceptionMiddleware>();
             builder.UseMiddleware<InvalidJwtTokenExceptionMiddleware>();
+            builder.UseMiddleware<InvalidEmailAddressExceptionMiddleware>();
         }
     }
 }

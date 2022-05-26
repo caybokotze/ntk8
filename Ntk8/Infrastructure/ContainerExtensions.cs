@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Ntk8.DatabaseServices;
 using Ntk8.Exceptions;
 using Ntk8.Exceptions.Middleware;
 using Ntk8.Middleware;
@@ -11,7 +12,7 @@ namespace Ntk8.Infrastructure;
 
 public static class ContainerExtensions
 {
-    public static void RegisterNtk8MiddlewareExceptionHandlers(this IServiceCollection serviceCollection)
+    public static void RegisterNtk8ExceptionHandlers(this IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddSingleton<UserNotAuthorisedExceptionMiddleware, UserNotAuthorisedExceptionMiddleware>();
@@ -32,7 +33,10 @@ public static class ContainerExtensions
                 VerificationTokenExpiredExceptionMiddleware>();
         serviceCollection
             .AddSingleton<InvalidRefreshTokenExceptionMiddleware, InvalidRefreshTokenExceptionMiddleware>();
-        serviceCollection.AddSingleton<InvalidJwtTokenExceptionMiddleware, InvalidJwtTokenExceptionMiddleware>();
+        serviceCollection
+            .AddSingleton<InvalidJwtTokenExceptionMiddleware, InvalidJwtTokenExceptionMiddleware>();
+        serviceCollection
+            .AddSingleton<InvalidEmailAddressExceptionMiddleware, InvalidEmailAddressExceptionMiddleware>();
     }
     
     public static void RegisterNtk8Services<T>(this IServiceCollection serviceCollection) where T : class, IBaseUser, new()
@@ -42,6 +46,12 @@ public static class ContainerExtensions
         serviceCollection.AddTransient<IAccountService, AccountService<T>>();
         serviceCollection.AddTransient<ITokenService, TokenService<T>>();
         serviceCollection.AddScoped<IAccountState, AccountState>();
+    }
+
+    public static void RegisterNkt8DatabaseServices<T>(this IServiceCollection serviceCollection) where T : class, IBaseUser, new()
+    {
+        serviceCollection.AddTransient<INtk8Commands, Ntk8Commands>();
+        serviceCollection.AddTransient<INtk8Queries<T>, Ntk8Queries<T>>();
     }
     
     public static void ConfigureNkt8Settings(this IServiceCollection serviceCollection,

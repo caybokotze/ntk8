@@ -20,11 +20,6 @@ namespace Ntk8.Demo
             var builder = WebApplication.CreateBuilder(args);
             ConfigureDependencies(builder);
 
-            builder.Services.ConfigureNtk8CustomSql(c =>
-            {
-                
-            });
-            
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
             app.UseRouting();
@@ -55,7 +50,7 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
-            builder.Services.RegisterNtk8MiddlewareExceptionHandlers();
+            builder.Services.RegisterNtk8ExceptionHandlers();
             builder.Services.RegisterNtk8Services<User>();
             builder.Services.ConfigureNkt8Settings(CreateConfigurationRoot());
         }

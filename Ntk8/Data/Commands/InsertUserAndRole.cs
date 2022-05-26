@@ -3,10 +3,10 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertUserAndRole : Command<long>
+    public class InsertUserAndRole : Command
     {
-        private IBaseUser BaseUser { get; }
-        private UserRole UserRole { get; }
+        public IBaseUser BaseUser { get; }
+        public UserRole UserRole { get; }
 
         public InsertUserAndRole(
              IBaseUser baseUser,
@@ -19,19 +19,18 @@ namespace Ntk8.Data.Commands
         public override void Execute()
         {
             var userId = InsertUser();
-            var _ = InsertUserRole(userId);
-            Result = userId;
+            InsertUserRole(userId);
         }
 
-        private long InsertUser()
+        private int InsertUser()
         {
             return CommandExecutor.Execute(new InsertUser(BaseUser));
         }
 
-        private long InsertUserRole(long userId)
+        private void InsertUserRole(int userId)
         {
             UserRole.UserId = userId;
-            return CommandExecutor
+            CommandExecutor
                 .Execute(new InsertUserRole(UserRole));
         }
     }

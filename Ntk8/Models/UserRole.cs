@@ -7,7 +7,7 @@ namespace Ntk8.Models
     {
         public int Id { get; set; }
         [ForeignKey(nameof(BaseUser))]
-        public long UserId { get; set; }
+        public int UserId { get; set; }
 
         [JsonIgnore]
         public virtual IBaseUser? BaseUser { get; set; }

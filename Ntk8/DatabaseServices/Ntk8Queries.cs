@@ -1,5 +1,6 @@
 using Dapper.CQRS;
 using Ntk8.Data.Queries;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.DatabaseServices;
@@ -29,6 +30,11 @@ public class Ntk8Queries<T> : INtk8Queries<T> where T : class, IBaseUser, new()
 
     public T? FetchUserByEmailAddress(string emailAddress)
     {
+        if (string.IsNullOrEmpty(emailAddress))
+        {
+            throw new InvalidEmailAddressException();
+        }
+        
         return _queryExecutor.Execute(new FetchUserByEmailAddress<T>(emailAddress));
     }
 

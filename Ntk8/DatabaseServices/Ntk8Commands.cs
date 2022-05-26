@@ -1,3 +1,5 @@
+using Dapper.CQRS;
+using Ntk8.Data.Commands;
 using Ntk8.Models;
 
 namespace Ntk8.DatabaseServices;
@@ -9,62 +11,69 @@ public interface INtk8Commands
     long InsertRefreshToken(RefreshToken refreshToken);
     int InsertRole(Role role);
     int InsertUser(IBaseUser user);
-    void InsertUserAndRole(IBaseUser user, Role role);
+    void InsertUserAndRole(IBaseUser user, UserRole userRole);
     int InsertUserRole(UserRole userRole);
-    void InvalidateRefreshToken(RefreshToken refreshToken);
+    void InvalidateRefreshToken(string refreshToken);
     void UpdateRefreshToken(RefreshToken refreshToken);
     void UpdateUser(IBaseUser user);
 }
 
 public class Ntk8Commands : INtk8Commands
 {
+    private readonly ICommandExecutor _commandExecutor;
+
+    public Ntk8Commands(ICommandExecutor commandExecutor)
+    {
+        _commandExecutor = commandExecutor;
+    }
+    
     public void DeleteRolesForUserById(int id)
     {
-        throw new System.NotImplementedException();
+        _commandExecutor.Execute(new DeleteRolesForUserById(id));
     }
 
     public void DeleteUserById(int id)
     {
-        throw new System.NotImplementedException();
+        _commandExecutor.Execute(new DeleteUserById(id));
     }
 
     public long InsertRefreshToken(RefreshToken refreshToken)
     {
-        throw new System.NotImplementedException();
+        return _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
     }
 
     public int InsertRole(Role role)
     {
-        throw new System.NotImplementedException();
+        return _commandExecutor.Execute(new InsertRole(role));
     }
 
     public int InsertUser(IBaseUser user)
     {
-        throw new System.NotImplementedException();
+        return _commandExecutor.Execute(new InsertUser(user));
     }
 
-    public void InsertUserAndRole(IBaseUser user, Role role)
+    public void InsertUserAndRole(IBaseUser user, UserRole userRole)
     {
-        throw new System.NotImplementedException();
+        _commandExecutor.Execute(new InsertUserAndRole(user, userRole));
     }
 
     public int InsertUserRole(UserRole userRole)
     {
-        throw new System.NotImplementedException();
+        return _commandExecutor.Execute(new InsertUserRole(userRole));
     }
 
-    public void InvalidateRefreshToken(RefreshToken refreshToken)
+    public void InvalidateRefreshToken(string refreshToken)
     {
-        throw new System.NotImplementedException();
+        _commandExecutor.Execute(new InvalidateRefreshToken(refreshToken));
     }
 
     public void UpdateRefreshToken(RefreshToken refreshToken)
     {
-        throw new System.NotImplementedException();
+        _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
     }
 
     public void UpdateUser(IBaseUser user)
     {
-        throw new System.NotImplementedException();
+        _commandExecutor.Execute(new UpdateUser(user));
     }
 }

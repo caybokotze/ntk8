@@ -6,7 +6,7 @@ namespace Ntk8.Data.Commands
     public class InsertUserRole : Command<int>
     {
         public int RoleId { get; }
-        public long UserId { get; }
+        public int UserId { get; }
 
         public InsertUserRole(UserRole userRole)
         {
@@ -16,8 +16,8 @@ namespace Ntk8.Data.Commands
         
         public override void Execute()
         {
-            Result = Execute(@"INSERT INTO user_roles (role_id, user_id) 
-            VALUES (@RoleId, @UserId)",
+            Result = QueryFirst<int>(@"INSERT INTO user_roles (role_id, user_id) 
+            VALUES (@RoleId, @UserId); SELECT last_insert_id();",
                 new
                 {
                     RoleId,

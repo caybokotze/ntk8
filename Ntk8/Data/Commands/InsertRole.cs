@@ -14,7 +14,7 @@ namespace Ntk8.Data.Commands
         
         public override void Execute()
         {
-            Result = Execute("INSERT INTO roles (id, role_name) VALUES (@Id, @RoleName);", Role);
+            Result = QueryFirst<int>("INSERT INTO roles (id, role_name) VALUES (@Id, @RoleName); SELECT last_insert_id();", Role);
         }
     }
 }

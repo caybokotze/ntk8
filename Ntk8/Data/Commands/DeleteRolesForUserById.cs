@@ -2,11 +2,11 @@ using Dapper.CQRS;
 
 namespace Ntk8.Data.Commands
 {
-    public class DeleteRolesForUser : Command
+    public class DeleteRolesForUserById : Command
     {
-        public long UserId { get; }
+        public int UserId { get; }
 
-        public DeleteRolesForUser(long userId)
+        public DeleteRolesForUserById(int userId)
         {
             UserId = userId;
         }

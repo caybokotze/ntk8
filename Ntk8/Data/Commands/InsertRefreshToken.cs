@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertRefreshToken : Command<int>
+    public class InsertRefreshToken : Command<long>
     {
         public RefreshToken RefreshToken { get; }
 
@@ -15,7 +15,7 @@ namespace Ntk8.Data.Commands
         public override void Execute()
         {
             Result =
-                QueryFirst<int>(@"INSERT INTO refresh_tokens (
+                QueryFirst<long>(@"INSERT INTO refresh_tokens (
                             user_id, 
                             token, 
                             expires,

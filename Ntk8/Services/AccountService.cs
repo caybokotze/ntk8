@@ -1,10 +1,7 @@
 ﻿using System;
-using Dapper.CQRS;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
-using Ntk8.Infrastructure;
 using Ntk8.Models;
 using Ntk8.Utilities;
 using BC = BCrypt.Net.BCrypt;
@@ -15,24 +12,24 @@ namespace Ntk8.Services
     {
         public static readonly int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
         public static readonly int RESET_TOKEN_TTL = 43200; // in seconds
-        
-        private readonly IQueryExecutor _queryExecutor;
-        private readonly ICommandExecutor _commandExecutor;
+
+        private readonly INtk8Commands _ntk8Commands;
+        private readonly INtk8Queries<T> _ntk8Queries;
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
         private readonly IBaseUser _baseUser;
         private readonly IAccountState _accountState;
 
         public AccountService(
-            IQueryExecutor queryExecutor,
-            ICommandExecutor commandExecutor,
+            INtk8Commands ntk8Commands,
+            INtk8Queries<T> ntk8Queries,
             ITokenService tokenService,
             IAuthSettings authSettings,
             IBaseUser baseUser,
             IAccountState accountState)
         {
-            _queryExecutor = queryExecutor;
-            _commandExecutor = commandExecutor;
+            _ntk8Commands = ntk8Commands;
+            _ntk8Queries = ntk8Queries;
             _tokenService = tokenService;
             _authSettings = authSettings;
             _baseUser = baseUser;
@@ -46,14 +43,13 @@ namespace Ntk8.Services
         /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.
         /// A refresh and JWT token is also generated for the user and send back to the caller.
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="authenticationRequest"></param>
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
         /// <exception cref="InvalidPasswordException"></exception>
-        public AuthenticatedResponse AuthenticateUser(AuthenticateRequest model)
+        public AuthenticatedResponse AuthenticateUser(AuthenticateRequest authenticationRequest)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email));
+            var user = _ntk8Queries.FetchUserByEmailAddress(authenticationRequest.Email ?? string.Empty);
             
             if (user is null)
             {
@@ -65,7 +61,7 @@ namespace Ntk8.Services
                 throw new UserIsNotVerifiedException();
             }
 
-            if (!BC.Verify(model.Password, user.PasswordHash))
+            if (!BC.Verify(authenticationRequest.Password, user.PasswordHash))
             {
                 throw new InvalidPasswordException();
             }
@@ -77,22 +73,23 @@ namespace Ntk8.Services
 
             if (user.RefreshToken is not null)
             {
-                _commandExecutor.Execute(new InvalidateRefreshToken(user.RefreshToken.Token));
+                _ntk8Commands.InvalidateRefreshToken(user.RefreshToken?.Token ?? string.Empty);
             }
-            
-            _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
+
+            _ntk8Commands.InsertRefreshToken(refreshToken);
 
             var response = user.MapFromTo(new AuthenticatedResponse());
             
             response.JwtToken = jwtToken.Token;
-            _tokenService.SetRefreshTokenCookie(refreshToken.Token);
+            _tokenService.SetRefreshTokenCookie(refreshToken.Token ?? string.Empty);
             return response;
         }
 
-        public void RegisterUser(RegisterRequest model)
+        
+        public void RegisterUser(RegisterRequest registerRequest)
         {
-            var existingUser = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty));
+            var existingUser = _ntk8Queries
+                .FetchUserByEmailAddress(registerRequest.Email ?? string.Empty);
             
             if (existingUser is not null)
             {
@@ -106,12 +103,11 @@ namespace Ntk8.Services
                     .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
                         ? VERIFICATION_TOKEN_TTL
                         : _authSettings.UserVerificationTokenTTL);
-
-                _commandExecutor.Execute(new UpdateUser(existingUser));
+                _ntk8Commands.UpdateUser(existingUser);
                 return;
             }
 
-            var user = model.MapFromTo((T)_baseUser);
+            var user = registerRequest.MapFromTo((T)_baseUser);
             
             user.IsActive = true;
             user.VerificationToken = _tokenService.RandomTokenString();
@@ -121,32 +117,34 @@ namespace Ntk8.Services
                 .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
                     ? VERIFICATION_TOKEN_TTL
                     : _authSettings.UserVerificationTokenTTL);
-            user.PasswordHash = BC.HashPassword(model.Password);
+            user.PasswordHash = BC.HashPassword(registerRequest.Password);
 
-            _commandExecutor
-                .Execute(new InsertUser(user));
+            _ntk8Commands.InsertUser(user);
         }
 
-        public void AutoVerifyUser(RegisterRequest model)
+        public void AutoVerifyUser(RegisterRequest registerRequest)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email ?? string.Empty));
+            var user = _ntk8Queries.FetchUserByEmailAddress(registerRequest.Email ?? string.Empty);
+
+            if (user is null)
+            {
+                throw new UserNotFoundException();
+            }
 
             if (user.IsVerified)
             {
-                return;
+                throw new UserIsVerifiedException();
             }
             
             user.DateVerified = DateTime.UtcNow;
             user.VerificationToken = null;
-
-            _commandExecutor.Execute(new UpdateUser(user));
+            
+            _ntk8Commands.UpdateUser(user);
         }
 
         public void VerifyUserByVerificationToken(string token)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserByVerificationToken<T>(token));
+            var user = _ntk8Queries.FetchUserByVerificationToken(token);
 
             if (user is null)
             {
@@ -172,18 +170,17 @@ namespace Ntk8.Services
             user.VerificationToken = null;
             user.IsActive = true;
 
-            _commandExecutor.Execute(new UpdateUser(user));
+            _ntk8Commands.UpdateUser(user);
         }
 
         /// <summary>
         /// Set's the user with a password reset token, which will expire in a few hours (as per app-settings configured.)
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="forgotPasswordRequest"></param>
         /// <para>Tip: Catch the UserNotFoundException to prevent email enumeration attacks.</para>
-        public string GetPasswordResetToken(ForgotPasswordRequest model)
+        public string GetPasswordResetToken(ForgotPasswordRequest forgotPasswordRequest)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<T>(model.Email));
+            var user = _ntk8Queries.FetchUserByEmailAddress(forgotPasswordRequest.Email ?? string.Empty);
             
             if (user is null)
             {
@@ -197,7 +194,7 @@ namespace Ntk8.Services
                         ? RESET_TOKEN_TTL
                         : _authSettings.PasswordResetTokenTTL);
                 
-                _commandExecutor.Execute(new UpdateUser(user));
+                _ntk8Commands.UpdateUser(user);
                 return user.ResetToken;
             }
             
@@ -207,34 +204,32 @@ namespace Ntk8.Services
                     ? RESET_TOKEN_TTL
                     : _authSettings.PasswordResetTokenTTL);
 
-            _commandExecutor.Execute(new UpdateUser(user));
+            _ntk8Commands.UpdateUser(user);
 
             return user.ResetToken;
         }
         
-        public void ResetUserPassword(ResetPasswordRequest model)
+        public void ResetUserPassword(ResetPasswordRequest resetPasswordRequest)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserByResetToken<T>(model.Token ?? string.Empty));
+            var user = _ntk8Queries.FetchUserByResetToken(resetPasswordRequest.Token ?? string.Empty);
 
             if (user is null)
             {
                 throw new InvalidResetTokenException();
             }
             
-            user.PasswordHash = BC.HashPassword(model.Password);
+            user.PasswordHash = BC.HashPassword(resetPasswordRequest.Password);
             user.DateOfPasswordReset = DateTime.UtcNow;
             user.ResetToken = null;
             user.DateResetTokenExpires = null;
 
-            _commandExecutor.Execute(new UpdateUser(user));
+            _ntk8Commands.UpdateUser(user);
         }
 
         public UserAccountResponse GetUserById(int id)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserById<T>(id));
-            
+            var user = _ntk8Queries.FetchUserById(id);
+
             if (user is null)
             {
                 throw new UserNotFoundException();
@@ -243,24 +238,23 @@ namespace Ntk8.Services
             return user.MapFromTo(new UserAccountResponse());
         }
 
-        public UserAccountResponse UpdateUser(int id, UpdateRequest model)
+        public UserAccountResponse UpdateUser(int id, UpdateRequest updateRequest)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserById<T>(id));
+            var user = _ntk8Queries.FetchUserById(id);
             
             if (user is null)
             {
                 throw new UserNotFoundException();
             }
 
-            if (!string.IsNullOrEmpty(model.Password))
+            if (!string.IsNullOrEmpty(updateRequest.Password))
             {
-                user.PasswordHash = BC.HashPassword(model.Password);
+                user.PasswordHash = BC.HashPassword(updateRequest.Password);
             }
             
             user.DateModified = DateTime.UtcNow;
 
-            _commandExecutor.Execute(new UpdateUser(user));
+            _ntk8Commands.UpdateUser(user);
 
             var response = user.MapFromTo(new UserAccountResponse());
             return response;
@@ -268,7 +262,7 @@ namespace Ntk8.Services
 
         public void DeleteUser(int id)
         {
-            _commandExecutor.Execute(new DeleteUserById(id));
+            _ntk8Commands.DeleteUserById(id);
         }
     }
 }

@@ -21,12 +21,16 @@ public class Nkt8QueriesTests
         {
             // arrange
             var queryExecutor = Substitute.For<IQueryExecutor>();
+            var randomUser = GetRandom<TestUser>();
+            queryExecutor.Execute(Arg.Any<FetchUserById<TestUser>>())
+                .Returns(randomUser);
             var sut = Substitute.For<Ntk8Queries<TestUser>>(queryExecutor);
             // act
-            sut.FetchUserById(3);
+            var result = sut.FetchUserById(3);
             // assert
             Expect(queryExecutor).To.Have.Received(1)
                 .Execute(Arg.Is<FetchUserById<TestUser>>(s => s.Id == 3));
+            Expect(result).To.Equal(randomUser);
         }
     }
 

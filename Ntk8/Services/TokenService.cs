@@ -3,12 +3,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Models;
@@ -31,19 +29,19 @@ namespace Ntk8.Services
 
     public class TokenService<T> : ITokenService where T : class, IBaseUser, new()
     {
-        private readonly IQueryExecutor _queryExecutor;
-        private readonly ICommandExecutor _commandExecutor;
+        private readonly INtk8Commands _ntk8Commands;
+        private readonly INtk8Queries<T> _ntk8Queries;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
-            IQueryExecutor queryExecutor,
-            ICommandExecutor commandExecutor,
+            INtk8Commands ntk8Commands,
+            INtk8Queries<T> ntk8Queries,
             IAuthSettings authSettings,
             IHttpContextAccessor contextAccessor)
         {
-            _queryExecutor = queryExecutor;
-            _commandExecutor = commandExecutor;
+            _ntk8Commands = ntk8Commands;
+            _ntk8Queries = ntk8Queries;
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
@@ -60,13 +58,12 @@ namespace Ntk8.Services
         {
             token.DateRevoked = DateTime.UtcNow;
             token.RevokedByIp = GetIpAddress();
-            _commandExecutor.Execute(new UpdateRefreshToken(token));
+            _ntk8Commands.UpdateRefreshToken(token);
         }
 
         public (bool isActive, long userId, Role[]? roles) IsRefreshTokenActive(string token)
         {
-            var user = _queryExecutor
-                .Execute(new FetchUserByRefreshToken<T>(token));
+            var user = _ntk8Queries.FetchUserByRefreshToken(token);
 
             if (user is null)
             {

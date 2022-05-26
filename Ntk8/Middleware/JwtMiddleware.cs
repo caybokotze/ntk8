@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
@@ -14,21 +14,21 @@ namespace Ntk8.Middleware
 {
     public class JwtMiddleware<T> : IMiddleware where T : class, IBaseUser, new()
     {
+        private readonly INtk8Queries<T> _ntk8Queries;
         private readonly IAuthSettings _authSettings;
-        private readonly IQueryCachedExecutor _queryCachedExecutor;
         private readonly ITokenService _tokenService;
         private readonly IAccountState _accountState;
 
         public JwtMiddleware(
-            IAuthSettings authSettings, 
-            IQueryCachedExecutor queryCachedExecutor, 
+            INtk8Queries<T> ntk8Queries,
+            IAuthSettings authSettings,
             ITokenService tokenService,
             IAccountState accountState)
         {
+            _ntk8Queries = ntk8Queries;
             _authSettings = authSettings;
             _tokenService = tokenService;
             _accountState = accountState;
-            _queryCachedExecutor = queryCachedExecutor;
         }
 
         public async Task InvokeAsync(
@@ -95,10 +95,12 @@ namespace Ntk8.Middleware
                 .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                 .Value ?? string.Empty);
 
-            var user = _queryCachedExecutor
-                .GetAndSet(new FetchUserById<T>(accountId),
-                    $"{nameof(FetchUserById<T>)}--{accountId}",
-                    TimeSpan.FromSeconds(_authSettings.UserCacheTTL));
+            var user = _ntk8Queries.FetchUserById(accountId);
+
+            if (user is null)
+            {
+                throw new UserNotFoundException();
+            }
 
             if (string.IsNullOrEmpty(user?.RefreshToken?.Token))
             {
