@@ -11,7 +11,6 @@ namespace Ntk8.Data.Queries
     public class FetchUserByRefreshToken<T> : Query<T?> where T : class, IBaseUser, new()
     {
         public string Token { get; }
-        public string? Sql { get; set; }
 
         public FetchUserByRefreshToken(string token)
         {
@@ -24,7 +23,7 @@ namespace Ntk8.Data.Queries
             {
                 var roles = new List<Role>();
 
-                Sql ??= @"
+                const string sql = @"
 SELECT u.id,
        u.title,
        u.first_name,
@@ -64,7 +63,7 @@ LEFT JOIN roles r on ur.role_id = r.id
 WHERE rt.token = @Token;";
 
                 var result = Query<T, RefreshToken, Role, T>(
-                    Sql,
+                    sql,
                     (user, token, role) =>
                     {
                         if (token is not null)

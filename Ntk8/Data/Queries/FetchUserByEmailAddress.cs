@@ -9,16 +9,15 @@ namespace Ntk8.Data.Queries
     public class FetchUserByEmailAddress<T> : Query<T?> where T : class, IBaseUser, new()
     {
         public string EmailAddress { get; }
-        public string? Sql { get; set; }
 
         public FetchUserByEmailAddress(string emailAddress)
         {
             EmailAddress = emailAddress.ToLowerInvariant();
         }
-        
+
         public override void Execute()
         {
-            Sql ??= @"
+            const string sql = @"
 SELECT u.id,
        u.title,
        u.first_name,
@@ -65,18 +64,19 @@ WHERE u.email = @EmailAddress;";
             {
                 var roles = new List<Role>();
                 var result = Query<T, RefreshToken, Role, T>(
-                    Sql,
+                    sql,
                     (user, token, role) =>
                     {
                         if (token is not null)
                         {
                             user.RefreshToken = token;
                         }
-                
+
                         if (role is not null)
                         {
                             roles.Add(role);
                         }
+
                         return user;
                     }, new
                     {
@@ -93,7 +93,6 @@ WHERE u.email = @EmailAddress;";
             {
                 Result = null;
             }
-            
         }
     }
 }
