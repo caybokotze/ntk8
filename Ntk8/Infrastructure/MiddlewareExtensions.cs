@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Builder;
-using Ntk8.Exceptions;
 using Ntk8.Exceptions.Middleware;
 using Ntk8.Middleware;
 using Ntk8.Models;

@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using Ntk8.Infrastructure;
-using Ntk8.Models;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
 

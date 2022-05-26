@@ -1,14 +1,10 @@
-﻿using System;
-using System.Transactions;
+﻿using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
 using NSubstitute;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
 using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
-using Ntk8.Infrastructure;
 using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.TestHelpers;
