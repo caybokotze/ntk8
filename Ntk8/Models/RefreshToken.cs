@@ -20,7 +20,6 @@ namespace Ntk8.Models
         public string? CreatedByIp { get; set; }
         public DateTime? DateRevoked { get; set; }
         public string? RevokedByIp { get; set; }
-        public string? ReplacedByToken { get; set; }
         public bool IsActive => DateRevoked == null && !IsExpired;
     }
 }

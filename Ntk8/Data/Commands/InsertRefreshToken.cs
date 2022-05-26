@@ -22,16 +22,14 @@ namespace Ntk8.Data.Commands
                             date_created, 
                             created_by_ip, 
                             date_revoked, 
-                            revoked_by_ip, 
-                            replaced_by_token) 
+                            revoked_by_ip) 
             VALUES (@UserId, 
                     @Token, 
                     @Expires, 
                     @DateCreated, 
                     @CreatedByIp, 
                     @DateRevoked, 
-                    @RevokedByIp, 
-                    @ReplacedByToken); 
+                    @RevokedByIp); 
             SELECT last_insert_id();", 
                     RefreshToken);
         }

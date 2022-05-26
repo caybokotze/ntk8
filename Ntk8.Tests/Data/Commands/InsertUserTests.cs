@@ -98,9 +98,9 @@ namespace Ntk8.Tests.Data.Commands
                         .To.Approximately.Equal((DateTime) user.DateResetTokenExpires);
                 }
 
-                Expect(user.DateVerified).To.Not.Be.Null();
-                Expect(user.DateOfPasswordReset).To.Not.Be.Null();
-                Expect(user.DateResetTokenExpires).To.Not.Be.Null();
+                Expect(expectedUser?.DateVerified).To.Not.Be.Null();
+                Expect(expectedUser?.DateOfPasswordReset).To.Not.Be.Null();
+                Expect(expectedUser?.DateResetTokenExpires).To.Not.Be.Null();
             }
         }
     }

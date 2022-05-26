@@ -20,10 +20,27 @@ namespace Ntk8.Tests.TestHelpers
             var user = GetRandom<TestUser>();
             user.UserRoles = CreateRandomUserRoles(user);
             user.Roles = user.UserRoles.Select(s => s.Role).ToArray();
-            user.RefreshToken = GetRandom<RefreshToken>();
+            user.RefreshToken = CreateValidRefreshToken();
             user.RefreshToken.Expires = DateTime.UtcNow.AddDays(1);
             user.RefreshToken.DateRevoked = null;
+            user.IsActive = true;
             return user;
+        }
+
+        public static RefreshToken CreateInvalidRefreshToken()
+        {
+            var refreshToken = GetRandom<RefreshToken>();
+            refreshToken.DateRevoked = DateTime.UtcNow.AddHours(-1);
+            refreshToken.Expires = DateTime.UtcNow.AddHours(-1);
+            return refreshToken;
+        }
+
+        public static RefreshToken CreateValidRefreshToken()
+        {
+            var refreshToken = GetRandom<RefreshToken>();
+            refreshToken.DateRevoked = null;
+            refreshToken.Expires = DateTime.UtcNow.AddHours(1);
+            return refreshToken;
         }
 
         private static UserRole[] CreateRandomUserRoles(IBaseUser user)

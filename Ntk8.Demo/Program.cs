@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.Common;
+using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ namespace Ntk8.Demo
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             ConfigureDependencies(builder);
@@ -24,15 +25,16 @@ namespace Ntk8.Demo
             app.UseRouting();
             app.UseNtk8JwtMiddleware<User>();
             app.UseNtk8ExceptionMiddleware();
-            
+
+            await Task.Delay(1000);
             var _ = new AuthHandler(app, 
                 app.Resolve<IAccountService>(),
                 app.Resolve<IQueryExecutor>(),
                 app.Resolve<ICommandExecutor>(),
                 app.Resolve<ITokenService>(),
                 app.Resolve<IHttpContextAccessor>());
-           
-            app.Run();
+            
+            await app.RunAsync();
         }
         
         // TODO: When fetching users, isActive results set to false, should be ignored.
@@ -47,8 +49,8 @@ namespace Ntk8.Demo
             builder.Services.AddHttpContextAccessor();
             builder.Services.RegisterNtk8ExceptionHandlers();
             builder.Services.RegisterNtk8Services<User>();
-            builder.Services.ConfigureNkt8Settings(CreateConfigurationRoot());
             builder.Services.RegisterNkt8DatabaseServices<User>();
+            builder.Services.ConfigureNkt8Settings(CreateConfigurationRoot());
         }
 
         public static string GetConnectionString()
