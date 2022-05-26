@@ -1,6 +1,6 @@
 using System;
 
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.TestHelpers
 {
     public static class NumericExtensions
     {

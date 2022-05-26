@@ -1,4 +1,4 @@
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.TestHelpers
 {
     public enum Roles
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Dapper.CQRS;
 
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.TestHelpers
 {
     public class GenericQuery<T> : Query<List<T>>
     {

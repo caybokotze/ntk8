@@ -9,7 +9,7 @@ using Ntk8.DatabaseServices;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;

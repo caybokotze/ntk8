@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using Ntk8.Infrastructure;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 
 namespace Ntk8.Tests

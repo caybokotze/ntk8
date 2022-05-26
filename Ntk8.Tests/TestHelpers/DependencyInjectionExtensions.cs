@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.TestHelpers
 {
     public static class DependencyInjectionExtensions
     {

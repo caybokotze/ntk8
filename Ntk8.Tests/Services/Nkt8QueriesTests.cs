@@ -3,7 +3,7 @@ using NExpect;
 using NSubstitute;
 using Ntk8.Data.Queries;
 using Ntk8.DatabaseServices;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;

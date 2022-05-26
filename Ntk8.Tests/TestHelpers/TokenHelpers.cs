@@ -9,7 +9,7 @@ using Ntk8.Models;
 using Ntk8.Services;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.TestHelpers
 {
     public static class TokenHelpers
     {

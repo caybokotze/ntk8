@@ -17,7 +17,7 @@ using Ntk8.Infrastructure;
 using Ntk8.Middleware;
 using Ntk8.Models;
 using Ntk8.Services;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using static NExpect.Expectations;

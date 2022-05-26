@@ -5,7 +5,7 @@ using System.Linq;
 using Ntk8.Models;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
-namespace Ntk8.Tests.Helpers
+namespace Ntk8.Tests.TestHelpers
 {
     public class TestUser : IBaseUser
     {

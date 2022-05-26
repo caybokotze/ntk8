@@ -6,11 +6,11 @@ using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 
-namespace Ntk8.Tests.Data.Queries.User
+namespace Ntk8.Tests.Data.Queries
 {
     [TestFixture]
     public class FetchUserByRefreshTokenTests : TestFixtureRequiringServiceProvider

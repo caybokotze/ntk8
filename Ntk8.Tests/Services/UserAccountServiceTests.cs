@@ -11,7 +11,7 @@ using Ntk8.Exceptions;
 using Ntk8.Infrastructure;
 using Ntk8.Models;
 using Ntk8.Services;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using Ntk8.Utilities;
 using NUnit.Framework;
 using static NExpect.Expectations;

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Ntk8.Tests.Helpers.SqlGenericBuilder;
+namespace Ntk8.Tests.TestHelpers.SqlGenericBuilder;
 
 [TestFixture]
 public class InterfaceBuilderTests

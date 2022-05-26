@@ -4,12 +4,12 @@ using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
 using Ntk8.Models;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using static NExpect.Expectations;
 
-namespace Ntk8.Tests.Data.Commands.User
+namespace Ntk8.Tests.Data.Commands
 {
     [TestFixture]
     public class InsertUserTests : TestFixtureRequiringServiceProvider

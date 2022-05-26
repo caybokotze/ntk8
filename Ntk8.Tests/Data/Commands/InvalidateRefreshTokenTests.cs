@@ -3,11 +3,11 @@ using Dapper.CQRS;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
-using Ntk8.Tests.Helpers;
+using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
 
-namespace Ntk8.Tests.Data.Commands.RefreshToken
+namespace Ntk8.Tests.Data.Commands
 {
     [TestFixture]
     public class InvalidateRefreshTokenTests
