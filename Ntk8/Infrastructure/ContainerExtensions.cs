@@ -45,7 +45,7 @@ public static class ContainerExtensions
         serviceCollection.AddTransient<JwtMiddleware<T>, JwtMiddleware<T>>();
         serviceCollection.AddTransient<IAccountService, AccountService<T>>();
         serviceCollection.AddTransient<ITokenService, TokenService<T>>();
-        serviceCollection.AddSingleton<IAccountState, AccountState>();
+        serviceCollection.AddScoped<IAccountState, AccountState>();
     }
 
     public static void RegisterNkt8DatabaseServices<T>(this IServiceCollection serviceCollection) where T : class, IBaseUser, new()

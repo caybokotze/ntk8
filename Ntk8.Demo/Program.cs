@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ namespace Ntk8.Demo
         static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.WebHost.UseDefaultServiceProvider(options => options.ValidateScopes = true);
             ConfigureDependencies(builder);
 
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -25,8 +27,7 @@ namespace Ntk8.Demo
             app.UseRouting();
             app.UseNtk8JwtMiddleware<User>();
             app.UseNtk8ExceptionMiddleware();
-
-            await Task.Delay(1000);
+            
             var _ = new AuthHandler(app, 
                 app.Resolve<IAccountService>(),
                 app.Resolve<IQueryExecutor>(),

@@ -63,7 +63,7 @@ FROM users u
          LEFT JOIN roles r on ur.role_id = r.id
 WHERE u.id = @Id;";
 
-                var result = Query<T, RefreshToken, Role, T>(sql,
+                var result = QueryList<T, RefreshToken, Role, T>(sql,
                     (user, token, role) =>
                     {
                         if (token is not null)

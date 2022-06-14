@@ -12,9 +12,9 @@
         <RepositoryType>github</RepositoryType>
         <Authors>Caybo Kotze</Authors>
         <Company>Merge Digital</Company>
-        <PackageReleaseNotes>Added interface for query and commands to make things easilty overridable</PackageReleaseNotes>
+        <PackageReleaseNotes>Upgrade deps on dapper.cqrs</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>4.0.0</PackageVersion>
+        <PackageVersion>4.0.1</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
@@ -23,7 +23,7 @@
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="11.0.1" />
         <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
-        <PackageReference Include="Dapper.CQRS" Version="1.2.3" />
+        <PackageReference Include="Dapper.CQRS" Version="1.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />

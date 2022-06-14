@@ -223,7 +223,7 @@ namespace Ntk8.Services
                 return GetRequestHeaders()[ControllerConstants.IpForwardHeader];
             }
 
-            return GetRemoteIpAddress();
+            return GetRemoteIpAddress() ?? string.Empty;
         }
     }
 }

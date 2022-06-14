@@ -63,7 +63,7 @@ WHERE u.email = @EmailAddress;";
             try
             {
                 var roles = new List<Role>();
-                var result = Query<T, RefreshToken, Role, T>(
+                var result = QueryList<T, RefreshToken, Role, T>(
                     sql,
                     (user, token, role) =>
                     {

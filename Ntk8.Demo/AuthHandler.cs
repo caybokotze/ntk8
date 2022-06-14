@@ -134,7 +134,7 @@ namespace Ntk8.Demo
         
         public async Task SecureEndpoint(HttpContext context)
         {
-            new AuthoriseAttribute("admin").OnAuthorization(
+            new AuthoriseAttribute("administrator").OnAuthorization(
                 new AuthorizationFilterContext(new ActionContext(_contextAccessor.HttpContext, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>()));
             
             if (!_accountService.IsUserAuthenticated)
@@ -142,7 +142,7 @@ namespace Ntk8.Demo
                 throw new UserNotAuthenticatedException();
             }
             
-            await context.SerialiseResponseBody($"Hi there {_accountService.CurrentUser?.FirstName}. You have these roles: {_accountService.CurrentUser?.Roles?.Select(s => s.RoleName)}");
+            await context.SerialiseResponseBody($"Hi there {_accountService.CurrentUser?.FirstName}. You have these roles: {string.Join(",",_accountService.CurrentUser?.Roles?.Select(s => s.RoleName))}");
         }
     }
 }
