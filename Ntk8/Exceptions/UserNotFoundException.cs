@@ -4,7 +4,7 @@ namespace Ntk8.Exceptions
 {
     public class UserNotFoundException : Exception
     {
-        public UserNotFoundException() : base("The user does not exist") 
+        public UserNotFoundException(string? message = null) : base(message ?? "The user does not exist") 
         {
             
         }

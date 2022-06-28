@@ -14,7 +14,7 @@
         <Company>Merge Digital</Company>
         <PackageReleaseNotes>Upgrade deps on dapper.cqrs</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>4.0.1</PackageVersion>
+        <PackageVersion>4.0.3</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>

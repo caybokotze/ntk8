@@ -4,7 +4,7 @@ namespace Ntk8.Exceptions
 {
     public class UserIsNotVerifiedException : Exception
     {
-        public UserIsNotVerifiedException() : base("User is not verified")
+        public UserIsNotVerifiedException(string? message = null) : base(message ?? "User is not verified")
         {
             
         }

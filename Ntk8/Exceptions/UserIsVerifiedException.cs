@@ -4,7 +4,7 @@ namespace Ntk8.Exceptions
 {
     public class UserIsVerifiedException : Exception
     {
-        public UserIsVerifiedException() : base("User is already verified.")
+        public UserIsVerifiedException(string? message = null) : base(message ?? "User is already verified.")
         {
             
         }
