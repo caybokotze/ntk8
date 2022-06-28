@@ -11,7 +11,7 @@ using static PeanutButter.RandomGenerators.RandomValueGen;
 
 namespace Ntk8.Tests.TestHelpers
 {
-    public static class TokenHelpers
+    public static class TestTokenHelpers
     {
         public static SecurityToken CreateValidJwtToken(string secret = null, long? userId = null)
         {

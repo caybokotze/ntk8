@@ -73,8 +73,8 @@ namespace Ntk8.Tests.MiddlewareTests
                 authSettings.RefreshTokenSecret = secret;
                 var queryExecutor = Substitute.For<IQueryExecutor>();
                 var tokenService = Substitute.For<ITokenService>();
-                var validToken = TokenHelpers.CreateValidJwtToken(secret, user.Id);
-                var validTokenAsString = TokenHelpers.CreateValidJwtTokenAsString(secret, user.Id);
+                var validToken = TestTokenHelpers.CreateValidJwtToken(secret, user.Id);
+                var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(secret, user.Id);
                 
                 tokenService
                     .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret)
@@ -128,7 +128,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 var ntk8Query = Substitute.For<INtk8Queries<TestUser>>();
                 var secret = GetRandomString(40);
                 var user = TestUser.Create();
-                var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
+                var token = TestTokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var tokenService = Substitute.For<ITokenService>();
                 tokenService
                     .ValidateJwtSecurityToken(Arg.Any<string>(), Arg.Any<string>())
@@ -148,7 +148,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     .Build();
                 // act
                 middleware
-                    .MountUserToContext(httpContext, TokenHelpers.CreateValidJwtTokenAsString(token));
+                    .MountUserToContext(httpContext, TestTokenHelpers.CreateValidJwtTokenAsString(token));
                 // assert
                 Expect(httpContext.Items[AuthenticationConstants.ContextAccount])
                     .To

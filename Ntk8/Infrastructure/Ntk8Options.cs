@@ -39,7 +39,7 @@ public class Ntk8Options<TUser> : IGlobalSettings where TUser : class, IBaseUser
     }
     
     public void OverrideNtk8Commands<TImplementation>() 
-        where TImplementation : class, INtk8Queries<TUser>
+        where TImplementation : class, INtk8Commands
     {
         Ntk8CommandType = typeof(TImplementation);
     }

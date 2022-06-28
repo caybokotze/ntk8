@@ -54,10 +54,8 @@ namespace Ntk8.Tests
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                     config.AddTransient<IDbConnection, DbConnection>(_ => new MySqlConnection(appSettings.GetDefaultConnection()));
-                    config.ConfigureNkt8Settings(appSettings);
                     config.RegisterNtk8Services<TestUser>();
                     config.RegisterNtk8ExceptionHandlers();
-                    config.RegisterNkt8DatabaseServices<TestUser>();
                 });
             });
 

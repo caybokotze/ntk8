@@ -21,7 +21,7 @@ namespace Ntk8.Tests.Data.Commands
                 using (new TransactionScope())
                 {
                     // arrange
-                    var refreshToken = TokenHelpers.CreateRefreshToken();
+                    var refreshToken = TestTokenHelpers.CreateRefreshToken();
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var commandExecutor = Resolve<ICommandExecutor>();
 

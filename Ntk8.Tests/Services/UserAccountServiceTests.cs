@@ -51,11 +51,11 @@ namespace Ntk8.Tests.Services
                 var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IBaseUser>();
-                var validJwtToken = TokenHelpers
+                var validJwtToken = TestTokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
                 var token = new ResetTokenResponse
                 {
-                    Token = TokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                    Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
                 var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
                 authenticateRequest.Password = GetRandomString();
@@ -67,7 +67,7 @@ namespace Ntk8.Tests.Services
                     .Returns(token);
 
                 tokenService.GenerateRefreshToken()
-                    .Returns(TokenHelpers.CreateRefreshToken());
+                    .Returns(TestTokenHelpers.CreateRefreshToken());
 
                 var accountService = Create(ntk8Queries, null, tokenService);
                 // act
