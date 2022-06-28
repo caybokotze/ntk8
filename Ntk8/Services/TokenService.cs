@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +9,7 @@ using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using Ntk8.Utilities;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Ntk8.Services
@@ -27,16 +27,16 @@ namespace Ntk8.Services
         string GetRefreshToken();
     }
 
-    public class TokenService<T> : ITokenService where T : class, IBaseUser, new()
+    public class TokenService<TUser> : ITokenService where TUser : class, IBaseUser, new()
     {
         private readonly INtk8Commands _ntk8Commands;
-        private readonly INtk8Queries<T> _ntk8Queries;
+        private readonly INtk8Queries<TUser> _ntk8Queries;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
             INtk8Commands ntk8Commands,
-            INtk8Queries<T> ntk8Queries,
+            INtk8Queries<TUser> ntk8Queries,
             IAuthSettings authSettings,
             IHttpContextAccessor contextAccessor)
         {
@@ -148,10 +148,7 @@ namespace Ntk8.Services
 
         public string RandomTokenString()
         {
-            var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            var randomBytes = new byte[40];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            return BitConverter.ToString(randomBytes).Replace("-", "");
+            return TokenHelpers.GenerateToken();
         }
         
         public void SetRefreshTokenCookie(string token)
