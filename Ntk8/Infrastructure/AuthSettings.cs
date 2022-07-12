@@ -31,6 +31,7 @@ namespace Ntk8.Models
             PasswordResetTokenTTL = 900;
             UserVerificationTokenTTL = 900;
         }
+        
         public string? RefreshTokenSecret { get; set; }
         public int RefreshTokenTTL { get; set; }
         public int JwtTTL { get; set; }

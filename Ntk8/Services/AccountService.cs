@@ -37,7 +37,8 @@ namespace Ntk8.Services
         }
 
         public IBaseUser? CurrentUser => _accountState.CurrentUser;
-        public bool IsUserAuthenticated => _accountState.CurrentJwtToken is not null;
+        public bool IsUserAuthenticated => _accountState.CurrentJwtToken is not null 
+                                           || _accountState.CurrentRefreshToken is not null;
 
         /// <summary>
         /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.

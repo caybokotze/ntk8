@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
+using Microsoft.Extensions.Logging;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -87,8 +89,9 @@ WHERE u.verification_token = @Token;";
                 user.Roles = roles.ToArray();
                 Result = user;
             }
-            catch
+            catch (Exception e)
             {
+                Logger.LogError(e.Message, e);
                 Result = null;
             }
         }

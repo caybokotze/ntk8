@@ -47,19 +47,19 @@ namespace Ntk8.Demo
         {
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
-            builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
+            builder.Services.AddTransient<IDbConnection, DbConnection>(_ => 
+                new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
-            builder.Services.ConfigureNtk8<User>();
-
             builder.Services.ConfigureNtk8<User>(o =>
             {
+                o.UseJwt = true;
                 o.OverrideNtk8Queries<Ntk8Queries<User>>();
                 o.ConfigureAuthSettings(a =>
                 {
                     a.JwtTTL = 1000;
+                    a.UserVerificationTokenTTL = 10_000;
                 });
             });
-            
         }
 
         public static string GetConnectionString()
