@@ -74,7 +74,7 @@ namespace Ntk8.Tests
                 throw new TransactionException("Tests that resolve real dependencies should be created inside of a transaction.");
             }
             
-            return ServiceProvider.GetRequiredService<T>();
+            return ServiceProvider!.GetRequiredService<T>();
         }
     }
 }

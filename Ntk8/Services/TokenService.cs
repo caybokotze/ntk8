@@ -18,9 +18,10 @@ namespace Ntk8.Services
     {
         ResetTokenResponse GenerateJwtToken(int userId, Role[]? roles);
         (bool isActive, int userId, Role[]? roles) IsRefreshTokenActive(string token);
-        RefreshToken GenerateRefreshToken();
+        RefreshToken GenerateRefreshToken(int userId);
         ResetTokenResponse GenerateJwtToken(string refreshToken);
         void SetRefreshTokenCookie(string token);
+        void RevokeRefreshToken(RefreshToken? token);
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
     }
 
@@ -42,18 +43,20 @@ namespace Ntk8.Services
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
-        
-        public string GetRefreshToken()
-        {
-            return _contextAccessor
-                .HttpContext
-                .Request
-                .Cookies[AuthenticationConstants.RefreshToken];
-        }
 
-        public void RevokeRefreshToken(RefreshToken token)
+        public void RevokeRefreshToken(RefreshToken? token)
         {
-            _contextAccessor.HttpContext.Response.Cookies.Append(AuthenticationConstants.RefreshToken, "");
+            _contextAccessor
+                .HttpContext
+                .Response
+                .Cookies
+                .Append(AuthenticationConstants.RefreshToken, "");
+            
+            if (token is null)
+            {
+                return;
+            }
+            
             token.DateRevoked = DateTime.UtcNow;
             token.RevokedByIp = _contextAccessor.GetIpAddress();
             _ntk8Commands.UpdateRefreshToken(token);
@@ -133,10 +136,11 @@ namespace Ntk8.Services
             };
         }
 
-        public RefreshToken GenerateRefreshToken()
+        public RefreshToken GenerateRefreshToken(int userId)
         {
             return new RefreshToken(TokenHelpers.GenerateCryptoRandomToken(_authSettings.RefreshTokenLength))
             {
+                UserId = userId,
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = _contextAccessor.GetIpAddress()

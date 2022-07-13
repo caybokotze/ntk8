@@ -51,7 +51,9 @@ namespace Ntk8.Services
         /// <exception cref="InvalidPasswordException"></exception>
         public AuthenticatedResponse AuthenticateUser(AuthenticateRequest authenticationRequest)
         {
-            var user = _ntk8Queries.FetchUserByEmailAddress(authenticationRequest.Email ?? string.Empty);
+            var user = _ntk8Queries
+                .FetchUserByEmailAddress(authenticationRequest.Email 
+                                         ?? string.Empty);
             
             if (user is null)
             {
@@ -70,10 +72,9 @@ namespace Ntk8.Services
 
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles);
 
-            var refreshToken = _tokenService.GenerateRefreshToken();
+            _tokenService.RevokeRefreshToken(user.RefreshToken);
 
-            refreshToken.UserId = user.Id;
-            _ntk8Commands.InvalidateRefreshToken(user.RefreshToken?.Token ?? string.Empty);
+            var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
             try
             {
@@ -84,7 +85,7 @@ namespace Ntk8.Services
                 _logger.LogError(e.Message, e);
                 _logger.LogInformation("Trying again");
                 
-                var newRefreshToken = _tokenService.GenerateRefreshToken();
+                var newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
                 _ntk8Commands.InsertRefreshToken(newRefreshToken);
             }
 

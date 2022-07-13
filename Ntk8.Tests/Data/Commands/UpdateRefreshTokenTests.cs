@@ -21,6 +21,7 @@ public class UpdateRefreshTokenTests
         public void ShouldUpdateRefreshToken()
         {
             using var scope = new TransactionScope();
+            
             // arrange
             var queryExecutor = Resolve<IQueryExecutor>();
             var commandExecutor = Resolve<ICommandExecutor>();
@@ -52,6 +53,7 @@ public class UpdateRefreshTokenTests
             Expect(expectedRefreshToken?.Expires)
                 .To.Approximately
                 .Equal(DateTime.UtcNow.AddDays(1));
+            
             Expect(expectedRefreshToken?.RevokedByIp).To.Equal(refreshToken.RevokedByIp);
             Expect(expectedRefreshToken?.DateRevoked).To.Approximately.Equal(DateTime.UtcNow.AddMinutes(5));
             Expect(expectedRefreshToken?.Id).To.Equal(refreshTokenId);
@@ -63,6 +65,7 @@ public class UpdateRefreshTokenTests
         public void ShouldOnlyUpdateExpectedToken()
         {
             using var scope = new TransactionScope();
+            
             // arrange
             var queryExecutor = Resolve<IQueryExecutor>();
             var commandExecutor = Resolve<ICommandExecutor>();

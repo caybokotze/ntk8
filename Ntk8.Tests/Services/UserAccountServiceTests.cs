@@ -67,7 +67,7 @@ namespace Ntk8.Tests.Services
                 tokenService.GenerateJwtToken(user.Id, user.Roles)
                     .Returns(token);
 
-                tokenService.GenerateRefreshToken()
+                tokenService.GenerateRefreshToken(user.Id)
                     .Returns(TestTokenHelpers.CreateRefreshToken());
 
                 var accountService = Create(ntk8Queries, null, tokenService);
@@ -128,7 +128,7 @@ namespace Ntk8.Tests.Services
 
                 var refreshToken = TestTokenHelpers.CreateRefreshToken();
 
-                tokenService.GenerateRefreshToken()
+                tokenService.GenerateRefreshToken(user.Id)
                     .Returns(refreshToken);
 
                 var accountService = Create(ntk8Queries, null, tokenService);
@@ -137,16 +137,49 @@ namespace Ntk8.Tests.Services
                 // assert
                 Expect(tokenService)
                     .To.Have.Received(1)
-                    .GenerateRefreshToken();
+                    .GenerateRefreshToken(user.Id);
             }
 
             [Test]
             public void ShouldInvalidateOldRefreshToken()
             {
                 // arrange
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Substitute.For<ITokenService>();
+                var user = GetRandom<IBaseUser>();
+                var validJwtToken = TestTokenHelpers
+                    .CreateValidJwtToken(GetRandomString(40), user.Id);
+                
+                var resetTokenResponse = new ResetTokenResponse
+                {
+                    Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                };
+                
+                var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
+                authenticateRequest.Password = GetRandomString();
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
+
+                ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>())
+                    .Returns(user);
+
+                tokenService
+                    .GenerateJwtToken(Arg.Any<int>(), Arg.Any<Role[]>())
+                    .Returns(resetTokenResponse);
+
+                var refreshToken = TestTokenHelpers.CreateRefreshToken();
+
+                tokenService.GenerateRefreshToken(user.Id)
+                    .Returns(refreshToken);
+
+                var accountService = Create(ntk8Queries, null, tokenService);
                 
                 // act
+                accountService.AuthenticateUser(authenticateRequest);
+                
                 // assert
+                Expect(tokenService)
+                    .To.Have.Received(1)
+                    .RevokeRefreshToken(user.RefreshToken);
             }
 
             [Test]

@@ -102,21 +102,22 @@ namespace Ntk8.Tests.Services
                 // arrange
                 var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
                 var tokenService = Create(ntk8Queries);
-                var randomUser = TestUser.Create();
-                var refreshToken = tokenService.GenerateRefreshToken();
+                var user = TestUser.Create();
+                
+                var refreshToken = tokenService.GenerateRefreshToken(user.Id);
 
-                randomUser.RefreshToken = refreshToken;
+                user.RefreshToken = refreshToken;
                 
                 ntk8Queries.FetchUserByRefreshToken(Arg.Any<string>())
-                    .Returns(randomUser);
+                    .Returns(user);
 
                 var _ = tokenService
-                    .IsRefreshTokenActive(refreshToken.Token);
+                    .IsRefreshTokenActive(refreshToken.Token ?? string.Empty);
                 // act
                 // assert
-                Expect(ntk8Queries.FetchUserByRefreshToken(refreshToken.Token))
+                Expect(ntk8Queries.FetchUserByRefreshToken(refreshToken.Token ?? string.Empty))
                     .To
-                    .Equal(randomUser);
+                    .Equal(user);
             }
             
             [Test]

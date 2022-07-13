@@ -12,7 +12,6 @@ public interface INtk8Commands
     int InsertRole(Role role);
     int InsertUser(IBaseUser user);
     int InsertUserRole(UserRole userRole);
-    void InvalidateRefreshToken(string refreshToken);
     void UpdateRefreshToken(RefreshToken refreshToken);
     void UpdateUser(IBaseUser user);
 }
@@ -54,11 +53,6 @@ public class Ntk8Commands : INtk8Commands
     public int InsertUserRole(UserRole userRole)
     {
         return _commandExecutor.Execute(new InsertUserRole(userRole));
-    }
-
-    public void InvalidateRefreshToken(string refreshToken)
-    {
-        _commandExecutor.Execute(new InvalidateRefreshToken(refreshToken));
     }
 
     public void UpdateRefreshToken(RefreshToken refreshToken)

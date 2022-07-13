@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Ntk8.Constants;
 
 namespace Ntk8.Utilities;
 
@@ -32,5 +33,13 @@ public static class HttpContextHelpers
         }
 
         return contextAccessor.GetRemoteIpAddress() ?? string.Empty;
+    }
+
+    public static string GetRefreshToken(this IHttpContextAccessor contextAccessor)
+    {
+        return contextAccessor
+            .HttpContext
+            .Request
+            .Cookies[AuthenticationConstants.RefreshToken];
     }
 }
