@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
 using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
@@ -16,6 +17,7 @@ namespace Ntk8.Services
         private readonly IAuthSettings _authSettings;
         private readonly IBaseUser _baseUser;
         private readonly IAccountState _accountState;
+        private readonly ILogger<AccountService<T>> _logger;
 
         public AccountService(
             INtk8Commands ntk8Commands,
@@ -23,7 +25,8 @@ namespace Ntk8.Services
             ITokenService tokenService,
             IAuthSettings authSettings,
             IBaseUser baseUser,
-            IAccountState accountState)
+            IAccountState accountState,
+            ILogger<AccountService<T>> logger)
         {
             _ntk8Commands = ntk8Commands;
             _ntk8Queries = ntk8Queries;
@@ -31,6 +34,7 @@ namespace Ntk8.Services
             _authSettings = authSettings;
             _baseUser = baseUser;
             _accountState = accountState;
+            _logger = logger;
         }
 
         public IBaseUser? CurrentUser => _accountState.CurrentUser;
@@ -67,16 +71,22 @@ namespace Ntk8.Services
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles);
 
             var refreshToken = _tokenService.GenerateRefreshToken();
-            
-            if (refreshToken is null)
-            {
-                throw new InvalidRefreshTokenException("Something went wrong when trying to generate a new refresh token");
-            }
-            
+
             refreshToken.UserId = user.Id;
             _ntk8Commands.InvalidateRefreshToken(user.RefreshToken?.Token ?? string.Empty);
-            
-            _ntk8Commands.InsertRefreshToken(refreshToken);
+
+            try
+            {
+                _ntk8Commands.InsertRefreshToken(refreshToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e);
+                _logger.LogInformation("Trying again");
+                
+                var newRefreshToken = _tokenService.GenerateRefreshToken();
+                _ntk8Commands.InsertRefreshToken(newRefreshToken);
+            }
 
             var response = user.MapFromTo(new AuthenticatedResponse());
             

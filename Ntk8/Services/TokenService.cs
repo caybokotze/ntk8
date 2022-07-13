@@ -135,9 +135,8 @@ namespace Ntk8.Services
 
         public RefreshToken GenerateRefreshToken()
         {
-            return new RefreshToken
+            return new RefreshToken(TokenHelpers.GenerateCryptoRandomToken(_authSettings.RefreshTokenLength))
             {
-                Token = TokenHelpers.GenerateCryptoRandomToken(_authSettings.RefreshTokenLength),
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = _contextAccessor.GetIpAddress()

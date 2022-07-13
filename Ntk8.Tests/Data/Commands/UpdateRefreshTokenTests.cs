@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
@@ -30,19 +29,19 @@ public class UpdateRefreshTokenTests
             // act
             var userid = commandExecutor.Execute(new InsertUser(user));
             refreshToken.UserId = userid;
-            commandExecutor.Execute(new InsertRefreshToken(refreshToken));
+            var _ = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
             var initialRetrievedUser = queryExecutor
                 .Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token ?? string.Empty));
 
             if (initialRetrievedUser is not null)
             {
-                refreshToken.DateCreated = DateTime.UtcNow.AddMinutes(30);
+                refreshToken.DateRevoked = DateTime.UtcNow.AddMinutes(5);
                 refreshToken.Expires = DateTime.UtcNow.AddDays(1);
-                refreshToken.CreatedByIp = RandomValueGen.GetRandomIPv4Address();
-                refreshToken.Token = "abc";
+                refreshToken.RevokedByIp = RandomValueGen.GetRandomIPv4Address();
             }
             
             commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
+            
             var secondRetrievedUser =
                 queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token ?? string.Empty));
 
@@ -51,6 +50,15 @@ public class UpdateRefreshTokenTests
             Expect(expectedRefreshToken?.Expires)
                 .To.Approximately
                 .Equal(DateTime.UtcNow.AddMinutes(30));
-        }    
+        }
+
+        [Test]
+        public void ShouldOnlyUpdateExpectedToken()
+        {
+            // arrange
+            
+            // act
+            // assert
+        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0aee953d_002D66da_002D41e2_002Dbbfa_002D6124b622ecaf/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldUpdateRefreshToken #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Commands.UpdateRefreshTokenTests+Transactions.ShouldUpdateRefreshToken&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Commands.UpdateRefreshTokenTests+Transactions&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1fb354f7_002Dae90_002D49ef_002Da83a_002D4ace2145a81b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateNewRefreshToken" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;

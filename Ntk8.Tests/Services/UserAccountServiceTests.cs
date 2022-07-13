@@ -1,5 +1,6 @@
 ﻿using System.Transactions;
 using Dapper.CQRS;
+using Microsoft.Extensions.Logging;
 using NExpect;
 using NSubstitute;
 using Ntk8.DatabaseServices;
@@ -432,7 +433,8 @@ namespace Ntk8.Tests.Services
                 tokenService ?? Substitute.For<ITokenService>(),
                 authSettings ?? CreateAuthSettings(),
                 GetRandom<IBaseUser>(), 
-                accountState ?? Substitute.For<IAccountState>());
+                accountState ?? Substitute.For<IAccountState>(),
+                Substitute.For<ILogger<AccountService<TestUser>>>());
         }
 
         private static AuthSettings CreateAuthSettings()

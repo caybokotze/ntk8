@@ -1,12 +1,10 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Models;
-using Ntk8.Services;
 using Ntk8.Utilities;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
@@ -55,9 +53,8 @@ namespace Ntk8.Tests.TestHelpers
 
         public static RefreshToken CreateRefreshToken()
         {
-            return new RefreshToken
+            return new RefreshToken(TokenHelpers.GenerateCryptoRandomToken())
             {
-                Token = TokenHelpers.GenerateCryptoRandomToken(),
                 Expires = DateTime.UtcNow.AddSeconds(900),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = GetRandomIPv4Address()

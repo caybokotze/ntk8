@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS refresh_tokens
 	created_by_ip varchar(30) null,
 	date_revoked datetime null,
 	revoked_by_ip varchar(30) null,
-	replaced_by_token varchar(100) null,
 	CONSTRAINT refresh_tokens_user_id
 		FOREIGN KEY (user_id) REFERENCES users (id)
 );

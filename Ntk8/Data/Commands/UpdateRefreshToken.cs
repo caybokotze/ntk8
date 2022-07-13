@@ -11,16 +11,15 @@ namespace Ntk8.Data.Commands
         {
             RefreshToken = refreshToken;
         }
-        
+
         public override void Execute()
         {
-            Result = Execute("UPDATE refresh_tokens " +
-                             "SET token = @RefreshToken" +
-                             "WHERE token = @RefreshToken",
-                new
-                {
-                    RefreshToken = RefreshToken.Token
-                });
+            Result = Execute(@"UPDATE refresh_tokens 
+                        SET expires = @Expires,
+                        date_revoked = @DateRevoked,
+                        revoked_by_ip = @RevokedByIp
+                        WHERE token = @Token;",
+                RefreshToken);
         }
     }
 }

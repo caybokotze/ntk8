@@ -5,15 +5,16 @@ namespace Ntk8.Models
 {
     public class RefreshToken
     {
-        public RefreshToken()
+        public RefreshToken(string? token = null)
         {
+            Token = token;
             DateCreated = DateTime.UtcNow;
         }
         
         [Key]
         public long Id { get; set; }
         public int UserId { get; set; }
-        public string? Token { get; set; }
+        public string? Token { get; }
         public DateTime? Expires { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;
         public DateTime DateCreated { get; set; }
