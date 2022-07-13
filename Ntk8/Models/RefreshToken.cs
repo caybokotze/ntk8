@@ -12,7 +12,7 @@ namespace Ntk8.Models
         
         [Key]
         public long Id { get; set; }
-        public long UserId { get; set; }
+        public int UserId { get; set; }
         public string? Token { get; set; }
         public DateTime? Expires { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;

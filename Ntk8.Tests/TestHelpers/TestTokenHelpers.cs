@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.Models;
 using Ntk8.Services;
+using Ntk8.Utilities;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
 namespace Ntk8.Tests.TestHelpers
@@ -54,19 +55,13 @@ namespace Ntk8.Tests.TestHelpers
 
         public static RefreshToken CreateRefreshToken()
         {
-            var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            var randomBytes = new byte[40];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            var token = BitConverter.ToString(randomBytes).Replace("-", "");
             return new RefreshToken
             {
-                Token = token,
-                Expires = DateTime.UtcNow.AddSeconds(AccountService<TestUser>.RESET_TOKEN_TTL),
+                Token = TokenHelpers.GenerateCryptoRandomToken(),
+                Expires = DateTime.UtcNow.AddSeconds(900),
                 DateCreated = DateTime.UtcNow,
                 CreatedByIp = GetRandomIPv4Address()
             };
-            
-            
         }
 
         public static bool IsJwtTokenValid(string token, string refreshTokenSecret)

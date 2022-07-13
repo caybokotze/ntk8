@@ -10,9 +10,6 @@ namespace Ntk8.Services
 {
     public class AccountService<T> : IAccountService where T : class, IBaseUser, new()
     {
-        public static readonly int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
-        public static readonly int RESET_TOKEN_TTL = 43200; // in seconds
-
         private readonly INtk8Commands _ntk8Commands;
         private readonly INtk8Queries<T> _ntk8Queries;
         private readonly ITokenService _tokenService;
@@ -70,13 +67,15 @@ namespace Ntk8.Services
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles);
 
             var refreshToken = _tokenService.GenerateRefreshToken();
-            refreshToken.UserId = user.Id;
-
-            if (user.RefreshToken is not null)
+            
+            if (refreshToken is null)
             {
-                _ntk8Commands.InvalidateRefreshToken(user.RefreshToken?.Token ?? string.Empty);
+                throw new InvalidRefreshTokenException("Something went wrong when trying to generate a new refresh token");
             }
-
+            
+            refreshToken.UserId = user.Id;
+            _ntk8Commands.InvalidateRefreshToken(user.RefreshToken?.Token ?? string.Empty);
+            
             _ntk8Commands.InsertRefreshToken(refreshToken);
 
             var response = user.MapFromTo(new AuthenticatedResponse());
@@ -101,9 +100,7 @@ namespace Ntk8.Services
                 
                 existingUser.DateModified = DateTime.UtcNow;
                 existingUser.DateResetTokenExpires = DateTime.UtcNow
-                    .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
-                        ? VERIFICATION_TOKEN_TTL
-                        : _authSettings.UserVerificationTokenTTL);
+                    .AddSeconds(_authSettings.UserVerificationTokenTTL);
                 _ntk8Commands.UpdateUser(existingUser);
                 return;
             }
@@ -111,13 +108,11 @@ namespace Ntk8.Services
             var user = registerRequest.MapFromTo((T)_baseUser);
             
             user.IsActive = true;
-            user.VerificationToken = _tokenService.RandomTokenString();
+            user.VerificationToken = TokenHelpers.GenerateCryptoRandomToken();
             user.DateCreated = DateTime.UtcNow;
             user.DateModified = DateTime.UtcNow;
             user.DateResetTokenExpires = DateTime.UtcNow
-                .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
-                    ? VERIFICATION_TOKEN_TTL
-                    : _authSettings.UserVerificationTokenTTL);
+                .AddSeconds(_authSettings.UserVerificationTokenTTL);
             user.PasswordHash = BC.HashPassword(registerRequest.Password);
 
             _ntk8Commands.InsertUser(user);
@@ -155,9 +150,7 @@ namespace Ntk8.Services
             if (user.DateResetTokenExpires != null
                 && user.DateResetTokenExpires
                     .Value
-                    .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
-                        ? VERIFICATION_TOKEN_TTL
-                        : _authSettings.UserVerificationTokenTTL) < DateTime.UtcNow)
+                    .AddSeconds(_authSettings.UserVerificationTokenTTL) < DateTime.UtcNow)
             {
                 throw new VerificationTokenExpiredException();
             }
@@ -191,19 +184,15 @@ namespace Ntk8.Services
             if (user.ResetToken is not null)
             {
                 user.DateResetTokenExpires = DateTime.UtcNow
-                    .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
-                        ? RESET_TOKEN_TTL
-                        : _authSettings.PasswordResetTokenTTL);
+                    .AddSeconds(_authSettings.PasswordResetTokenTTL);
                 
                 _ntk8Commands.UpdateUser(user);
                 return user.ResetToken;
             }
             
-            user.ResetToken = _tokenService.RandomTokenString();
+            user.ResetToken = TokenHelpers.GenerateCryptoRandomToken();
             user.DateResetTokenExpires = DateTime.UtcNow
-                .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
-                    ? RESET_TOKEN_TTL
-                    : _authSettings.PasswordResetTokenTTL);
+                .AddSeconds(_authSettings.PasswordResetTokenTTL);
 
             _ntk8Commands.UpdateUser(user);
 

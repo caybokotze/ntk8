@@ -104,7 +104,46 @@ namespace Ntk8.Tests.Services
             public void ShouldGenerateNewRefreshToken()
             {
                 // arrange
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Substitute.For<ITokenService>();
+                var user = GetRandom<IBaseUser>();
+                var validJwtToken = TestTokenHelpers
+                    .CreateValidJwtToken(GetRandomString(40), user.Id);
+                
+                var resetTokenResponse = new ResetTokenResponse
+                {
+                    Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                };
+                
+                var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
+                authenticateRequest.Password = GetRandomString();
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
 
+                ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>())
+                    .Returns(user);
+
+                tokenService.GenerateJwtToken(Arg.Any<int>(), Arg.Any<Role[]>())
+                    .Returns(resetTokenResponse);
+
+                var refreshToken = TestTokenHelpers.CreateRefreshToken();
+
+                tokenService.GenerateRefreshToken()
+                    .Returns(refreshToken);
+
+                var accountService = Create(ntk8Queries, null, tokenService);
+                // act
+                accountService.AuthenticateUser(authenticateRequest);
+                // assert
+                Expect(tokenService)
+                    .To.Have.Received(1)
+                    .GenerateRefreshToken();
+            }
+
+            [Test]
+            public void ShouldInvalidateOldRefreshToken()
+            {
+                // arrange
+                
                 // act
                 // assert
             }

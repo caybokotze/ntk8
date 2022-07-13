@@ -50,6 +50,8 @@ namespace Ntk8.Tests
                 {
                     Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
                     config.AddSingleton<IMemoryCache, MemoryCache>();
+                    config.AddTransient<IExecutable, Executable>();
+                    config.AddTransient<IQueryable, Queryable>();
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

@@ -1,4 +1,9 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0aee953d_002D66da_002D41e2_002Dbbfa_002D6124b622ecaf/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldUpdateRefreshToken #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Commands.UpdateRefreshTokenTests+Transactions.ShouldUpdateRefreshToken&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1fb354f7_002Dae90_002D49ef_002Da83a_002D4ace2145a81b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateNewRefreshToken" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.AccountServiceTests+Behaviour+RevokeRefreshTokenAndGenerateNewRefreshToken+WhenUserHasExistingRefreshTokens.ShouldGenerateNewRefreshToken&lt;/TestId&gt;&#xD;
@@ -23,6 +28,11 @@
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net5.0::Ntk8.Tests.Infrastructure.TokenServiceDependencyLifecycleTests+WhenResolvingForTokenService.ShouldResolveAsScoped&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5f62e5fe_002Dc51f_002D4ae0_002D8b3c_002D8714e2072f63/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldUpdateRefreshToken" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Commands.UpdateRefreshTokenTests+Transactions.ShouldUpdateRefreshToken&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=88ad6b4c_002D3445_002D42e6_002Dadd9_002D65918956e98b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldAttachUserRolesToFirstResult #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Queries.User.FetchUserByEmailAddressTests+Behaviour.ShouldAttachUserRolesToFirstResult&lt;/TestId&gt;&#xD;
@@ -34,7 +44,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d0c22442_002D9be8_002D4dac_002Db476_002Db4aaefda7b17/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldAddAuthenticationRequestHeader" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="C:\code\personal\ntk8\Ntk8.Tests" Presentation="&amp;lt;Ntk8.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d56d7fa9_002Ddd9a_002D414c_002Db2b2_002D58df3406e70b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TokenServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d56d7fa9_002Ddd9a_002D414c_002Db2b2_002D58df3406e70b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TokenServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="C:\code\personal\Ntk8\Ntk8.Tests" Presentation="&amp;lt;Ntk8.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

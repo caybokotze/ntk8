@@ -29,7 +29,8 @@ namespace Ntk8.Data.Commands
                     @DateCreated, 
                     @CreatedByIp, 
                     @DateRevoked, 
-                    @RevokedByIp); 
+                    @RevokedByIp);
+
             SELECT last_insert_id();", 
                     RefreshToken);
         }

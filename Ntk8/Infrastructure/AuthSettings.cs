@@ -19,13 +19,14 @@ namespace Ntk8.Models
         int JwtTTL { get; set; }
         int PasswordResetTokenTTL { get; set; }
         int UserVerificationTokenTTL { get; set; }
+        int RefreshTokenLength { get; set; }
     }
 
     public class AuthSettings : IAuthSettings
     {
         public AuthSettings()
         {
-            RefreshTokenSecret = TokenHelpers.GenerateToken();
+            RefreshTokenSecret = TokenHelpers.GenerateCryptoRandomToken();
             RefreshTokenTTL = 3600;
             JwtTTL = 900;
             PasswordResetTokenTTL = 900;
@@ -37,5 +38,6 @@ namespace Ntk8.Models
         public int JwtTTL { get; set; }
         public int PasswordResetTokenTTL { get; set; }
         public int UserVerificationTokenTTL { get; set; }
+        public int RefreshTokenLength { get; set; }
     }
 }
