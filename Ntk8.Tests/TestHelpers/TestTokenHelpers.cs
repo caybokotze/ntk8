@@ -12,7 +12,9 @@ namespace Ntk8.Tests.TestHelpers
 {
     public static class TestTokenHelpers
     {
-        public static SecurityToken CreateValidJwtToken(string secret = null, long? userId = null)
+        public static SecurityToken CreateValidJwtToken(
+            string? secret = null, 
+            long? userId = null)
         {
             userId ??= GetRandomInt();
             secret ??= GetRandomString(50);

@@ -5,7 +5,12 @@ namespace Ntk8.Models
 {
     public class RefreshToken
     {
-        public RefreshToken(string? token = null)
+        public RefreshToken()
+        {
+            // required
+        }
+        
+        public RefreshToken(string token)
         {
             Token = token;
             DateCreated = DateTime.UtcNow;
