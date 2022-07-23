@@ -130,6 +130,52 @@ namespace Ntk8.Tests.MiddlewareTests
             }
         }
 
+        [TestFixture]
+        public class WhenJwtTokenIsEnabledAndHeaderDoesNotExist
+        {
+            [Test]
+            public async Task ShouldIgnoreAndByPass()
+            {
+                // arrange
+                var authSettings = TestUser.CreateValidAuthenticationSettings();
+                var user = TestUser.Create();
+                var queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Substitute.For<ITokenService>();
+                var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
+                var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
+                
+                tokenService
+                    .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret!)
+                    .Returns(validToken);
+
+                var globalSettings = new GlobalSettings
+                {
+                    UseJwt = true
+                };
+
+                var middleware = Substitute
+                    .For<JwtMiddleware<TestUser>>(
+                        queries, 
+                        authSettings, 
+                        tokenService,
+                        globalSettings);
+
+                var httpContext = new DefaultHttpContext();
+
+                var requestDelegate = Substitute.For<RequestDelegate>();
+                
+                // act
+                
+                await middleware
+                    .InvokeAsync(httpContext, requestDelegate);
+                
+                // assert
+
+                Expect(tokenService.ValidateJwtSecurityToken(Arg.Any<string>(), Arg.Any<string>()))
+                    .To.Not.Have.Been.Called();
+            }
+        }
+
         public class WhenMountingUserToContext
         {
             [Test]

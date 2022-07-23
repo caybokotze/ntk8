@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Models;
@@ -53,5 +54,25 @@ public static class HttpContextHelpers
             .Cookies.TryGetValue(AuthenticationConstants.RefreshToken, out var value);
         
         return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    public static string? GetJwtToken(this HttpContext context)
+    {
+        var value = context.Request.Headers[AuthenticationConstants.DefaultJwtHeader];
+
+        if (value.Count is 0 
+            || string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        try
+        {
+            return value.ToString().Split(" ")[1];
+        }
+        catch (IndexOutOfRangeException)
+        {
+            return null;
+        }
     }
 }

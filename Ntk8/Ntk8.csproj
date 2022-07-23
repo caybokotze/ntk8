@@ -14,7 +14,7 @@
         <Company>Merge Digital</Company>
         <PackageReleaseNotes>Make jwt token creation optional</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>5.0.0-alpha</PackageVersion>
+        <PackageVersion>5.0.1-alpha</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>

@@ -14,6 +14,8 @@
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.Data.Queries.FetchUserByEmailAddressTests+Behaviour.ShouldAttachRefreshTokenToUser&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenMiddlewareIsInvoked.ShouldAddUserToTheHttpContext&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.InfrastructureTests.AuthSettingsTests.ShouldContainExpectedDefaultValues&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenJwtTokenIsEnabledAndTokenIsEmpty.ShouldIgnoreAndByPass&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B4A0B3A1-792F-4A3F-8309-BAFDB7CD122B::net6.0::Ntk8.Tests.MiddlewareTests.JwtMiddlewareTests+WhenJwtTokenIsEnabledAndHeaderDoesNotExist.ShouldIgnoreAndByPass&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1fb354f7_002Dae90_002D49ef_002Da83a_002D4ace2145a81b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ShouldGenerateNewRefreshToken" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;

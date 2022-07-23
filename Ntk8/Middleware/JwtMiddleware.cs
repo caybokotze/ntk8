@@ -38,12 +38,7 @@ namespace Ntk8.Middleware
         {
             try
             {
-                var token = context
-                    .Request
-                    .Headers[AuthenticationConstants.DefaultJwtHeader]
-                    .FirstOrDefault()
-                    ?.Split(" ")
-                    .Last();
+                var token = context.GetJwtToken();
 
                 var useJwt = _globalSettings.UseJwt;
 
