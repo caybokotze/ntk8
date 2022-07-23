@@ -115,7 +115,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     .To
                     .Have
                     .Received(1)
-                    .MountUserToContext(httpContext, validTokenAsString);
+                    .MountUserToContext(httpContext, validTokenAsString, true);
             }
         }
 
@@ -148,9 +148,9 @@ namespace Ntk8.Tests.MiddlewareTests
                     .Build();
                 // act
                 middleware
-                    .MountUserToContext(httpContext, TestTokenHelpers.CreateValidJwtTokenAsString(token));
+                    .MountUserToContext(httpContext, TestTokenHelpers.CreateValidJwtTokenAsString(token), true);
                 // assert
-                Expect(httpContext.Items[AuthenticationConstants.ContextAccount])
+                Expect(httpContext.Items[AuthenticationConstants.CurrentUser])
                     .To
                     .Equal(user);
             }
@@ -170,7 +170,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     JwtTTL = 1000
                 },
                 tokenService ?? Substitute.For<ITokenService>(),
-                Substitute.For<IAccountState>());
+                GetRandom<GlobalSettings>());
         }
     }
 }

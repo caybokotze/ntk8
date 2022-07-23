@@ -16,10 +16,10 @@ namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        ResetTokenResponse GenerateJwtToken(int userId, Role[]? roles);
+        AccessTokenResponse GenerateJwtToken(int userId, Role[]? roles);
         (bool isActive, int userId, Role[]? roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken(int userId);
-        ResetTokenResponse GenerateJwtToken(string refreshToken);
+        AccessTokenResponse GenerateJwtToken(string refreshToken);
         void SetRefreshTokenCookie(string token);
         void RevokeRefreshToken(RefreshToken? token);
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
@@ -81,7 +81,7 @@ namespace Ntk8.Services
             return (refreshToken.IsActive, user.Id, user.Roles);
         }
         
-        public ResetTokenResponse GenerateJwtToken(string refreshToken)
+        public AccessTokenResponse GenerateJwtToken(string refreshToken)
         {
             var (isActive, userId, roles) = IsRefreshTokenActive(refreshToken);
 
@@ -92,13 +92,13 @@ namespace Ntk8.Services
             
             var jwtToken = GenerateJwtToken(userId, roles);
             
-            return new ResetTokenResponse
+            return new AccessTokenResponse
             {
                 Token = jwtToken.Token
             };
         }
 
-        public ResetTokenResponse GenerateJwtToken(int userId, Role[]? roles)
+        public AccessTokenResponse GenerateJwtToken(int userId, Role[]? roles)
         {
             if (_authSettings.RefreshTokenSecret?.Length < 32)
             {
@@ -129,7 +129,7 @@ namespace Ntk8.Services
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             
-            return new ResetTokenResponse
+            return new AccessTokenResponse
             {
                 Token = tokenHandler.WriteToken(token),
                 ExpiryDate = DateTime.UtcNow.AddSeconds(_authSettings.JwtTTL)
@@ -157,7 +157,11 @@ namespace Ntk8.Services
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL)
             };
             
-            _contextAccessor.HttpContext.Response.Cookies.Append(
+            _contextAccessor
+                .HttpContext
+                .Response
+                .Cookies
+                .Append(
                 AuthenticationConstants.RefreshToken, 
                 token,
                 cookieOptions);

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Ntk8.Models;
+using Ntk8.Utilities;
 using static PeanutButter.RandomGenerators.RandomValueGen;
 
 namespace Ntk8.Tests.TestHelpers
@@ -37,9 +38,15 @@ namespace Ntk8.Tests.TestHelpers
 
         public static RefreshToken CreateValidRefreshToken()
         {
-            var refreshToken = GetRandom<RefreshToken>();
-            refreshToken.DateRevoked = null;
-            refreshToken.Expires = DateTime.UtcNow.AddHours(1);
+            var refreshToken = new RefreshToken(TokenHelpers.GenerateCryptoRandomToken())
+            {
+                DateRevoked = null,
+                Expires = DateTime.UtcNow.AddHours(1),
+                CreatedByIp = GetRandomIPv4Address(),
+                DateCreated = DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)),
+                RevokedByIp = null,
+                UserId = 0
+            };
             return refreshToken;
         }
 

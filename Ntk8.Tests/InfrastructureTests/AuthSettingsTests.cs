@@ -3,7 +3,7 @@ using Ntk8.Models;
 using NUnit.Framework;
 using static NExpect.Expectations;
 
-namespace Ntk8.Tests.Infrastructure;
+namespace Ntk8.Tests.InfrastructureTests;
 
 public class AuthSettingsTests
 {

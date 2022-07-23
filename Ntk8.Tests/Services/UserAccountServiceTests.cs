@@ -1,5 +1,6 @@
 ﻿using System.Transactions;
 using Dapper.CQRS;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NExpect;
 using NSubstitute;
@@ -54,7 +55,7 @@ namespace Ntk8.Tests.Services
                 var user = GetRandom<IBaseUser>();
                 var validJwtToken = TestTokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
-                var token = new ResetTokenResponse
+                var token = new AccessTokenResponse
                 {
                     Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
@@ -111,7 +112,7 @@ namespace Ntk8.Tests.Services
                 var validJwtToken = TestTokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
                 
-                var resetTokenResponse = new ResetTokenResponse
+                var resetTokenResponse = new AccessTokenResponse
                 {
                     Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
@@ -150,7 +151,7 @@ namespace Ntk8.Tests.Services
                 var validJwtToken = TestTokenHelpers
                     .CreateValidJwtToken(GetRandomString(40), user.Id);
                 
-                var resetTokenResponse = new ResetTokenResponse
+                var resetTokenResponse = new AccessTokenResponse
                 {
                     Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
                 };
@@ -181,50 +182,204 @@ namespace Ntk8.Tests.Services
                     .To.Have.Received(1)
                     .RevokeRefreshToken(user.RefreshToken);
             }
-
-            [Test]
-            public void ShouldFetchTheUserFromDb()
-            {
-                // arrange
-
-                // act
-                // assert
-            }
-
+            
             [Test]
             public void ShouldAttachUserRolesToUserResponse()
             {
                 // arrange
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Substitute.For<ITokenService>();
+                var user = GetRandom<IBaseUser>();
+                user.Roles = GetRandomArray<Role>();
+                
+                var validJwtToken = TestTokenHelpers
+                    .CreateValidJwtToken(GetRandomString(40), user.Id);
+                
+                var resetTokenResponse = new AccessTokenResponse
+                {
+                    Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                };
+                
+                var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
+                authenticateRequest.Password = GetRandomString();
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
 
-                // act
-                // assert
-            }
+                ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>())
+                    .Returns(user);
 
-            [Test]
-            public void ShouldNotUpdateUser()
-            {
-                // arrange
+                tokenService
+                    .GenerateJwtToken(Arg.Any<int>(), Arg.Any<Role[]>())
+                    .Returns(resetTokenResponse);
+
+                var refreshToken = TestTokenHelpers.CreateRefreshToken();
+
+                tokenService.GenerateRefreshToken(user.Id)
+                    .Returns(refreshToken);
+
+                var accountService = Create(ntk8Queries, null, tokenService);
                 
                 // act
-                // assert
-            }
-
-            [Test]
-            public void ShouldRespondWithUserRoles()
-            {
-                // arrange
+                var response = accountService.AuthenticateUser(authenticateRequest);
                 
-                // act
                 // assert
+                Expect(response.Roles).To.Equal(user.Roles);
             }
 
             [Test]
             public void ShouldSetRefreshTokenCookie()
             {
                 // arrange
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Substitute.For<ITokenService>();
+                var user = GetRandom<IBaseUser>();
+                user.Roles = GetRandomArray<Role>();
+                
+                var validJwtToken = TestTokenHelpers
+                    .CreateValidJwtToken(GetRandomString(40), user.Id);
+                
+                var resetTokenResponse = new AccessTokenResponse
+                {
+                    Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                };
+                
+                var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
+                authenticateRequest.Password = GetRandomString();
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
+
+                ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>())
+                    .Returns(user);
+
+                tokenService
+                    .GenerateJwtToken(Arg.Any<int>(), Arg.Any<Role[]>())
+                    .Returns(resetTokenResponse);
+
+                var refreshToken = TestTokenHelpers.CreateRefreshToken();
+
+                tokenService.GenerateRefreshToken(user.Id)
+                    .Returns(refreshToken);
+
+                var accountService = Create(ntk8Queries, null, tokenService);
                 
                 // act
+                var _ = accountService.AuthenticateUser(authenticateRequest);
+                
                 // assert
+                Expect(tokenService)
+                    .To.Have
+                    .Received(1)
+                    .SetRefreshTokenCookie(refreshToken.Token!);
+            }
+
+            [TestFixture]
+            public class WhenJwtTokensAreEnabled
+            {
+                [Test]
+                public void ShouldReturnJwtTokenWithResponse()
+                {
+                    // arrange
+                    var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                    var tokenService = Substitute.For<ITokenService>();
+                    var user = GetRandom<IBaseUser>();
+                    user.Roles = GetRandomArray<Role>();
+                
+                    var validJwtToken = TestTokenHelpers
+                        .CreateValidJwtToken(GetRandomString(40), user.Id);
+                
+                    var accessTokenResponse = new AccessTokenResponse
+                    {
+                        Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                    };
+                
+                    var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
+                    authenticateRequest.Password = GetRandomString();
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
+
+                    ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>())
+                        .Returns(user);
+
+                    tokenService
+                        .GenerateJwtToken(Arg.Any<int>(), Arg.Any<Role[]>())
+                        .Returns(accessTokenResponse);
+
+                    var refreshToken = TestTokenHelpers.CreateRefreshToken();
+
+                    tokenService.GenerateRefreshToken(user.Id)
+                        .Returns(refreshToken);
+
+                    var globalSettings = new GlobalSettings
+                    {
+                        UseJwt = true
+                    };
+
+                    var accountService = Create(
+                        ntk8Queries, 
+                        null, 
+                        tokenService, 
+                        null, 
+                        globalSettings);
+
+                    // act
+                    var result = accountService.AuthenticateUser(authenticateRequest);
+                
+                    // assert
+                    Expect(result.JwtToken).To.Equal(accessTokenResponse.Token);
+                }   
+            }
+
+            [TestFixture]
+            public class WhenJwtTokensAreDisabled
+            {
+                [Test]
+                public void ShouldNotReturnJwtTokenWithResponse()
+                {
+                    // arrange
+                    var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                    var tokenService = Substitute.For<ITokenService>();
+                    var user = GetRandom<IBaseUser>();
+                    user.Roles = GetRandomArray<Role>();
+                
+                    var validJwtToken = TestTokenHelpers
+                        .CreateValidJwtToken(GetRandomString(40), user.Id);
+                
+                    var accessTokenResponse = new AccessTokenResponse
+                    {
+                        Token = TestTokenHelpers.CreateValidJwtTokenAsString(validJwtToken)
+                    };
+                
+                    var authenticateRequest = user.MapFromTo(new AuthenticateRequest());
+                    authenticateRequest.Password = GetRandomString();
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(authenticateRequest.Password);
+
+                    ntk8Queries.FetchUserByEmailAddress(Arg.Any<string>())
+                        .Returns(user);
+
+                    tokenService
+                        .GenerateJwtToken(Arg.Any<int>(), Arg.Any<Role[]>())
+                        .Returns(accessTokenResponse);
+
+                    var refreshToken = TestTokenHelpers.CreateRefreshToken();
+
+                    tokenService.GenerateRefreshToken(user.Id)
+                        .Returns(refreshToken);
+
+                    var globalSettings = new GlobalSettings
+                    {
+                        UseJwt = false
+                    };
+
+                    var accountService = Create(
+                        ntk8Queries, 
+                        null, 
+                        tokenService, 
+                        null,
+                        globalSettings);
+
+                    // act
+                    var result = accountService.AuthenticateUser(authenticateRequest);
+                
+                    // assert
+                    Expect(result.JwtToken).To.Be.Null();
+                }
             }
         }
 
@@ -458,16 +613,17 @@ namespace Ntk8.Tests.Services
             INtk8Commands? ntk8Commands = null,
             ITokenService? tokenService = null,
             IAuthSettings? authSettings = null,
-            IAccountState? accountState = null)
+            GlobalSettings? globalSettings = null)
         {
             return new AccountService<TestUser>(
                 ntk8Commands ?? Substitute.For<INtk8Commands>(),
                 ntk8Queries ?? Substitute.For<INtk8Queries<TestUser>>(),
                 tokenService ?? Substitute.For<ITokenService>(),
                 authSettings ?? CreateAuthSettings(),
-                GetRandom<IBaseUser>(), 
-                accountState ?? Substitute.For<IAccountState>(),
-                Substitute.For<ILogger<AccountService<TestUser>>>());
+                GetRandom<IBaseUser>(),
+                Substitute.For<ILogger<AccountService<TestUser>>>(),
+                globalSettings ?? GetRandom<GlobalSettings>(),
+                Substitute.For<IHttpContextAccessor>());
         }
 
         private static AuthSettings CreateAuthSettings()

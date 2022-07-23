@@ -45,6 +45,8 @@ namespace Ntk8.Demo
 
         private static void ConfigureDependencies(WebApplicationBuilder builder)
         {
+            builder.Services.AddTransient<IExecutable, Executable>();
+            builder.Services.AddSingleton<IQueryable, Queryable>();
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(_ => 

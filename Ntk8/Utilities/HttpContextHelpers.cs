@@ -1,5 +1,7 @@
+using System;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
+using Ntk8.Models;
 
 namespace Ntk8.Utilities;
 
@@ -15,6 +17,16 @@ public static class HttpContextHelpers
             .ToString();
     }
 
+    public static IBaseUser? GetCurrentUser(this HttpContext httpContext)
+    {
+        if(httpContext.Items.TryGetValue(AuthenticationConstants.CurrentUser, out var value))
+        {
+            return (IBaseUser?) value ?? null;
+        }
+
+        return null;
+    }
+
     public static IHeaderDictionary GetRequestHeaders(this IHttpContextAccessor contextAccessor)
     {
         return contextAccessor
@@ -27,7 +39,7 @@ public static class HttpContextHelpers
     {
         if (contextAccessor
             .GetRequestHeaders()
-            .TryGetValue(Constants.ControllerConstants.IpForwardHeader, out var value))
+            .TryGetValue(ControllerConstants.IpForwardHeader, out var value))
         {
             return value;
         }
@@ -35,10 +47,9 @@ public static class HttpContextHelpers
         return contextAccessor.GetRemoteIpAddress() ?? string.Empty;
     }
 
-    public static string GetRefreshToken(this IHttpContextAccessor contextAccessor)
+    public static string? GetRefreshToken(this HttpContext context)
     {
-        return contextAccessor
-            .HttpContext
+        return context
             .Request
             .Cookies[AuthenticationConstants.RefreshToken];
     }

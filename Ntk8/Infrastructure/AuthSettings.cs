@@ -10,6 +10,7 @@ namespace Ntk8.Models
     public class GlobalSettings : IGlobalSettings
     {
         public bool UseJwt { get; set; }
+        
     }
     
     public interface IAuthSettings

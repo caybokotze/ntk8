@@ -13,7 +13,10 @@ public static class ContainerExtensions
     public static void ConfigureNtk8<TUser>(
         this IServiceCollection serviceCollection,
         Action<Ntk8Options<TUser>>? options = null)
-        where TUser : class, IBaseUser, new()
+        where TUser : 
+        class, 
+        IBaseUser, 
+        new()
     {
         var ntk8Options = new Ntk8Options<TUser>();
         options?.Invoke(ntk8Options);
@@ -46,7 +49,7 @@ public static class ContainerExtensions
             UseJwt = ntk8Options.UseJwt
         });
         
-        serviceCollection.AddSingleton<AuthSettings, AuthSettings>(_ => ntk8Options.GetAuthSettings());
+        serviceCollection.AddSingleton<IAuthSettings, AuthSettings>(_ => ntk8Options.GetAuthSettings());
         RegisterNtk8Services<TUser>(serviceCollection);
         RegisterNtk8ExceptionHandlers(serviceCollection);
     }
@@ -77,12 +80,15 @@ public static class ContainerExtensions
             .AddSingleton<InvalidEmailAddressExceptionMiddleware, InvalidEmailAddressExceptionMiddleware>();
     }
     
-    public static void RegisterNtk8Services<TUser>(this IServiceCollection serviceCollection) where TUser : class, IBaseUser, new()
+    public static void RegisterNtk8Services<TUser>(
+        this IServiceCollection serviceCollection) 
+        where TUser : class, 
+        IBaseUser, 
+        new()
     {
         serviceCollection.AddTransient<IBaseUser, TUser>();
         serviceCollection.AddTransient<JwtMiddleware<TUser>, JwtMiddleware<TUser>>();
-        serviceCollection.AddTransient<IAccountService, AccountService<TUser>>();
         serviceCollection.AddTransient<ITokenService, TokenService<TUser>>();
-        serviceCollection.AddScoped<IAccountState, AccountState>();
+        serviceCollection.AddTransient<IAccountService, AccountService<TUser>>();
     }
 }

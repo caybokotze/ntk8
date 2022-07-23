@@ -9,6 +9,7 @@ using Ntk8.DatabaseServices;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
+using Ntk8.Utilities;
 
 namespace Ntk8.Middleware
 {
@@ -17,18 +18,18 @@ namespace Ntk8.Middleware
         private readonly INtk8Queries<T> _ntk8Queries;
         private readonly IAuthSettings _authSettings;
         private readonly ITokenService _tokenService;
-        private readonly IAccountState _accountState;
+        private readonly IGlobalSettings _globalSettings;
 
         public JwtMiddleware(
             INtk8Queries<T> ntk8Queries,
             IAuthSettings authSettings,
             ITokenService tokenService,
-            IAccountState accountState)
+            IGlobalSettings globalSettings)
         {
             _ntk8Queries = ntk8Queries;
             _authSettings = authSettings;
             _tokenService = tokenService;
-            _accountState = accountState;
+            _globalSettings = globalSettings;
         }
 
         public async Task InvokeAsync(
@@ -44,9 +45,19 @@ namespace Ntk8.Middleware
                     ?.Split(" ")
                     .Last();
 
+                var useJwt = _globalSettings.UseJwt;
+
                 if (token is not null)
                 {
-                    MountUserToContext(context, token);
+                    MountUserToContext(context, token, useJwt);
+                }
+
+                var refreshToken = context.GetRefreshToken();
+
+                if (token is null 
+                    && refreshToken is not null)
+                {
+                    MountUserToContext(context, refreshToken, useJwt);
                 }
 
                 if (!context.Response.HasStarted)
@@ -77,43 +88,57 @@ namespace Ntk8.Middleware
             await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 
-        public void MountUserToContext(
-            HttpContext context,
-            string token)
+        public void MountUserToContext(HttpContext httpContext, string token, bool useJwt)
         {
-            var validatedToken = _tokenService
-                .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret ?? string.Empty);
-
-            if (validatedToken == null)
+            IBaseUser? user;
+            switch (useJwt)
             {
-                throw new InvalidJwtTokenException();
-            }
+                case true:
+                {
+                    var validatedToken = _tokenService
+                        .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret ?? string.Empty);
+                
+                    if (validatedToken is null)
+                    {
+                        throw new InvalidJwtTokenException();
+                    }
             
-            var jwtToken = (JwtSecurityToken) validatedToken;
+                    var jwtToken = (JwtSecurityToken) validatedToken;
 
-            var accountId = int.Parse(jwtToken.Claims
-                .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
-                .Value ?? string.Empty);
+                    var accountId = int.Parse(jwtToken.Claims
+                        .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
+                        .Value ?? string.Empty);
 
-            var user = _ntk8Queries.FetchUserById(accountId);
+                    user = _ntk8Queries.FetchUserById(accountId);
 
-            if (user is null)
-            {
-                throw new UserNotFoundException();
+                    if (user is null)
+                    {
+                        throw new UserNotFoundException();
+                    }
+                
+                    if (user.RefreshToken?.Token is null 
+                        || !user.RefreshToken.IsActive)
+                    {
+                        throw new InvalidRefreshTokenException();
+                    }
+                    
+                    
+                    httpContext.Items.Add(AuthenticationConstants.CurrentUser, user);
+                    break;
+                }
+                case false:
+                {
+                    user = _ntk8Queries.FetchUserByRefreshToken(token);
+                
+                    if (user?.RefreshToken is null)
+                    {
+                        throw new InvalidRefreshTokenException();
+                    }
+                
+                    httpContext.Items.Add(AuthenticationConstants.CurrentUser, user);
+                    break;
+                }
             }
-
-            if (string.IsNullOrEmpty(user?.RefreshToken?.Token))
-            {
-                throw new InvalidRefreshTokenException();
-            }
-
-            if (user.RefreshToken.IsExpired || !user.RefreshToken.IsActive)
-            {
-                throw new InvalidRefreshTokenException();
-            }
-
-            context.Items[AuthenticationConstants.ContextAccount] = user;
-            _accountState.SetCurrentUser(user);
         }
     }
 }

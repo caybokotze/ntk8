@@ -123,7 +123,7 @@ namespace Ntk8.Demo
         public async Task NewToken(HttpContext context)
         {
             var resetTokenRequest = await context
-                .DeserializeRequestBody<ResetTokenRequest>();
+                .DeserializeRequestBody<AccessTokenRequest>();
             
             ValidateModel(resetTokenRequest);
 
