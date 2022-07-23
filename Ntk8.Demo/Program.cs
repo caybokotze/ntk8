@@ -54,7 +54,7 @@ namespace Ntk8.Demo
             builder.Services.AddHttpContextAccessor();
             builder.Services.ConfigureNtk8<User>(o =>
             {
-                o.UseJwt = true;
+                o.UseJwt = false;
                 o.OverrideNtk8Queries<Ntk8Queries<User>>();
                 o.ConfigureAuthSettings(a =>
                 {

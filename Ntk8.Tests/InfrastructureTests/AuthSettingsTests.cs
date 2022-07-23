@@ -15,6 +15,7 @@ public class AuthSettingsTests
         // act
         // assert
         Expect(authSettings.RefreshTokenSecret).To.Not.Be.Empty();
+        Expect(authSettings.RefreshTokenLength).To.Equal(40);
         Expect(authSettings.JwtTTL).To.Equal(900);
         Expect(authSettings.RefreshTokenTTL).To.Equal(3600);
         Expect(authSettings.PasswordResetTokenTTL).To.Equal(900);

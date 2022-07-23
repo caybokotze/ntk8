@@ -51,7 +51,7 @@ public static class HttpContextHelpers
         context
             .Request
             .Cookies.TryGetValue(AuthenticationConstants.RefreshToken, out var value);
-
-        return value;
+        
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 }

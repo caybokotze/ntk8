@@ -47,15 +47,15 @@ namespace Ntk8.Middleware
 
                 var useJwt = _globalSettings.UseJwt;
 
-                if (token is not null)
+                if (token is not null && useJwt)
                 {
                     MountUserToContext(context, token, useJwt);
                 }
 
                 var refreshToken = context.GetRefreshToken();
 
-                if (token is null 
-                    && refreshToken is not null)
+                if (refreshToken is not null
+                    && !useJwt)
                 {
                     MountUserToContext(context, refreshToken, useJwt);
                 }
@@ -128,12 +128,11 @@ namespace Ntk8.Middleware
                 {
                     user = _ntk8Queries.FetchUserByRefreshToken(token);
                 
-                    if (user?.RefreshToken is null)
+                    if (user?.RefreshToken?.IsActive ?? false)
                     {
-                        throw new InvalidRefreshTokenException();
+                        httpContext.Items.Add(AuthenticationConstants.CurrentUser, user);
                     }
                 
-                    httpContext.Items.Add(AuthenticationConstants.CurrentUser, user);
                     break;
                 }
             }

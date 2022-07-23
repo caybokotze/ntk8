@@ -12,9 +12,9 @@
         <RepositoryType>github</RepositoryType>
         <Authors>Caybo Kotze</Authors>
         <Company>Merge Digital</Company>
-        <PackageReleaseNotes>Upgrade deps on dapper.cqrs</PackageReleaseNotes>
+        <PackageReleaseNotes>Make jwt token creation optional</PackageReleaseNotes>
         <PackageLicenseFile>license.txt</PackageLicenseFile>
-        <PackageVersion>4.0.3</PackageVersion>
+        <PackageVersion>5.0.0-alpha</PackageVersion>
         <PackageTags>jwt token package, security, authentication</PackageTags>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
