@@ -36,6 +36,19 @@ namespace Ntk8.Tests.TestHelpers
             return refreshToken;
         }
 
+        public static IAuthSettings CreateValidAuthenticationSettings()
+        {
+            return new AuthSettings
+            {
+                JwtTTL = 600,
+                PasswordResetTokenTTL = 600,
+                RefreshTokenLength = 40,
+                RefreshTokenSecret = TokenHelpers.GenerateCryptoRandomToken(),
+                RefreshTokenTTL = 600,
+                UserVerificationTokenTTL = 600
+            };
+        }
+
         public static RefreshToken CreateValidRefreshToken()
         {
             var refreshToken = new RefreshToken(TokenHelpers.GenerateCryptoRandomToken())

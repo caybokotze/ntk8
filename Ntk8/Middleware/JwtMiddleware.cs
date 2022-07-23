@@ -97,13 +97,11 @@ namespace Ntk8.Middleware
                 {
                     var validatedToken = _tokenService
                         .ValidateJwtSecurityToken(token, _authSettings.RefreshTokenSecret ?? string.Empty);
-                
-                    if (validatedToken is null)
+
+                    if (validatedToken is not JwtSecurityToken jwtToken)
                     {
                         throw new InvalidJwtTokenException();
                     }
-            
-                    var jwtToken = (JwtSecurityToken) validatedToken;
 
                     var accountId = int.Parse(jwtToken.Claims
                         .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)

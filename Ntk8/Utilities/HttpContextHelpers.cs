@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Http;
 using Ntk8.Constants;
 using Ntk8.Models;
@@ -49,8 +48,10 @@ public static class HttpContextHelpers
 
     public static string? GetRefreshToken(this HttpContext context)
     {
-        return context
+        context
             .Request
-            .Cookies[AuthenticationConstants.RefreshToken];
+            .Cookies.TryGetValue(AuthenticationConstants.RefreshToken, out var value);
+
+        return value;
     }
 }
