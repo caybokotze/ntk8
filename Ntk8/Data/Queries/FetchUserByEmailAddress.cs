@@ -48,7 +48,6 @@ SELECT u.id,
        rt.created_by_ip,
        rt.date_revoked,
        rt.revoked_by_ip,
-       rt.replaced_by_token,
        r.id,
        r.role_name
 FROM users u
