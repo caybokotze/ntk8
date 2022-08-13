@@ -8,7 +8,7 @@ namespace Ntk8.Models
     {
         int Id { get; set; }
         bool IsActive { get; set; }
-        Guid? Guid { get; set; }
+        Guid Guid { get; set; }
         string? TelNumber { get; set; }
         string? Username { get; set; }
         int? AccessFailedCount { get; set; }

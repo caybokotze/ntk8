@@ -95,7 +95,6 @@ namespace Ntk8.Tests.Data.Queries
                     {
                         role.BaseUser = null;
                         role.Role!.Id += 100;
-                        role.Role.UserRoles = null;
                         role.UserId = user.Id;
                         role.RoleId = role.Role.Id += 100;
                     }

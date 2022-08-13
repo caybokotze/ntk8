@@ -68,7 +68,7 @@ namespace Ntk8.Services
                 throw new UserIsNotVerifiedException();
             }
 
-            if (!BC.Verify(authenticationRequest.Password, user.PasswordHash))
+            if (!BC.Verify($"{authenticationRequest.Password}{user.PasswordSalt ?? string.Empty}", $"{user.PasswordHash}"))
             {
                 throw new InvalidPasswordException();
             }
@@ -131,7 +131,8 @@ namespace Ntk8.Services
             user.DateModified = DateTime.UtcNow;
             user.DateResetTokenExpires = DateTime.UtcNow
                 .AddSeconds(_authSettings.UserVerificationTokenTTL);
-            user.PasswordHash = BC.HashPassword(registerRequest.Password);
+            user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
+            user.PasswordHash = BC.HashPassword($"{registerRequest.Password}{user.PasswordSalt}");
 
             _ntk8Commands.InsertUser(user);
         }
@@ -179,6 +180,7 @@ namespace Ntk8.Services
             }
 
             user.DateVerified = DateTime.UtcNow;
+            user.DateOfPasswordReset = null;
             user.VerificationToken = null;
             user.IsActive = true;
 
@@ -225,8 +227,17 @@ namespace Ntk8.Services
             {
                 throw new InvalidResetTokenException();
             }
-            
-            user.PasswordHash = BC.HashPassword(resetPasswordRequest.Password);
+
+            if (user.DateResetTokenExpires != null
+                && user.DateResetTokenExpires
+                    .Value
+                    .AddSeconds(_authSettings.PasswordResetTokenTTL) < DateTime.UtcNow)
+            {
+                throw new PasswordResetTokenExpiredException();
+            }
+
+            user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
+            user.PasswordHash = BC.HashPassword($"{resetPasswordRequest.Password}{user.PasswordSalt}");
             user.DateOfPasswordReset = DateTime.UtcNow;
             user.ResetToken = null;
             user.DateResetTokenExpires = null;
@@ -257,7 +268,8 @@ namespace Ntk8.Services
 
             if (!string.IsNullOrEmpty(updateRequest.Password))
             {
-                user.PasswordHash = BC.HashPassword(updateRequest.Password);
+                user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
+                user.PasswordHash = BC.HashPassword($"{updateRequest.Password}{user.PasswordSalt}");
             }
             
             user.DateModified = DateTime.UtcNow;

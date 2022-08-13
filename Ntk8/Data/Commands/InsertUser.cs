@@ -11,7 +11,7 @@ namespace Ntk8.Data.Commands
         public InsertUser(IBaseUser baseUser)
         {
             BaseUser = baseUser;
-            baseUser.Guid ??= Guid.NewGuid();
+            baseUser.Guid = Guid.NewGuid();
             BaseUser.Email = baseUser.Email?.ToLowerInvariant();
             BaseUser.DateModified = DateTime.UtcNow;
             BaseUser.DateCreated = DateTime.UtcNow;

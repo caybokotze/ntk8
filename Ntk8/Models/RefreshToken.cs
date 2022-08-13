@@ -5,9 +5,12 @@ namespace Ntk8.Models
 {
     public class RefreshToken
     {
+        /// <summary>
+        /// Required for AutoMapper
+        /// </summary>
         public RefreshToken()
         {
-            // required
+            DateCreated = DateTime.UtcNow;
         }
         
         public RefreshToken(string token)

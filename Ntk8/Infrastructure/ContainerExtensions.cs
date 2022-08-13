@@ -78,6 +78,8 @@ public static class ContainerExtensions
             .AddSingleton<InvalidJwtTokenExceptionMiddleware, InvalidJwtTokenExceptionMiddleware>();
         serviceCollection
             .AddSingleton<InvalidEmailAddressExceptionMiddleware, InvalidEmailAddressExceptionMiddleware>();
+        serviceCollection
+            .AddSingleton<PasswordResetTokenExpiredExceptionMiddleware, PasswordResetTokenExpiredExceptionMiddleware>();
     }
     
     public static void RegisterNtk8Services<TUser>(

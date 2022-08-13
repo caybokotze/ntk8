@@ -176,6 +176,7 @@ namespace Ntk8.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             
             SecurityToken validatedToken;
+            
             try
             {
                 tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters

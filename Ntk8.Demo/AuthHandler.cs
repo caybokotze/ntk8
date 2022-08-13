@@ -47,6 +47,8 @@ namespace Ntk8.Demo
             builder.MapPost("/secure", SecureEndpoint);
             builder.MapPost("/new-token", NewToken);
             builder.MapPost("/update", Update);
+            builder.MapPost("/request-reset", RequestPasswordReset);
+            builder.MapPost("/reset-password", ResetPassword);
         }
 
         public async Task Update(HttpContext context)
@@ -85,6 +87,25 @@ namespace Ntk8.Demo
             }
             
             return Task.CompletedTask;
+        }
+
+        public async Task RequestPasswordReset(HttpContext context)
+        {
+            var resetRequest = await context.DeserializeRequestBody<ForgotPasswordRequest>();
+            
+            var token = _accountService.GetPasswordResetToken(new ForgotPasswordRequest
+            {
+                Email = resetRequest.Email
+            });
+
+            await context.SerialiseResponseBody(token);
+        }
+
+        public async Task ResetPassword(HttpContext context)
+        {
+            var resetRequest = await context.DeserializeRequestBody<ResetPasswordRequest>();
+            
+            _accountService.ResetUserPassword(resetRequest);
         }
 
         public async Task Register(HttpContext context)

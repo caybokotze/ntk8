@@ -1,4 +1,5 @@
-﻿using System.Transactions;
+﻿using System;
+using System.Transactions;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ using static PeanutButter.RandomGenerators.RandomValueGen;
 namespace Ntk8.Tests.Services
 {
     [TestFixture]
-    public class UserAccountServiceTests
+    public class AccountServiceTests
     {
         [TestFixture]
         public class DependencyInjection : TestFixtureRequiringServiceProvider
@@ -519,12 +520,30 @@ namespace Ntk8.Tests.Services
         public class ResetUserPassword
         {
             [Test]
-            public void ShouldResetUserPassword()
+            public void ShouldExecuteUpdateUserCommand()
             {
                 // arrange
-                
+                var user = TestUser.Create();
+                user.DateResetTokenExpires = DateTime.UtcNow.AddMinutes(-1);
+                var authSettings = GetRandom<AuthSettings>();
+                authSettings.PasswordResetTokenTTL = 100;
+                var resetPasswordRequest = GetRandom<ResetPasswordRequest>();
+                var ntk8Queries = Substitute.For<INtk8Queries<TestUser>>();
+                var ntk8Commands = Substitute.For<INtk8Commands>();
+                ntk8Queries.FetchUserByResetToken(resetPasswordRequest.Token!).Returns(user);
+                var sut = Create(
+                    ntk8Queries: ntk8Queries, 
+                    authSettings: authSettings, 
+                    ntk8Commands: ntk8Commands);
+
                 // act
+                sut.ResetUserPassword(resetPasswordRequest);
                 // assert
+                Expect(ntk8Commands)
+                    .To.Have.Received(1)
+                    .UpdateUser(Arg.Is<TestUser>(s => s.Email == user.Email
+                                                      && s.ResetToken == null 
+                                                      && s.DateResetTokenExpires == null));
             }
         }
 
@@ -608,7 +627,7 @@ namespace Ntk8.Tests.Services
         }
 
 
-        private static IAccountService Create(
+        private static AccountService<TestUser> Create(
             INtk8Queries<TestUser>? ntk8Queries = null,
             INtk8Commands? ntk8Commands = null,
             ITokenService? tokenService = null,

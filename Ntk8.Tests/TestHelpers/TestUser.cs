@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ntk8.Models;
 using Ntk8.Utilities;
-using static PeanutButter.RandomGenerators.RandomValueGen;
+using PeanutButter.RandomGenerators;
 
 namespace Ntk8.Tests.TestHelpers
 {
@@ -18,7 +18,19 @@ namespace Ntk8.Tests.TestHelpers
         
         public static TestUser Create()
         {
-            var user = GetRandom<TestUser>();
+            var user = new TestUser
+            {
+                AcceptedTerms = true,
+                FirstName = Faker.Name.First(),
+                LastName = Faker.Name.Last(),
+                AccessFailedCount = 10,
+                DateCreated = DateTime.UtcNow,
+                DateModified = DateTime.UtcNow,
+                DateOfPasswordReset = null,
+                DateResetTokenExpires = null,
+                DateVerified = null,
+                Email = Faker.Internet.Email()
+            };
             user.UserRoles = CreateRandomUserRoles(user);
             user.Roles = user.UserRoles.Select(s => s.Role).ToArray();
             user.RefreshToken = CreateValidRefreshToken();
@@ -30,9 +42,11 @@ namespace Ntk8.Tests.TestHelpers
 
         public static RefreshToken CreateInvalidRefreshToken()
         {
-            var refreshToken = GetRandom<RefreshToken>();
-            refreshToken.DateRevoked = DateTime.UtcNow.AddHours(-1);
-            refreshToken.Expires = DateTime.UtcNow.AddHours(-1);
+            var refreshToken = new RefreshToken(TokenHelpers.GenerateCryptoRandomToken())
+            {
+                DateRevoked = DateTime.UtcNow.AddHours(-1),
+                Expires = DateTime.UtcNow.AddHours(-1),
+            };
             return refreshToken;
         }
 
@@ -55,7 +69,7 @@ namespace Ntk8.Tests.TestHelpers
             {
                 DateRevoked = null,
                 Expires = DateTime.UtcNow.AddHours(1),
-                CreatedByIp = GetRandomIPv4Address(),
+                CreatedByIp = Faker.Internet.DomainWord(),
                 DateCreated = DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)),
                 RevokedByIp = null,
                 UserId = 0
@@ -65,7 +79,7 @@ namespace Ntk8.Tests.TestHelpers
 
         private static UserRole[] CreateRandomUserRoles(IBaseUser user)
         {
-            var roleId = GetRandomInt(100);
+            var roleId = Faker.RandomNumber.Next();
             var userRoles = new List<UserRole>
             {
                 new()
@@ -73,7 +87,7 @@ namespace Ntk8.Tests.TestHelpers
                     Role = new Role
                     {
                         Id = roleId,
-                        RoleName = GetRandomString()
+                        RoleName = Faker.Internet.UserName()
                     },
                     RoleId = roleId,
                     UserId = user.Id
@@ -83,7 +97,7 @@ namespace Ntk8.Tests.TestHelpers
                     Role = new Role
                     {
                         Id = roleId + 1,
-                        RoleName = GetRandomString()
+                        RoleName = Faker.Internet.UserName()
                     },
                     RoleId = roleId + 1,
                     UserId = user.Id
@@ -98,7 +112,7 @@ namespace Ntk8.Tests.TestHelpers
         public string? Email { get; set; }
         public int Id { get; set; }
         public bool IsActive { get; set; }
-        public Guid? Guid { get; set; }
+        public Guid Guid { get; set; }
         public string? TelNumber { get; set; }
         public string? Username { get; set; }
         public int? AccessFailedCount { get; set; }
