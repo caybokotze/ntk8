@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
@@ -10,15 +12,14 @@ namespace Ntk8.Services
 {
     public class AccountService<T> : IAccountService where T : class, IBaseUser, new()
     {
-        public static readonly int VERIFICATION_TOKEN_TTL = 14400; // in seconds.
-        public static readonly int RESET_TOKEN_TTL = 43200; // in seconds
-
         private readonly INtk8Commands _ntk8Commands;
         private readonly INtk8Queries<T> _ntk8Queries;
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
         private readonly IBaseUser _baseUser;
-        private readonly IAccountState _accountState;
+        private readonly ILogger<AccountService<T>> _logger;
+        private readonly IGlobalSettings _globalSettings;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountService(
             INtk8Commands ntk8Commands,
@@ -26,18 +27,22 @@ namespace Ntk8.Services
             ITokenService tokenService,
             IAuthSettings authSettings,
             IBaseUser baseUser,
-            IAccountState accountState)
+            ILogger<AccountService<T>> logger,
+            IGlobalSettings globalSettings,
+            IHttpContextAccessor httpContextAccessor)
         {
             _ntk8Commands = ntk8Commands;
             _ntk8Queries = ntk8Queries;
             _tokenService = tokenService;
             _authSettings = authSettings;
             _baseUser = baseUser;
-            _accountState = accountState;
+            _logger = logger;
+            _globalSettings = globalSettings;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public IBaseUser? CurrentUser => _accountState.CurrentUser;
-        public bool IsUserAuthenticated => _accountState.CurrentJwtToken is not null;
+        public IBaseUser? CurrentUser => _httpContextAccessor.HttpContext.GetCurrentUser();
+        public bool IsUserAuthenticated => CurrentUser is not null;
 
         /// <summary>
         /// Authenticate will fetch a user by their email address, ensure that the user is verified, and then make sure that their passwords match.
@@ -49,7 +54,9 @@ namespace Ntk8.Services
         /// <exception cref="InvalidPasswordException"></exception>
         public AuthenticatedResponse AuthenticateUser(AuthenticateRequest authenticationRequest)
         {
-            var user = _ntk8Queries.FetchUserByEmailAddress(authenticationRequest.Email ?? string.Empty);
+            var user = _ntk8Queries
+                .FetchUserByEmailAddress(authenticationRequest.Email 
+                                         ?? string.Empty);
             
             if (user is null)
             {
@@ -61,26 +68,37 @@ namespace Ntk8.Services
                 throw new UserIsNotVerifiedException();
             }
 
-            if (!BC.Verify(authenticationRequest.Password, user.PasswordHash))
+            if (!BC.Verify($"{authenticationRequest.Password}{user.PasswordSalt ?? string.Empty}", $"{user.PasswordHash}"))
             {
                 throw new InvalidPasswordException();
             }
 
             var jwtToken = _tokenService.GenerateJwtToken(user.Id, user.Roles);
 
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            refreshToken.UserId = user.Id;
+            _tokenService.RevokeRefreshToken(user.RefreshToken);
 
-            if (user.RefreshToken is not null)
+            var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
+
+            try
             {
-                _ntk8Commands.InvalidateRefreshToken(user.RefreshToken?.Token ?? string.Empty);
+                _ntk8Commands.InsertRefreshToken(refreshToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e);
+                _logger.LogInformation("Trying again");
+                
+                var newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
+                _ntk8Commands.InsertRefreshToken(newRefreshToken);
             }
 
-            _ntk8Commands.InsertRefreshToken(refreshToken);
-
             var response = user.MapFromTo(new AuthenticatedResponse());
+
+            if (_globalSettings.UseJwt)
+            {
+                response.JwtToken = jwtToken.Token;
+            }
             
-            response.JwtToken = jwtToken.Token;
             _tokenService.SetRefreshTokenCookie(refreshToken.Token ?? string.Empty);
             return response;
         }
@@ -100,9 +118,7 @@ namespace Ntk8.Services
                 
                 existingUser.DateModified = DateTime.UtcNow;
                 existingUser.DateResetTokenExpires = DateTime.UtcNow
-                    .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
-                        ? VERIFICATION_TOKEN_TTL
-                        : _authSettings.UserVerificationTokenTTL);
+                    .AddSeconds(_authSettings.UserVerificationTokenTTL);
                 _ntk8Commands.UpdateUser(existingUser);
                 return;
             }
@@ -110,14 +126,13 @@ namespace Ntk8.Services
             var user = registerRequest.MapFromTo((T)_baseUser);
             
             user.IsActive = true;
-            user.VerificationToken = _tokenService.RandomTokenString();
+            user.VerificationToken = TokenHelpers.GenerateCryptoRandomToken();
             user.DateCreated = DateTime.UtcNow;
             user.DateModified = DateTime.UtcNow;
             user.DateResetTokenExpires = DateTime.UtcNow
-                .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
-                    ? VERIFICATION_TOKEN_TTL
-                    : _authSettings.UserVerificationTokenTTL);
-            user.PasswordHash = BC.HashPassword(registerRequest.Password);
+                .AddSeconds(_authSettings.UserVerificationTokenTTL);
+            user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
+            user.PasswordHash = BC.HashPassword($"{registerRequest.Password}{user.PasswordSalt}");
 
             _ntk8Commands.InsertUser(user);
         }
@@ -154,9 +169,7 @@ namespace Ntk8.Services
             if (user.DateResetTokenExpires != null
                 && user.DateResetTokenExpires
                     .Value
-                    .AddSeconds(_authSettings.UserVerificationTokenTTL == 0
-                        ? VERIFICATION_TOKEN_TTL
-                        : _authSettings.UserVerificationTokenTTL) < DateTime.UtcNow)
+                    .AddSeconds(_authSettings.UserVerificationTokenTTL) < DateTime.UtcNow)
             {
                 throw new VerificationTokenExpiredException();
             }
@@ -167,6 +180,7 @@ namespace Ntk8.Services
             }
 
             user.DateVerified = DateTime.UtcNow;
+            user.DateOfPasswordReset = null;
             user.VerificationToken = null;
             user.IsActive = true;
 
@@ -190,19 +204,15 @@ namespace Ntk8.Services
             if (user.ResetToken is not null)
             {
                 user.DateResetTokenExpires = DateTime.UtcNow
-                    .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
-                        ? RESET_TOKEN_TTL
-                        : _authSettings.PasswordResetTokenTTL);
+                    .AddSeconds(_authSettings.PasswordResetTokenTTL);
                 
                 _ntk8Commands.UpdateUser(user);
                 return user.ResetToken;
             }
             
-            user.ResetToken = _tokenService.RandomTokenString();
+            user.ResetToken = TokenHelpers.GenerateCryptoRandomToken();
             user.DateResetTokenExpires = DateTime.UtcNow
-                .AddSeconds(_authSettings.PasswordResetTokenTTL == 0
-                    ? RESET_TOKEN_TTL
-                    : _authSettings.PasswordResetTokenTTL);
+                .AddSeconds(_authSettings.PasswordResetTokenTTL);
 
             _ntk8Commands.UpdateUser(user);
 
@@ -217,8 +227,17 @@ namespace Ntk8.Services
             {
                 throw new InvalidResetTokenException();
             }
-            
-            user.PasswordHash = BC.HashPassword(resetPasswordRequest.Password);
+
+            if (user.DateResetTokenExpires != null
+                && user.DateResetTokenExpires
+                    .Value
+                    .AddSeconds(_authSettings.PasswordResetTokenTTL) < DateTime.UtcNow)
+            {
+                throw new PasswordResetTokenExpiredException();
+            }
+
+            user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
+            user.PasswordHash = BC.HashPassword($"{resetPasswordRequest.Password}{user.PasswordSalt}");
             user.DateOfPasswordReset = DateTime.UtcNow;
             user.ResetToken = null;
             user.DateResetTokenExpires = null;
@@ -249,7 +268,8 @@ namespace Ntk8.Services
 
             if (!string.IsNullOrEmpty(updateRequest.Password))
             {
-                user.PasswordHash = BC.HashPassword(updateRequest.Password);
+                user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
+                user.PasswordHash = BC.HashPassword($"{updateRequest.Password}{user.PasswordSalt}");
             }
             
             user.DateModified = DateTime.UtcNow;

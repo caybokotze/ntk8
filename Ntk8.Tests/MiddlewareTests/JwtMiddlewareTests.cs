@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +16,8 @@ using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.ContextBuilders;
 using Ntk8.Tests.TestHelpers;
+using Ntk8.Tests.TestModels;
+using Ntk8.Utilities;
 using NUnit.Framework;
 using PeanutButter.Utils;
 using static NExpect.Expectations;
@@ -46,10 +50,10 @@ namespace Ntk8.Tests.MiddlewareTests
             {
                 // arrange
                 var middleware = Create();
-                
+
                 var httpContext = new HttpContextBuilder()
                     .Build();
-                
+
                 var requestDelegate = Substitute
                     .For<RequestDelegate>();
                 // act
@@ -63,29 +67,36 @@ namespace Ntk8.Tests.MiddlewareTests
                     .Containing("Object reference not set");
             }
 
+
             [Test]
             public async Task ShouldAddUserToTheHttpContext()
             {
                 // arrange
-                var authSettings = GetRandom<AuthSettings>();
-                var secret = GetRandomString(35);
+                var authSettings = TestUser.CreateValidAuthenticationSettings();
                 var user = TestUser.Create();
-                authSettings.RefreshTokenSecret = secret;
-                var queryExecutor = Substitute.For<IQueryExecutor>();
+                var queries = Substitute.For<INtk8Queries<TestUser>>();
                 var tokenService = Substitute.For<ITokenService>();
-                var validToken = TokenHelpers.CreateValidJwtToken(secret, user.Id);
-                var validTokenAsString = TokenHelpers.CreateValidJwtTokenAsString(secret, user.Id);
+                var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
+                var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
                 
                 tokenService
-                    .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret)
+                    .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret!)
                     .Returns(validToken);
                 
-                queryExecutor.Execute(Arg.Is<FetchUserById<TestUser>>(
-                        u => u.Id == user.Id))
-                    .Returns(user);
-                
-                var middleware = Substitute.For<JwtMiddleware<TestUser>>(authSettings, queryExecutor, tokenService);
-                
+                queries.FetchUserById(user.Id).Returns(user);
+
+                var globalSettings = new GlobalSettings
+                {
+                    UseJwt = true
+                };
+
+                var middleware = Substitute
+                    .For<JwtMiddleware<TestUser>>(
+                        queries, 
+                        authSettings, 
+                        tokenService,
+                        globalSettings);
+
                 var httpContext = new HttpContextBuilder()
                     .WithRequest(new HttpRequestBuilder()
                         .WithHeaders(new HeaderDictionary
@@ -95,6 +106,10 @@ namespace Ntk8.Tests.MiddlewareTests
                                     AuthenticationConstants.DefaultJwtHeader,
                                     validTokenAsString)
                         })
+                        .WithCookies(new MockRequestCookieCollection(new Dictionary<string, string?>
+                        {
+                            // { AuthenticationConstants.RefreshToken, GetRandomString() }
+                        }))
                         .Build())
                     .WithItems(new Dictionary<object, object>())
                     .WithResponse(new HttpResponseBuilder()
@@ -110,12 +125,54 @@ namespace Ntk8.Tests.MiddlewareTests
                     .InvokeAsync(httpContext, requestDelegate);
                 
                 // assert
+
+                Expect(httpContext.GetCurrentUser()).To.Equal(user);
+            }
+        }
+
+        [TestFixture]
+        public class WhenJwtTokenIsEnabledAndHeaderDoesNotExist
+        {
+            [Test]
+            public async Task ShouldIgnoreAndByPass()
+            {
+                // arrange
+                var authSettings = TestUser.CreateValidAuthenticationSettings();
+                var user = TestUser.Create();
+                var queries = Substitute.For<INtk8Queries<TestUser>>();
+                var tokenService = Substitute.For<ITokenService>();
+                var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
+                var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
                 
-                Expect(middleware)
-                    .To
-                    .Have
-                    .Received(1)
-                    .MountUserToContext(httpContext, validTokenAsString);
+                tokenService
+                    .ValidateJwtSecurityToken(validTokenAsString, authSettings.RefreshTokenSecret!)
+                    .Returns(validToken);
+
+                var globalSettings = new GlobalSettings
+                {
+                    UseJwt = true
+                };
+
+                var middleware = Substitute
+                    .For<JwtMiddleware<TestUser>>(
+                        queries, 
+                        authSettings, 
+                        tokenService,
+                        globalSettings);
+
+                var httpContext = new DefaultHttpContext();
+
+                var requestDelegate = Substitute.For<RequestDelegate>();
+                
+                // act
+                
+                await middleware
+                    .InvokeAsync(httpContext, requestDelegate);
+                
+                // assert
+
+                Expect(tokenService.ValidateJwtSecurityToken(Arg.Any<string>(), Arg.Any<string>()))
+                    .To.Not.Have.Been.Called();
             }
         }
 
@@ -128,7 +185,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 var ntk8Query = Substitute.For<INtk8Queries<TestUser>>();
                 var secret = GetRandomString(40);
                 var user = TestUser.Create();
-                var token = TokenHelpers.CreateValidJwtToken(secret, user.Id);
+                var token = TestTokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var tokenService = Substitute.For<ITokenService>();
                 tokenService
                     .ValidateJwtSecurityToken(Arg.Any<string>(), Arg.Any<string>())
@@ -148,9 +205,9 @@ namespace Ntk8.Tests.MiddlewareTests
                     .Build();
                 // act
                 middleware
-                    .MountUserToContext(httpContext, TokenHelpers.CreateValidJwtTokenAsString(token));
+                    .MountUserToContext(httpContext, TestTokenHelpers.CreateValidJwtTokenAsString(token), true);
                 // assert
-                Expect(httpContext.Items[AuthenticationConstants.ContextAccount])
+                Expect(httpContext.Items[AuthenticationConstants.CurrentUser])
                     .To
                     .Equal(user);
             }
@@ -170,7 +227,7 @@ namespace Ntk8.Tests.MiddlewareTests
                     JwtTTL = 1000
                 },
                 tokenService ?? Substitute.For<ITokenService>(),
-                Substitute.For<IAccountState>());
+                GetRandom<GlobalSettings>());
         }
     }
 }

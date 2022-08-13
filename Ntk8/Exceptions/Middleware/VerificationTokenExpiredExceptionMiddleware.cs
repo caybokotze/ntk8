@@ -5,7 +5,7 @@ namespace Ntk8.Exceptions.Middleware
 {
     public class VerificationTokenExpiredExceptionMiddleware: ExceptionHandlerMiddleware<VerificationTokenExpiredException>
     {
-        public VerificationTokenExpiredExceptionMiddleware() : base((int)HttpStatusCode.Unauthorized, GenerateMessage)
+        public VerificationTokenExpiredExceptionMiddleware() : base((int)HttpStatusCode.BadRequest, GenerateMessage)
         {
         }
 

@@ -25,6 +25,7 @@ namespace Ntk8.Infrastructure
             builder.UseMiddleware<InvalidRefreshTokenExceptionMiddleware>();
             builder.UseMiddleware<InvalidJwtTokenExceptionMiddleware>();
             builder.UseMiddleware<InvalidEmailAddressExceptionMiddleware>();
+            builder.UseMiddleware<PasswordResetTokenExpiredExceptionMiddleware>();
         }
     }
 }

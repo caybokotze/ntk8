@@ -4,7 +4,7 @@ namespace Ntk8.Exceptions
 {
     public class UserNotAuthenticatedException : Exception
     {
-        public UserNotAuthenticatedException() : base("User is not authenticated")
+        public UserNotAuthenticatedException(string? message = null) : base(message ?? "User is not authenticated")
         {
             
         }

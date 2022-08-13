@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
+using Ntk8.DatabaseServices;
 using Ntk8.Infrastructure;
 using Ntk8.Services;
 using static ScopeFunction.Utils.AppSettingsBuilder;
@@ -27,7 +28,7 @@ namespace Ntk8.Demo
             app.UseRouting();
             app.UseNtk8JwtMiddleware<User>();
             app.UseNtk8ExceptionMiddleware();
-            
+
             var _ = new AuthHandler(app, 
                 app.Resolve<IAccountService>(),
                 app.Resolve<IQueryExecutor>(),
@@ -44,14 +45,23 @@ namespace Ntk8.Demo
 
         private static void ConfigureDependencies(WebApplicationBuilder builder)
         {
+            builder.Services.AddTransient<IExecutable, Executable>();
+            builder.Services.AddSingleton<IQueryable, Queryable>();
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
-            builder.Services.AddTransient<IDbConnection, DbConnection>(sp => new MySqlConnection(GetConnectionString()));
+            builder.Services.AddTransient<IDbConnection, DbConnection>(_ => 
+                new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
-            builder.Services.RegisterNtk8ExceptionHandlers();
-            builder.Services.RegisterNtk8Services<User>();
-            builder.Services.RegisterNkt8DatabaseServices<User>();
-            builder.Services.ConfigureNkt8Settings(CreateConfigurationRoot());
+            builder.Services.ConfigureNtk8<User>(o =>
+            {
+                o.UseJwt = true;
+                o.OverrideNtk8Queries<Ntk8Queries<User>>();
+                o.ConfigureAuthSettings(a =>
+                {
+                    a.JwtTTL = 1000;
+                    a.UserVerificationTokenTTL = 10_000;
+                });
+            });
         }
 
         public static string GetConnectionString()

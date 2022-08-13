@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Ntk8.Constants;
+using Microsoft.Extensions.DependencyInjection;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using Ntk8.Utilities;
 
 namespace Ntk8.ActionFilters
 {
@@ -18,11 +19,18 @@ namespace Ntk8.ActionFilters
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (IBaseUser) context
+            var user = context.HttpContext.GetCurrentUser();
+            var globalSettings = context
                 .HttpContext
-                .Items[AuthenticationConstants.ContextAccount];
+                .RequestServices
+                .GetRequiredService<IGlobalSettings>();
 
-            if (user == null)
+            if (globalSettings.UseJwt && user is null)
+            {
+                throw new InvalidJwtTokenException();
+            }
+            
+            if (user is null)
             {
                 throw new UserNotAuthenticatedException();
             }

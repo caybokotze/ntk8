@@ -95,14 +95,13 @@ namespace Ntk8.Tests.Data.Queries
                     {
                         role.BaseUser = null;
                         role.Role!.Id += 100;
-                        role.Role.UserRoles = null;
                         role.UserId = user.Id;
                         role.RoleId = role.Role.Id += 100;
                     }
                     var userId = commandExecutor.Execute(new InsertUser(user));
                     foreach (var role in userRoles.Select(s => s.Role))
                     {
-                        commandExecutor.Execute(new InsertRole(role));
+                        commandExecutor.Execute(new InsertRole(role!));
                     }
                     foreach (var userRole in userRoles)
                     {
@@ -133,7 +132,7 @@ namespace Ntk8.Tests.Data.Queries
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));
 
-                    var refreshToken = GetRandom<RefreshToken>();
+                    var refreshToken = TestUser.CreateValidRefreshToken();
                     refreshToken.UserId = userId;
                     var refreshId = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
                     refreshToken.Id = refreshId;
@@ -147,11 +146,11 @@ namespace Ntk8.Tests.Data.Queries
                         .To.Approximately.Equal((DateTime)refreshToken.Expires!);
                     Expect(result?.RefreshToken?.DateCreated)
                         .To.Approximately.Equal(refreshToken.DateCreated);
-                    Expect(result?.RefreshToken?.DateRevoked)
-                        .To.Approximately.Equal((DateTime)refreshToken.DateRevoked!);
                     result!.RefreshToken!.Expires = refreshToken.Expires;
                     result.RefreshToken.DateCreated = refreshToken.DateCreated;
                     result.RefreshToken.DateRevoked = refreshToken.DateRevoked;
+                    Expect(result.RefreshToken.Token).To.Not.Be.Null();
+                    Expect(result.RefreshToken.Token).To.Equal(refreshToken.Token);
                     Expect(result).Not.To.Be.Null();
                     Expect(result.RefreshToken)
                         .To.Deep.Equal(refreshToken);

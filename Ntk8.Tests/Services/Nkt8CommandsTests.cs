@@ -131,23 +131,6 @@ public class Nkt8CommandsTests
         }
     }
 
-    public class InvalidateRefreshTokenTests
-    {
-        [Test]
-        public void CommandShouldReceiveExpectedParameters()
-        {
-            // arrange
-            var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
-            var refreshToken = GetRandomAlphaString();
-            // act
-            sut.InvalidateRefreshToken(refreshToken);
-            // assert
-            Expect(commandExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<InvalidateRefreshToken>(s => s.Token == refreshToken));
-        }
-    }
-
     public class UpdateRefreshTokenTests
     {
         [Test]

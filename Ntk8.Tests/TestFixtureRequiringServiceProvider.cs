@@ -50,14 +50,14 @@ namespace Ntk8.Tests
                 {
                     Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
                     config.AddSingleton<IMemoryCache, MemoryCache>();
+                    config.AddTransient<IExecutable, Executable>();
+                    config.AddTransient<IQueryable, Queryable>();
                     config.AddTransient<IQueryExecutor, QueryExecutor>();
                     config.AddTransient<ICommandExecutor, CommandExecutor>();
                     config.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                     config.AddTransient<IDbConnection, DbConnection>(_ => new MySqlConnection(appSettings.GetDefaultConnection()));
-                    config.ConfigureNkt8Settings(appSettings);
                     config.RegisterNtk8Services<TestUser>();
                     config.RegisterNtk8ExceptionHandlers();
-                    config.RegisterNkt8DatabaseServices<TestUser>();
                 });
             });
 
@@ -74,7 +74,7 @@ namespace Ntk8.Tests
                 throw new TransactionException("Tests that resolve real dependencies should be created inside of a transaction.");
             }
             
-            return ServiceProvider.GetRequiredService<T>();
+            return ServiceProvider!.GetRequiredService<T>();
         }
     }
 }

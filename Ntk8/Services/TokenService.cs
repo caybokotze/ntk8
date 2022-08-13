@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
@@ -10,33 +9,32 @@ using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using Ntk8.Utilities;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        ResetTokenResponse GenerateJwtToken(long userId, Role[]? roles);
-        (bool isActive, long userId, Role[]? roles) IsRefreshTokenActive(string token);
-        RefreshToken GenerateRefreshToken();
-        ResetTokenResponse GenerateJwtToken(string refreshToken);
+        AccessTokenResponse GenerateJwtToken(int userId, Role[]? roles);
+        (bool isActive, int userId, Role[]? roles) IsRefreshTokenActive(string token);
+        RefreshToken GenerateRefreshToken(int userId);
+        AccessTokenResponse GenerateJwtToken(string refreshToken);
         void SetRefreshTokenCookie(string token);
-        string RandomTokenString();
+        void RevokeRefreshToken(RefreshToken? token);
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
-        void RevokeRefreshToken(RefreshToken token);
-        string GetRefreshToken();
     }
 
-    public class TokenService<T> : ITokenService where T : class, IBaseUser, new()
+    public class TokenService<TUser> : ITokenService where TUser : class, IBaseUser, new()
     {
         private readonly INtk8Commands _ntk8Commands;
-        private readonly INtk8Queries<T> _ntk8Queries;
+        private readonly INtk8Queries<TUser> _ntk8Queries;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
             INtk8Commands ntk8Commands,
-            INtk8Queries<T> ntk8Queries,
+            INtk8Queries<TUser> ntk8Queries,
             IAuthSettings authSettings,
             IHttpContextAccessor contextAccessor)
         {
@@ -45,23 +43,26 @@ namespace Ntk8.Services
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
-        
-        public string GetRefreshToken()
-        {
-            return _contextAccessor
-                .HttpContext
-                .Request
-                .Cookies[AuthenticationConstants.RefreshToken];
-        }
 
-        public void RevokeRefreshToken(RefreshToken token)
+        public void RevokeRefreshToken(RefreshToken? token)
         {
+            _contextAccessor
+                .HttpContext
+                .Response
+                .Cookies
+                .Append(AuthenticationConstants.RefreshToken, "");
+            
+            if (token is null)
+            {
+                return;
+            }
+            
             token.DateRevoked = DateTime.UtcNow;
-            token.RevokedByIp = GetIpAddress();
+            token.RevokedByIp = _contextAccessor.GetIpAddress();
             _ntk8Commands.UpdateRefreshToken(token);
         }
 
-        public (bool isActive, long userId, Role[]? roles) IsRefreshTokenActive(string token)
+        public (bool isActive, int userId, Role[]? roles) IsRefreshTokenActive(string token)
         {
             var user = _ntk8Queries.FetchUserByRefreshToken(token);
 
@@ -80,7 +81,7 @@ namespace Ntk8.Services
             return (refreshToken.IsActive, user.Id, user.Roles);
         }
         
-        public ResetTokenResponse GenerateJwtToken(string refreshToken)
+        public AccessTokenResponse GenerateJwtToken(string refreshToken)
         {
             var (isActive, userId, roles) = IsRefreshTokenActive(refreshToken);
 
@@ -91,13 +92,13 @@ namespace Ntk8.Services
             
             var jwtToken = GenerateJwtToken(userId, roles);
             
-            return new ResetTokenResponse
+            return new AccessTokenResponse
             {
                 Token = jwtToken.Token
             };
         }
 
-        public ResetTokenResponse GenerateJwtToken(long userId, Role[]? roles)
+        public AccessTokenResponse GenerateJwtToken(int userId, Role[]? roles)
         {
             if (_authSettings.RefreshTokenSecret?.Length < 32)
             {
@@ -128,32 +129,24 @@ namespace Ntk8.Services
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             
-            return new ResetTokenResponse
+            return new AccessTokenResponse
             {
                 Token = tokenHandler.WriteToken(token),
                 ExpiryDate = DateTime.UtcNow.AddSeconds(_authSettings.JwtTTL)
             };
         }
 
-        public RefreshToken GenerateRefreshToken()
+        public RefreshToken GenerateRefreshToken(int userId)
         {
-            return new RefreshToken
+            return new RefreshToken(TokenHelpers.GenerateCryptoRandomToken(_authSettings.RefreshTokenLength))
             {
-                Token = RandomTokenString(),
+                UserId = userId,
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL),
                 DateCreated = DateTime.UtcNow,
-                CreatedByIp = GetIpAddress()
+                CreatedByIp = _contextAccessor.GetIpAddress()
             };
         }
 
-        public string RandomTokenString()
-        {
-            var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            var randomBytes = new byte[40];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            return BitConverter.ToString(randomBytes).Replace("-", "");
-        }
-        
         public void SetRefreshTokenCookie(string token)
         {
             var cookieOptions = new CookieOptions
@@ -164,7 +157,11 @@ namespace Ntk8.Services
                 Expires = DateTime.UtcNow.AddSeconds(_authSettings.RefreshTokenTTL)
             };
             
-            _contextAccessor.HttpContext.Response.Cookies.Append(
+            _contextAccessor
+                .HttpContext
+                .Response
+                .Cookies
+                .Append(
                 AuthenticationConstants.RefreshToken, 
                 token,
                 cookieOptions);
@@ -179,6 +176,7 @@ namespace Ntk8.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             
             SecurityToken validatedToken;
+            
             try
             {
                 tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
@@ -198,32 +196,6 @@ namespace Ntk8.Services
             return validatedToken;
         }
         
-        private string? GetRemoteIpAddress()
-        {
-            return _contextAccessor
-                .HttpContext
-                .Connection
-                .RemoteIpAddress
-                ?.MapToIPv4().ToString();
-        }
-
-        private IHeaderDictionary GetRequestHeaders()
-        {
-            return _contextAccessor
-                .HttpContext
-                .Request
-                .Headers;
-        }
-
-        private string GetIpAddress()
-        {
-            if (GetRequestHeaders()
-                .ContainsKey(ControllerConstants.IpForwardHeader))
-            {
-                return GetRequestHeaders()[ControllerConstants.IpForwardHeader];
-            }
-
-            return GetRemoteIpAddress() ?? string.Empty;
-        }
+        
     }
 }

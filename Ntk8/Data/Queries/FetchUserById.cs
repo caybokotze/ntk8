@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
+using Microsoft.Extensions.Logging;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -50,7 +52,6 @@ SELECT u.id,
        rt.created_by_ip,
        rt.date_revoked,
        rt.revoked_by_ip,
-       rt.replaced_by_token,
        r.id,
        r.role_name
 FROM users u
@@ -87,8 +88,9 @@ WHERE u.id = @Id;";
                 user.Roles = roles.ToArray();
                 Result = user;
             }
-            catch
+            catch (Exception e)
             {
+                Logger.LogError(e.Message, e);
                 Result = null;
             }
         }

@@ -12,7 +12,7 @@ public class User : IBaseUser
     public string? LastName { get; set; }
     public string? Email { get; set; }
     public bool IsActive { get; set; }
-    public Guid? Guid { get; set; }
+    public Guid Guid { get; set; }
     public string? TelNumber { get; set; }
     public string? Username { get; set; }
     public int? AccessFailedCount { get; set; }
