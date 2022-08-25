@@ -74,6 +74,16 @@ namespace Ntk8.Demo
                 .VerifyUserByVerificationToken(user.VerificationToken);
         }
 
+        public async Task ResetPassword(HttpContext context)
+        {
+            var request = await context.DeserializeRequestBody<ResetPasswordRequest>();
+            
+            _accountService.ResetUserPassword(new ForgotPasswordRequest()
+            {
+                Email = ""
+            });
+        }
+
         public Task VerifyByUrl(HttpContext context)
         {
             var verifyRequest =  context

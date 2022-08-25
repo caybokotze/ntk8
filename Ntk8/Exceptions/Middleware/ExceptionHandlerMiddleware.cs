@@ -33,7 +33,7 @@ namespace Ntk8.Exceptions.Middleware
             catch (T ex)
             {
                 context.Response.StatusCode = _errorCode;
-                var content = _errorMessageGenerator?.Invoke(ex, context);
+                var content = _errorMessageGenerator.Invoke(ex, context);
                 if (string.IsNullOrWhiteSpace(content))
                 {
                     return;
@@ -50,7 +50,7 @@ namespace Ntk8.Exceptions.Middleware
             try
             {
                 var logger = context.RequestServices.GetService<ILogger<T>>();
-                logger.LogError(ex, ex.Message);
+                logger.LogError(ex, "An error occurred within the ExceptionHandlerMiddleware");
             }
             catch
             {

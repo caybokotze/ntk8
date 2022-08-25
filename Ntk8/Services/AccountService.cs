@@ -137,9 +137,15 @@ namespace Ntk8.Services
             _ntk8Commands.InsertUser(user);
         }
 
-        public void AutoVerifyUser(RegisterRequest registerRequest)
+        /// <summary>
+        /// Verifies the user using the email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <exception cref="UserNotFoundException"></exception>
+        /// <exception cref="UserIsVerifiedException"></exception>
+        public void VerifyUserByEmail(string email)
         {
-            var user = _ntk8Queries.FetchUserByEmailAddress(registerRequest.Email ?? string.Empty);
+            var user = _ntk8Queries.FetchUserByEmailAddress(email);
 
             if (user is null)
             {
@@ -150,13 +156,21 @@ namespace Ntk8.Services
             {
                 throw new UserIsVerifiedException();
             }
-            
+
+            user.IsActive = true;
             user.DateVerified = DateTime.UtcNow;
             user.VerificationToken = null;
             
             _ntk8Commands.UpdateUser(user);
         }
 
+        /// <summary>
+        /// Verifies the user using the verification token
+        /// </summary>
+        /// <param name="token"></param>
+        /// <exception cref="InvalidValidationTokenException"></exception>
+        /// <exception cref="VerificationTokenExpiredException"></exception>
+        /// <exception cref="UserIsVerifiedException"></exception>
         public void VerifyUserByVerificationToken(string token)
         {
             var user = _ntk8Queries.FetchUserByVerificationToken(token);
@@ -188,11 +202,12 @@ namespace Ntk8.Services
         }
 
         /// <summary>
-        /// Set's the user with a password reset token, which will expire in a few hours (as per app-settings configured.)
+        /// Initialises the process of resetting the user password. This is the first step
         /// </summary>
         /// <param name="forgotPasswordRequest"></param>
-        /// <para>Tip: Catch the UserNotFoundException to prevent email enumeration attacks.</para>
-        public string GetPasswordResetToken(ForgotPasswordRequest forgotPasswordRequest)
+        /// <returns></returns>
+        /// <exception cref="UserNotFoundException"></exception>
+        public (string resetToken, IBaseUser user) ResetUserPassword(ForgotPasswordRequest forgotPasswordRequest)
         {
             var user = _ntk8Queries.FetchUserByEmailAddress(forgotPasswordRequest.Email ?? string.Empty);
             
@@ -207,7 +222,8 @@ namespace Ntk8.Services
                     .AddSeconds(_authSettings.PasswordResetTokenTTL);
                 
                 _ntk8Commands.UpdateUser(user);
-                return user.ResetToken;
+                
+                return (user.ResetToken, user);
             }
             
             user.ResetToken = TokenHelpers.GenerateCryptoRandomToken();
@@ -216,9 +232,14 @@ namespace Ntk8.Services
 
             _ntk8Commands.UpdateUser(user);
 
-            return user.ResetToken;
+            return (user.ResetToken, user);
         }
         
+        /// <summary>
+        /// After the token has been sent this overload can be used to reset the password
+        /// </summary>
+        /// <param name="resetPasswordRequest"></param>
+        /// <exception cref="InvalidResetTokenException"></exception>
         public void ResetUserPassword(ResetPasswordRequest resetPasswordRequest)
         {
             var user = _ntk8Queries.FetchUserByResetToken(resetPasswordRequest.Token ?? string.Empty);
@@ -243,46 +264,6 @@ namespace Ntk8.Services
             user.DateResetTokenExpires = null;
 
             _ntk8Commands.UpdateUser(user);
-        }
-
-        public UserAccountResponse GetUserById(int id)
-        {
-            var user = _ntk8Queries.FetchUserById(id);
-
-            if (user is null)
-            {
-                throw new UserNotFoundException();
-            }
-
-            return user.MapFromTo(new UserAccountResponse());
-        }
-
-        public UserAccountResponse UpdateUser(int id, UpdateRequest updateRequest)
-        {
-            var user = _ntk8Queries.FetchUserById(id);
-            
-            if (user is null)
-            {
-                throw new UserNotFoundException();
-            }
-
-            if (!string.IsNullOrEmpty(updateRequest.Password))
-            {
-                user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
-                user.PasswordHash = BC.HashPassword($"{updateRequest.Password}{user.PasswordSalt}");
-            }
-            
-            user.DateModified = DateTime.UtcNow;
-
-            _ntk8Commands.UpdateUser(user);
-
-            var response = user.MapFromTo(new UserAccountResponse());
-            return response;
-        }
-
-        public void DeleteUser(int id)
-        {
-            _ntk8Commands.DeleteUserById(id);
         }
     }
 }
