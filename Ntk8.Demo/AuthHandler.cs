@@ -38,11 +38,11 @@ namespace Ntk8.Demo
             _commandExecutor = commandExecutor;
             _tokenService = tokenService;
             _contextAccessor = contextAccessor;
-            builder.MapPost("/login", Login);
-            builder.MapPost("/register", Register);
+            // builder.MapPost("/login", Login);
+            // builder.MapPost("/register", Register);
             // builder.MapGet("/verify", VerifyByUrl);
-            builder.MapPost("/verify", Verify);
-            builder.MapPost("/secure", SecureEndpoint);
+            // builder.MapPost("/verify", Verify);
+            // builder.MapPost("/secure", SecureEndpoint);
             // builder.MapPost("/new-token", NewToken);
             builder.MapPost("/update", Update);
             // builder.MapPost("/request-reset", RequestPasswordReset);
@@ -59,13 +59,13 @@ namespace Ntk8.Demo
             // _commandExecutor.Execute(new UpdateUser(user));
         }
 
-        public async Task Verify(HttpContext context)
-        {
-            var verifyRequest = await context
-                .DeserializeRequestBody<VerifyUserByEmailRequest>();
-            
-            _accountService.VerifyUserByEmail(verifyRequest.Email);
-        }
+        // public async Task Verify(HttpContext context)
+        // {
+        //     var verifyRequest = await context
+        //         .DeserializeRequestBody<VerifyUserByEmailRequest>();
+        //     
+        //     _accountService.VerifyUserByEmail(verifyRequest.Email);
+        // }
 
         // public async Task ResetPassword(HttpContext context)
         // {
@@ -77,20 +77,20 @@ namespace Ntk8.Demo
         //     });
         // }
 
-        public Task VerifyByUrl(HttpContext context)
-        {
-            var verifyRequest =  context
-                .Request
-                .Query[nameof(VerifyUserByVerificationTokenRequest.Token)];
-
-            if (!string.IsNullOrEmpty(verifyRequest))
-            {
-                _accountService
-                    .VerifyUserByVerificationToken(verifyRequest);
-            }
-            
-            return Task.CompletedTask;
-        }
+        // public Task VerifyByUrl(HttpContext context)
+        // {
+        //     var verifyRequest =  context
+        //         .Request
+        //         .Query[nameof(VerifyUserByVerificationTokenRequest.Token)];
+        //
+        //     if (!string.IsNullOrEmpty(verifyRequest))
+        //     {
+        //         _accountService
+        //             .VerifyUserByVerificationToken(verifyRequest);
+        //     }
+        //     
+        //     return Task.CompletedTask;
+        // }
 
         // public async Task RequestPasswordReset(HttpContext context)
         // {
@@ -104,45 +104,45 @@ namespace Ntk8.Demo
         //     await context.SerialiseResponseBody(token);
         // }
 
-        public async Task ResetPassword(HttpContext context)
-        {
-            var resetRequest = await context.DeserializeRequestBody<ResetPasswordRequest>();
-            
-            _accountService.ResetUserPassword(resetRequest);
-        }
+        // public async Task ResetPassword(HttpContext context)
+        // {
+        //     var resetRequest = await context.DeserializeRequestBody<ResetPasswordRequest>();
+        //     
+        //     _accountService.ResetUserPassword(resetRequest);
+        // }
 
-        public async Task Register(HttpContext context)
-        {
-            var registerRequest = await context
-                .DeserializeRequestBody<RegisterRequest>();
-            
-            ValidateModel(registerRequest);
-
-            try
-            {
-                _accountService
-                    .RegisterUser(registerRequest);
-            }
-            catch (Exception e)
-            {
-                // ignore
-            }
-
-            // todo: send email or something...
-        }
+        // public async Task Register(HttpContext context)
+        // {
+        //     var registerRequest = await context
+        //         .DeserializeRequestBody<RegisterRequest>();
+        //     
+        //     ValidateModel(registerRequest);
+        //
+        //     try
+        //     {
+        //         _accountService
+        //             .RegisterUser(registerRequest);
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         // ignore
+        //     }
+        //
+        //     // todo: send email or something...
+        // }
         
-        public async Task Login(HttpContext context)
-        {
-            var authRequest = await context
-                .DeserializeRequestBody<AuthenticateRequest>();
-            
-            ValidateModel(authRequest);
-            
-            var response = _accountService
-                .AuthenticateUser(authRequest);
-            
-            await context.SerialiseResponseBody(response);
-        }
+        // public async Task Login(HttpContext context)
+        // {
+        //     var authRequest = await context
+        //         .DeserializeRequestBody<AuthenticateRequest>();
+        //     
+        //     ValidateModel(authRequest);
+        //     
+        //     var response = _accountService
+        //         .AuthenticateUser(authRequest);
+        //     
+        //     await context.SerialiseResponseBody(response);
+        // }
 
         // public async Task NewToken(HttpContext context)
         // {
@@ -156,17 +156,17 @@ namespace Ntk8.Demo
         //     await context.SerialiseResponseBody(response);
         // }
         
-        public async Task SecureEndpoint(HttpContext context)
-        {
-            new AuthoriseAttribute("administrator").OnAuthorization(
-                new AuthorizationFilterContext(new ActionContext(_contextAccessor.HttpContext, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>()));
-            
-            if (!_accountService.IsUserAuthenticated)
-            {
-                throw new UserNotAuthenticatedException();
-            }
-            
-            await context.SerialiseResponseBody($"Hi there {_accountService.CurrentUser?.FirstName}. You have these roles: {string.Join(",",_accountService.CurrentUser?.Roles?.Select(s => s.RoleName))}");
-        }
+        // public async Task SecureEndpoint(HttpContext context)
+        // {
+        //     new AuthoriseAttribute("administrator").OnAuthorization(
+        //         new AuthorizationFilterContext(new ActionContext(_contextAccessor.HttpContext, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>()));
+        //     
+        //     if (!_accountService.IsUserAuthenticated)
+        //     {
+        //         throw new UserNotAuthenticatedException();
+        //     }
+        //     
+        //     await context.SerialiseResponseBody($"Hi there {_accountService.CurrentUser?.FirstName}. You have these roles: {string.Join(",",_accountService.CurrentUser?.Roles?.Select(s => s.RoleName))}");
+        // }
     }
 }

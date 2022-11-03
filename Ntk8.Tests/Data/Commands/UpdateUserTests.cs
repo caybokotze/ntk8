@@ -3,6 +3,7 @@ using Dapper.CQRS;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
@@ -19,17 +20,16 @@ namespace Ntk8.Tests.Data.Commands
             {
                 // arrange
                 var user = TestUser.Create();
-                var commandExecutor = Resolve<ICommandExecutor>();
-                var queryExecutor = Resolve<IQueryExecutor>();
+                var commandExecutor = Resolve<IAccountCommands>();
+                var queryExecutor = Resolve<IAccountQueries>();
                 // act
-                var id = commandExecutor.Execute(new InsertUser(user));
+                var userAccount = commandExecutor.InsertUser(user);
                 var updatedUser = TestUser.Create();
-                updatedUser.UserRoles = null;
-                updatedUser.Roles = null;
                 updatedUser.RefreshToken = null;
-                updatedUser.Id = id;
-                commandExecutor.Execute(new UpdateUser(updatedUser));
-                var expected = queryExecutor.Execute(new FetchUserById<TestUser>(id));
+                updatedUser.Id = userAccount.Id;
+                
+                commandExecutor.UpdateUser(updatedUser);
+                var expected = queryExecutor.FetchUserById<TestUser>(id);
                 Expect(updatedUser.DateModified).To.Approximately.Equal(expected!.DateModified);
                 Expect(updatedUser.DateCreated).To.Approximately.Equal(expected.DateCreated);
                 Expect(updatedUser.DateVerified).To.Approximately.Equal((DateTime) expected.DateVerified!);
@@ -41,7 +41,6 @@ namespace Ntk8.Tests.Data.Commands
                 updatedUser.DateVerified = expected.DateVerified;
                 updatedUser.DateOfPasswordReset = expected.DateOfPasswordReset;
                 updatedUser.DateResetTokenExpires = expected.DateResetTokenExpires;
-                expected.Roles = null;
                 // assert
                 Expect(updatedUser).To.Deep.Equal(expected);
             }

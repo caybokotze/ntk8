@@ -33,7 +33,7 @@ namespace Ntk8.Tests.TestHelpers
                 Email = Faker.Internet.Email()
             };
             user.UserRoles = CreateRandomUserRoles(user);
-            user.Roles = user.UserRoles.Select(s => s.Role).ToArray();
+            user.Roles = user.UserRoles.Select(s => s.Role!).ToArray();
             user.RefreshToken = CreateValidRefreshToken();
             user.RefreshToken.Expires = DateTime.UtcNow.AddDays(1);
             user.RefreshToken.DateRevoked = null;

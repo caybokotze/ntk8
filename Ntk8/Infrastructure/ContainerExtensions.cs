@@ -85,15 +85,14 @@ public static class ContainerExtensions
             .AddSingleton<InvalidRoleExceptionMiddleware, InvalidRoleExceptionMiddleware>();
     }
     
-    public static void RegisterNtk8Services<TUser>(
+    public static void RegisterNtk8Services<T>(
         this IServiceCollection serviceCollection) 
-        where TUser : class, 
+        where T : class, 
         IUserEntity, 
         new()
     {
-        serviceCollection.AddTransient<IUserEntity, TUser>();
-        serviceCollection.AddTransient<JwtMiddleware<TUser>, JwtMiddleware<TUser>>();
-        serviceCollection.AddTransient<ITokenService, TokenService<TUser>>();
-        serviceCollection.AddTransient<IAccountService, AccountService<TUser>>();
+        serviceCollection.AddScoped<JwtMiddleware<T>, JwtMiddleware<T>>();
+        serviceCollection.AddScoped<ITokenService, TokenService<T>>();
+        serviceCollection.AddScoped<IAccountService, AccountService<T>>();
     }
 }

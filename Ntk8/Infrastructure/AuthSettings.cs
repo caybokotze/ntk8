@@ -27,10 +27,9 @@ namespace Ntk8.Models
     {
         public AuthSettings()
         {
-            RefreshTokenSecret = TokenHelpers.GenerateCryptoRandomToken();
             RefreshTokenLength = 40;
-            RefreshTokenTTL = 3600;
-            JwtTTL = 900;
+            RefreshTokenTTL = 604_800; // 7 days
+            JwtTTL = 900; // 
             PasswordResetTokenTTL = 900;
             UserVerificationTokenTTL = 900;
         }

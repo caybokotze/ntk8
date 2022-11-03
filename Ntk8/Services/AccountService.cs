@@ -11,13 +11,24 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
 {
+    public interface IAccountService
+    {
+        IUserEntity? CurrentUser { get; }
+        bool IsUserAuthenticated { get; }
+        AuthenticatedResponse AuthenticateUser(AuthenticateRequest authenticationRequest);
+        UserAccountResponse RegisterUser(RegisterRequest registerRequest);
+        void VerifyUserByEmail(VerifyUserByEmailRequest? request);
+        void VerifyUserByVerificationToken(VerifyUserByVerificationTokenRequest? request);
+        (string resetToken, IUserEntity user) ResetUserPassword(ForgotPasswordRequest forgotPasswordRequest);
+        void ResetUserPassword(ResetPasswordRequest resetPasswordRequest);
+    }
+    
     public class AccountService<T> : IAccountService where T : class, IUserEntity, new()
     {
         private readonly IAccountCommands _accountCommands;
         private readonly IAccountQueries _accountQueries;
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
-        private readonly IUserEntity _userEntity;
         private readonly ILogger<AccountService<T>> _logger;
         private readonly IGlobalSettings _globalSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -27,7 +38,6 @@ namespace Ntk8.Services
             IAccountQueries accountQueries,
             ITokenService tokenService,
             IAuthSettings authSettings,
-            IUserEntity userEntity,
             ILogger<AccountService<T>> logger,
             IGlobalSettings globalSettings,
             IHttpContextAccessor httpContextAccessor)
@@ -36,7 +46,6 @@ namespace Ntk8.Services
             _accountQueries = accountQueries;
             _tokenService = tokenService;
             _authSettings = authSettings;
-            _userEntity = userEntity;
             _logger = logger;
             _globalSettings = globalSettings;
             _httpContextAccessor = httpContextAccessor;
@@ -104,7 +113,7 @@ namespace Ntk8.Services
         }
 
         
-        public AuthenticatedResponse RegisterUser(RegisterRequest registerRequest)
+        public UserAccountResponse RegisterUser(RegisterRequest registerRequest)
         {
             var existingUser = _accountQueries
                 .FetchUserByEmailAddress<T>(registerRequest.Email);
@@ -120,11 +129,10 @@ namespace Ntk8.Services
                 existingUser.DateResetTokenExpires = DateTime.UtcNow
                     .AddSeconds(_authSettings.UserVerificationTokenTTL);
                 _accountCommands.UpdateUser(existingUser);
-                return existingUser.MapTo(new AuthenticatedResponse());
+                return existingUser.MapTo(new UserAccountResponse());
             }
 
-            var user = registerRequest.MapTo((T)_userEntity);
-            
+            var user = registerRequest.MapTo(new T());
             user.IsActive = true;
             user.VerificationToken = TokenHelpers.GenerateCryptoRandomToken();
             user.DateCreated = DateTime.UtcNow;
@@ -133,8 +141,7 @@ namespace Ntk8.Services
                 .AddSeconds(_authSettings.UserVerificationTokenTTL);
             user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
             user.PasswordHash = BC.HashPassword($"{registerRequest.Password}{user.PasswordSalt}");
-            user.Id = _accountCommands.InsertUser(user);
-            return user.MapTo(new AuthenticatedResponse());
+            return _accountCommands.InsertUser(user);
         }
 
         /// <summary>

@@ -10,6 +10,7 @@ using MySql.Data.MySqlClient;
 using Ntk8.DatabaseServices;
 using Ntk8.Dto;
 using Ntk8.Infrastructure;
+using Ntk8.Models;
 using Ntk8.Services;
 using ScopeFunction.Utils;
 using static ScopeFunction.Utils.AppSettingsBuilder;
@@ -47,8 +48,38 @@ namespace Ntk8.Demo
                 {
                     var dbUser = accountQueries.FetchUserById<UserEntity>(request.Id);
                     request.MapTo(dbUser);
-                    accountCommands.UpdateUser(dbUser);
+                    return accountCommands.UpdateUser(dbUser);
                 });
+
+            app.MapPost("/assign-roles", (IAccountService accountService, IAccountCommands accountCommands, IAccountQueries accountQueries) =>
+            {
+                var currentUser = accountService.CurrentUser;
+                accountCommands.InsertOrUpdateUserRole(new UserRole
+                {
+                    UserId = accountService.CurrentUser!.Id,
+                    RoleId = 1
+                });
+                
+                accountCommands.InsertOrUpdateUserRole(new UserRole
+                {
+                    UserId = accountService.CurrentUser!.Id,
+                    RoleId = 1
+                });
+                
+                accountCommands.InsertOrUpdateUserRole(new UserRole
+                {
+                    UserId = accountService.CurrentUser!.Id,
+                    RoleId = 2
+                });
+
+                return accountQueries.FetchUserById<UserEntity>(currentUser!.Id).MapTo(new UserAccountResponse());
+            });
+
+            app.MapPost("/request-password-reset", (ForgotPasswordRequest forgot, IAccountService accountService) =>
+            {
+                var res = accountService.ResetUserPassword(forgot);
+                return res.resetToken;
+            });
 
             await app.RunAsync();
         }
@@ -60,7 +91,7 @@ namespace Ntk8.Demo
         private static void ConfigureDependencies(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<IExecutable, Executable>();
-            builder.Services.AddSingleton<IQueryable, Queryable>();
+            builder.Services.AddTransient<IQueryable, Queryable>();
             builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(_ => 
@@ -73,7 +104,9 @@ namespace Ntk8.Demo
                 o.UseJwt = true;
                 o.ConfigureAuthSettings(a =>
                 {
-                    a.JwtTTL = 1000;
+                    a.RefreshTokenSecret = builder.Configuration["AuthSettings:RefreshTokenSecret"];
+                    a.JwtTTL = 30_000;
+                    a.RefreshTokenTTL = 300_000_000;
                     a.UserVerificationTokenTTL = 10_000;
                 });
             });

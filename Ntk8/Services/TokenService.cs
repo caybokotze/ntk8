@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Ntk8.Constants;
 using Ntk8.DatabaseServices;
@@ -16,7 +18,7 @@ namespace Ntk8.Services
 {
     public interface ITokenService
     {
-        AccessTokenResponse GenerateJwtToken(int userId, Role[]? roles);
+        AccessTokenResponse GenerateJwtToken(int userId, Role[] roles);
         (bool isActive, int userId, Role[]? roles) IsRefreshTokenActive(string token);
         RefreshToken GenerateRefreshToken(int userId);
         AccessTokenResponse GenerateJwtToken(string refreshToken);
@@ -31,17 +33,20 @@ namespace Ntk8.Services
         private readonly IAccountQueries _accountQueries;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly ILogger<TokenService<T>> _logger;
 
         public TokenService(
             IAccountCommands accountCommands,
             IAccountQueries accountQueries,
             IAuthSettings authSettings,
-            IHttpContextAccessor contextAccessor)
+            IHttpContextAccessor contextAccessor,
+            ILogger<TokenService<T>> logger)
         {
             _accountCommands = accountCommands;
             _accountQueries = accountQueries;
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
+            _logger = logger;
         }
 
         public void RevokeRefreshToken(RefreshToken? token)
@@ -100,14 +105,13 @@ namespace Ntk8.Services
 
         public AccessTokenResponse GenerateJwtToken(int userId, Role[]? roles)
         {
-            if (_authSettings.RefreshTokenSecret?.Length < 32)
+            if (_authSettings.RefreshTokenSecret?.Length is < 32)
             {
-                throw new InvalidTokenLengthException();
+                throw new InvalidTokenLengthException("The refresh token secret must be at least 32 characters.");
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_authSettings.RefreshTokenSecret
-                                             ?? throw new RefreshTokenNotIncludedException("The refresh token does not seem to exist in your user settings in the appsettings.json file"));
+            var key = Encoding.UTF8.GetBytes(_authSettings.RefreshTokenSecret!);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -169,9 +173,9 @@ namespace Ntk8.Services
         
         public SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret)
         {
-            var key = Encoding
+            var key = new HMACSHA512(Encoding
                 .UTF8
-                .GetBytes(refreshTokenSecret);
+                .GetBytes(refreshTokenSecret));
             
             var tokenHandler = new JwtSecurityTokenHandler();
             
@@ -182,14 +186,15 @@ namespace Ntk8.Services
                 tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    IssuerSigningKey = new SymmetricSecurityKey(key.Key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
                 }, out validatedToken);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "A error occurred within the Token Service the. JWT was invalid");
                 throw new InvalidJwtTokenException();
             }
 

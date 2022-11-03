@@ -1,7 +1,9 @@
 using Dapper.CQRS;
 using Ntk8.Data.Commands;
+using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Models;
+using ScopeFunction.Utils;
 
 namespace Ntk8.DatabaseServices;
 
@@ -9,12 +11,12 @@ public interface IAccountCommands
 {
     void DeleteRolesForUserById(int id);
     void DeleteUserById(int id);
-    long InsertRefreshToken(RefreshToken? refreshToken);
-    int InsertRole(Role? role);
-    int InsertUser(IUserEntity? userEntity);
-    int InsertUserRole(UserRole? userRole);
-    void UpdateRefreshToken(RefreshToken? refreshToken);
-    void UpdateUser(IUserEntity? userEntity);
+    RefreshToken InsertRefreshToken(RefreshToken? refreshToken);
+    Role InsertOrUpdateRole(Role? role);
+    UserAccountResponse InsertUser(IUserEntity? userEntity);
+    UserRole InsertOrUpdateUserRole(UserRole? userRole);
+    RefreshToken UpdateRefreshToken(RefreshToken? refreshToken);
+    UserAccountResponse UpdateUser(IUserEntity? userEntity);
 }
 
 public class AccountCommands : IAccountCommands
@@ -36,58 +38,69 @@ public class AccountCommands : IAccountCommands
         _commandExecutor.Execute(new DeleteUserById(id));
     }
 
-    public long InsertRefreshToken(RefreshToken refreshToken)
+    public RefreshToken InsertRefreshToken(RefreshToken? refreshToken)
     {
-        return _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
+        if (refreshToken is null)
+        {
+            throw new InvalidRefreshTokenException("Can not insert a null refresh token");
+        }
+        
+        refreshToken.Id = _commandExecutor.Execute(new InsertRefreshToken(refreshToken));
+        return refreshToken;
     }
 
-    public int InsertRole(Role role)
+    public Role InsertOrUpdateRole(Role? role)
     {
         if (role is null)
         {
-            throw new InvalidRoleException();
+            throw new InvalidRoleException("Can not insert a null role");
         }
         
-        return _commandExecutor.Execute(new InsertRole(role));
+        role.Id = _commandExecutor.Execute(new InsertOrUpdateRole(role));
+        return role;
     }
 
-    public int InsertUser(IUserEntity userEntity)
+    public UserAccountResponse InsertUser(IUserEntity? userEntity)
     {
         if (userEntity is null)
         {
             throw new InvalidUserException("Cannot insert a null user");
         }
         
-        return _commandExecutor.Execute(new InsertUser(userEntity));
+        userEntity.Id = _commandExecutor.Execute(new InsertUser(userEntity));
+        return userEntity.MapTo(new UserAccountResponse());
     }
 
-    public int InsertUserRole(UserRole userRole)
+    public UserRole InsertOrUpdateUserRole(UserRole? userRole)
     {
         if (userRole is null)
         {
-            throw new InvalidRoleException();
+            throw new InvalidRoleException("Cannot insert a null user role");
         }
         
-        return _commandExecutor.Execute(new InsertUserRole(userRole));
+        userRole.Id = _commandExecutor.Execute(new InsertOrUpdateUserRole(userRole));
+        return userRole;
     }
 
-    public void UpdateRefreshToken(RefreshToken? refreshToken)
+    public RefreshToken UpdateRefreshToken(RefreshToken? refreshToken)
     {
         if (refreshToken is null)
         {
             throw new InvalidRefreshTokenException("Can not update a null refresh token");
         }
         
-        _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
+        refreshToken.Id = _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
+        return refreshToken;
     }
 
-    public void UpdateUser(IUserEntity? userEntity)
+    public UserAccountResponse UpdateUser(IUserEntity? userEntity)
     {
         if (userEntity is null)
         {
             throw new InvalidUserException("A null user can not be updated");
         }
         
-        _commandExecutor.Execute(new UpdateUser(userEntity));
+        userEntity.Id = _commandExecutor.Execute(new UpdateUser(userEntity));
+        return userEntity.MapTo(new UserAccountResponse(userEntity.IsVerified));
     }
 }

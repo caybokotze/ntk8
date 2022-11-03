@@ -6,6 +6,7 @@ using Dapper.CQRS;
 using NExpect;
 using Ntk8.Data.Commands;
 using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Models;
 using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
@@ -26,12 +27,12 @@ namespace Ntk8.Tests.Data.Queries
                 using (new TransactionScope())
                 {
                     // arrange
-                    var queryExecutor = Resolve<IQueryExecutor>();
-                    var commandExecutor = Resolve<ICommandExecutor>();
+                    var queryExecutor = Resolve<IAccountQueries>();
+                    var commandExecutor = Resolve<IAccountCommands>();
                     var user = TestUser.Create();
                     // act
-                    var userId = commandExecutor.Execute(new InsertUser(user));
-                    var expectedUser = queryExecutor.Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
+                    var userId = commandExecutor.InsertUser(user);
+                    var expectedUser = queryExecutor.FetchUserByEmailAddress<TestUser>(user.Email);
                     user.Id = userId;
                     // assert
                     Expect(user.DateCreated).To.Approximately.Equal((DateTime)expectedUser?.DateCreated!);
@@ -48,10 +49,7 @@ namespace Ntk8.Tests.Data.Queries
                     user.DateOfPasswordReset = expectedUser.DateOfPasswordReset;
                     user.DateResetTokenExpires = expectedUser.DateResetTokenExpires;
                     user.RefreshToken = null;
-                    user.Roles = null;
-                    user.UserRoles = null;
                     expectedUser.RefreshToken = null;
-                    expectedUser.Roles = null;
                     Expect(user)
                         .To.Deep.Equal(expectedUser);
                 }
@@ -63,8 +61,8 @@ namespace Ntk8.Tests.Data.Queries
                 using (new TransactionScope())
                 {
                     // arrange
-                    var commandExecutor = Resolve<ICommandExecutor>();
-                    var queryExecutor = Resolve<IQueryExecutor>();
+                    var commandExecutor = Resolve<IAccountCommands>();
+                    var queryExecutor = Resolve<IAccountQueries>();
                     var user = TestUser.Create();
                     var roleId = GetRandomInt(100);
                     var userRoles = new List<UserRole>
@@ -98,24 +96,26 @@ namespace Ntk8.Tests.Data.Queries
                         role.UserId = user.Id;
                         role.RoleId = role.Role.Id += 100;
                     }
-                    var userId = commandExecutor.Execute(new InsertUser(user));
+
+                    var userId = commandExecutor.InsertUser(user);
+                    
                     foreach (var role in userRoles.Select(s => s.Role))
                     {
-                        commandExecutor.Execute(new InsertRole(role!));
+                        commandExecutor.InsertOrUpdateRole(role);
                     }
+                    
                     foreach (var userRole in userRoles)
                     {
                         userRole.UserId = userId;
-                        commandExecutor.Execute(new InsertUserRole(userRole));
+                        commandExecutor.InsertOrUpdateUserRole(userRole);
                     }
 
                     // act
-                    var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
+                    var result = queryExecutor.FetchUserByEmailAddress<TestUser>(user.Email);
 
                     // assert
                     Expect(result).Not.To.Be.Null();
-                    Expect(result?.Roles).To.Deep.Equal(userRoles.Select(s => s.Role));
+                    Expect(result!.Roles).To.Deep!.Equal(userRoles.Select(s => s.Role));
                 }
             }
 

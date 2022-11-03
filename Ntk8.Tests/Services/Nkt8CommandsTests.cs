@@ -123,7 +123,7 @@ public class Nkt8CommandsTests
             var sut = Substitute.For<AccountCommands>(commandExecutor);
             var userRole = GetRandom<UserRole>();
             // act
-            var result = sut.InsertUserRole(userRole);
+            var result = sut.InsertOrUpdateUserRole(userRole);
             // assert
             Expect(commandExecutor).To.Have.Received(1)
                 .Execute(Arg.Is<InsertUserRole>(s => s.RoleId == userRole.RoleId && s.UserId == userRole.UserId));
