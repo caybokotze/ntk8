@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Ntk8.ActionFilters;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
 using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Services;
@@ -45,52 +43,45 @@ namespace Ntk8.Demo
             // builder.MapGet("/verify", VerifyByUrl);
             builder.MapPost("/verify", Verify);
             builder.MapPost("/secure", SecureEndpoint);
-            builder.MapPost("/new-token", NewToken);
+            // builder.MapPost("/new-token", NewToken);
             builder.MapPost("/update", Update);
-            builder.MapPost("/request-reset", RequestPasswordReset);
+            // builder.MapPost("/request-reset", RequestPasswordReset);
             // builder.MapPost("/reset-password", ResetPassword);
         }
 
         public async Task Update(HttpContext context)
         {
-
             var updateRequest = await context.DeserializeRequestBody<UpdateRequest>();
 
-            var user = _queryExecutor.Execute(new FetchUserByEmailAddress<UserEntity>(updateRequest.Email));
-            user.TelNumber = updateRequest.TelNumber;
-
-            _commandExecutor.Execute(new UpdateUser(user));
+            // var user = _queryExecutor.Execute(new FetchUserByEmailAddress<UserEntity>(updateRequest.Email));
+            // user.TelNumber = updateRequest.TelNumber;
+            //
+            // _commandExecutor.Execute(new UpdateUser(user));
         }
 
         public async Task Verify(HttpContext context)
         {
             var verifyRequest = await context
-                .DeserializeRequestBody<VerifyEmailRequest>();
+                .DeserializeRequestBody<VerifyUserByEmailRequest>();
             
-            _accountService.VerifyUserByEmail(verifyRequest.Email ?? string.Empty);
-            
-            var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<UserEntity>(verifyRequest.Email));
-            
-            _accountService
-                .VerifyUserByVerificationToken(user.VerificationToken);
+            _accountService.VerifyUserByEmail(verifyRequest.Email);
         }
 
-        public async Task ResetPassword(HttpContext context)
-        {
-            var request = await context.DeserializeRequestBody<ResetPasswordRequest>();
-            
-            _accountService.ResetUserPassword(new ForgotPasswordRequest()
-            {
-                Email = ""
-            });
-        }
+        // public async Task ResetPassword(HttpContext context)
+        // {
+        //     var request = await context.DeserializeRequestBody<ResetPasswordRequest>();
+        //     
+        //     _accountService.ResetUserPassword(new ForgotPasswordRequest()
+        //     {
+        //         Email = ""
+        //     });
+        // }
 
         public Task VerifyByUrl(HttpContext context)
         {
             var verifyRequest =  context
                 .Request
-                .Query[nameof(VerifyEmailByTokenRequest.Token)];
+                .Query[nameof(VerifyUserByVerificationTokenRequest.Token)];
 
             if (!string.IsNullOrEmpty(verifyRequest))
             {
@@ -101,17 +92,17 @@ namespace Ntk8.Demo
             return Task.CompletedTask;
         }
 
-        public async Task RequestPasswordReset(HttpContext context)
-        {
-            var resetRequest = await context.DeserializeRequestBody<ForgotPasswordRequest>();
-            
-            var token = _accountService.GetPasswordResetToken(new ForgotPasswordRequest
-            {
-                Email = resetRequest.Email
-            });
-
-            await context.SerialiseResponseBody(token);
-        }
+        // public async Task RequestPasswordReset(HttpContext context)
+        // {
+        //     var resetRequest = await context.DeserializeRequestBody<ForgotPasswordRequest>();
+        //     
+        //     var token = _accountService.GetPasswordResetToken(new ForgotPasswordRequest
+        //     {
+        //         Email = resetRequest.Email
+        //     });
+        //
+        //     await context.SerialiseResponseBody(token);
+        // }
 
         public async Task ResetPassword(HttpContext context)
         {
@@ -153,17 +144,17 @@ namespace Ntk8.Demo
             await context.SerialiseResponseBody(response);
         }
 
-        public async Task NewToken(HttpContext context)
-        {
-            var resetTokenRequest = await context
-                .DeserializeRequestBody<AccessTokenRequest>();
-            
-            ValidateModel(resetTokenRequest);
-
-            var user = _queryExecutor.Execute(new FetchUserByRefreshToken<UserEntity>(resetTokenRequest.Token));
-            var response = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
-            await context.SerialiseResponseBody(response);
-        }
+        // public async Task NewToken(HttpContext context)
+        // {
+        //     var resetTokenRequest = await context
+        //         .DeserializeRequestBody<AccessTokenRequest>();
+        //     
+        //     ValidateModel(resetTokenRequest);
+        //
+        //     var user = _queryExecutor.Execute(new FetchUserByRefreshToken<UserEntity>(resetTokenRequest.Token));
+        //     var response = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
+        //     await context.SerialiseResponseBody(response);
+        // }
         
         public async Task SecureEndpoint(HttpContext context)
         {

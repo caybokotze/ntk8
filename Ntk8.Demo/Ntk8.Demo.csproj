@@ -13,7 +13,7 @@
       <PackageReference Include="GenericSqlBuilder" Version="1.1.1" />
       <PackageReference Include="MySql.Data" Version="8.0.26" />
       <PackageReference Include="PeanutButter.Utils" Version="3.0.4" />
-      <PackageReference Include="ScopeFunction.Utils" Version="1.0.0" />
+      <PackageReference Include="ScopeFunction.Utils" Version="1.2.0" />
     </ItemGroup>
 
 </Project>

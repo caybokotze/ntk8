@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-
-namespace Ntk8.Models
+﻿namespace Ntk8.Models
 {
     public class Role
     {

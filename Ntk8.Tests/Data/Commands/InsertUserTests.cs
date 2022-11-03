@@ -1,8 +1,6 @@
 ﻿using System;
-using Dapper.CQRS;
 using NExpect;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Models;
 using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
@@ -20,16 +18,14 @@ namespace Ntk8.Tests.Data.Commands
             using (Transactions.UncommittedRead())
             {
                 // arrange
-                var user = TestUserEntity.Create();
-                var commandExecutor = Resolve<ICommandExecutor>();
-                var queryExecutor = Resolve<IQueryExecutor>();
+                var user = TestUser.Create();
+                var accountCommands = Resolve<IAccountCommands>();
+                var accountQueries = Resolve<IAccountQueries>();
                 
                 // act
-                var id = commandExecutor
-                    .Execute(new InsertUser(user));
-                var expectedUser = queryExecutor
-                    .Execute(new FetchUserById<TestUserEntity>(id)); 
-                
+                var id = accountCommands.InsertUser(user);
+                var expectedUser = accountQueries.FetchUserById<TestUser>(id);
+
                 // assert
                 Expect(id)
                     .To.Be.Greater.Than(1);
@@ -41,9 +37,7 @@ namespace Ntk8.Tests.Data.Commands
                 Expect(expectedUser?.DateResetTokenExpires).To.Approximately
                     .Equal((DateTime) user.DateResetTokenExpires!);
                 user.RefreshToken = null;
-                user.UserRoles = null;
-                user.Roles = null;
-                
+
                 expectedUser!.DateCreated = user.DateCreated;
                 expectedUser.DateModified = user.DateModified;
                 expectedUser.DateVerified = user.DateVerified;
@@ -64,16 +58,14 @@ namespace Ntk8.Tests.Data.Commands
             {
                 // arrange
                 var user = RandomValueGen.GetRandom<IUserEntity>();
-                var commandExecutor = Resolve<ICommandExecutor>();
-                var queryExecutor = Resolve<IQueryExecutor>();
+                var accountCommands = Resolve<IAccountCommands>();
+                var accountQueries = Resolve<IAccountQueries>();
                 
                 // act
-                var id = commandExecutor
-                    .Execute(new InsertUser(user));
+                var id = accountCommands.InsertUser(user);
 
-                var expectedUser = queryExecutor
-                    .Execute(new FetchUserById<TestUserEntity>(id));
-                
+                var expectedUser = accountQueries.FetchUserById<TestUser>(id);
+
                 // assert
                 Expect(expectedUser?.DateCreated)
                     .To.Approximately.Equal(user.DateCreated);

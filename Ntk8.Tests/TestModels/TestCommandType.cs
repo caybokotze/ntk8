@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Tests.TestModels;
 
-public class TestCommandType : IUserCommands
+public class TestCommandType : IAccountCommands
 {
     public void DeleteRolesForUserById(int id)
     {

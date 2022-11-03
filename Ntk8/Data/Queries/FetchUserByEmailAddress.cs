@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using Microsoft.Extensions.Logging;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -11,8 +12,13 @@ namespace Ntk8.Data.Queries
     {
         public string EmailAddress { get; }
 
-        public FetchUserByEmailAddress(string emailAddress)
+        public FetchUserByEmailAddress(string? emailAddress)
         {
+            if (emailAddress is null)
+            {
+                throw new InvalidEmailAddressException("The provided email address is null and can not be retrieved");
+            }
+            
             EmailAddress = emailAddress.ToLowerInvariant();
         }
 
@@ -91,7 +97,7 @@ WHERE u.email = @EmailAddress;";
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message, e);
+                Logger.LogError(e, "Failed to fetch user by email address: FetchUserByEmailAddress.cs");
                 Result = null;
             }
         }

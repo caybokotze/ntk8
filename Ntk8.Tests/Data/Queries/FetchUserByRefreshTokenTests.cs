@@ -23,7 +23,7 @@ namespace Ntk8.Tests.Data.Queries
                 // arrange
                 var queryExecutor = Resolve<IQueryExecutor>();
                 var commandExecutor = Resolve<ICommandExecutor>();
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 var refreshToken = user.RefreshToken;
                 var userId = commandExecutor.Execute(new InsertUser(user));
                 refreshToken!.UserId = userId;
@@ -36,7 +36,7 @@ namespace Ntk8.Tests.Data.Queries
                 }));
                 // act
                 var expectedUser = queryExecutor
-                    .Execute(new FetchUserByRefreshToken<TestUserEntity>(user.RefreshToken?.Token!));
+                    .Execute(new FetchUserByRefreshToken<TestUser>(user.RefreshToken?.Token!));
                 // assert
                 Expect(expectedUser)
                     .Not.To.Be.Null();

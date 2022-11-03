@@ -27,7 +27,7 @@ public class FetchUserByResetTokenTests
                 var queryExecutor = Resolve<IQueryExecutor>();
                 var commandExecutor = Resolve<ICommandExecutor>();
 
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 user.RefreshToken = null;
                 user.UserRoles = null;
                 user.Roles = Array.Empty<Role>();
@@ -35,7 +35,7 @@ public class FetchUserByResetTokenTests
                 var userId = commandExecutor.Execute(new InsertUser(user));
                 user.Id = userId;
                 // act
-                var expectedUser = queryExecutor.Execute(new FetchUserByResetToken<TestUserEntity>(user.ResetToken));
+                var expectedUser = queryExecutor.Execute(new FetchUserByResetToken<TestUser>(user.ResetToken));
                 // assert
                 Expect(expectedUser!.DateCreated).To.Approximately.Equal(user.DateCreated);
                 Expect(expectedUser.DateModified).To.Approximately.Equal(user.DateModified);

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using Dapper.CQRS;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
@@ -13,7 +13,7 @@ namespace Ntk8.Data.Commands
         {
             if (userEntityModel.Id < 1)
             {
-                throw new InvalidDataException("Can not update a record with a non valid ID, as that is used as the primary key.");
+                throw new InvalidUserException("Ïnvalid ID provided for the user");
             }
             
             UserEntity = userEntityModel;
@@ -23,7 +23,7 @@ namespace Ntk8.Data.Commands
 
         public override void Execute()
         {
-            Result = Execute(
+            Result = QueryFirst<int>(
                 @"UPDATE users SET 
             first_name = @FirstName,
             last_name = @LastName,
@@ -45,7 +45,7 @@ namespace Ntk8.Data.Commands
             date_modified = @DateModified,
             date_created = @DateCreated,
             is_active = @IsActive
-            WHERE id = @Id;",
+            WHERE id = @Id; SELECT last_insert_id();",
                 UserEntity);
         }
     }

@@ -1,15 +1,9 @@
-using System.Data;
-using System.Data.Common;
 using System.Threading.Tasks;
-using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MySql.Data.MySqlClient;
 using NExpect;
 using Ntk8.Infrastructure;
 using Ntk8.Models;
@@ -58,7 +52,7 @@ public class AuthSettingsTests
 
                     webHost.ConfigureServices(config =>
                     {
-                        config.ConfigureNtk8<TestUserEntity>(options =>
+                        config.ConfigureNtk8<TestUser>(options =>
                         {
                             options.ConfigureAuthSettings(c =>
                             {

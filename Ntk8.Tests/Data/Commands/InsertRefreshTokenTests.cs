@@ -1,8 +1,7 @@
 using System.Transactions;
 using Dapper.CQRS;
 using NExpect;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using static NExpect.Expectations;
@@ -24,14 +23,16 @@ namespace Ntk8.Tests.Data.Commands
                     var refreshToken = TestTokenHelpers.CreateRefreshToken();
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var commandExecutor = Resolve<ICommandExecutor>();
+                    var userCommands = Resolve<IAccountCommands>();
+                    var userQueries = Resolve<IAccountQueries>();
 
-                    var testUser = TestUserEntity.Create();
-                    var userId = commandExecutor.Execute(new InsertUser(testUser));
+                    var testUser = TestUser.Create();
+                    var userId = userCommands.InsertUser(testUser);
 
                     refreshToken.UserId = userId;
                     // act
-                    commandExecutor.Execute(new InsertRefreshToken(refreshToken));
-                    var baseUser = queryExecutor.Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token));
+                    var refreshTokenId = userCommands.InsertRefreshToken(refreshToken);
+                    var baseUser = userQueries.FetchUserByRefreshToken<TestUser>(refreshToken.Token);
                     // assert
                     Expect(baseUser).Not.To.Be.Null();
                 }

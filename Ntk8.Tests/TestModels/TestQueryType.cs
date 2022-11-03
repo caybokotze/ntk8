@@ -1,31 +1,31 @@
 using Ntk8.DatabaseServices;
-using Ntk8.Tests.TestHelpers;
+using Ntk8.Models;
 
 namespace Ntk8.Tests.TestModels;
 
-public class TestQueryType : IUserQueries
+public class TestQueryType : IAccountQueries
 {
-    public TestUserEntity? FetchUserById(int id)
+    public T? FetchUserById<T>(int id) where T : class, IUserEntity, new()
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUserEntity? FetchUserByEmailAddress(string emailAddress)
+    public T? FetchUserByEmailAddress<T>(string emailAddress) where T : class, IUserEntity, new()
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUserEntity? FetchUserByRefreshToken(string refreshToken)
+    public T? FetchUserByRefreshToken<T>(string refreshToken) where T : class, IUserEntity, new()
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUserEntity? FetchUserByResetToken(string resetToken)
+    public T? FetchUserByResetToken<T>(string resetToken) where T : class, IUserEntity, new()
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUserEntity? FetchUserByVerificationToken(string verificationToken)
+    public T? FetchUserByVerificationToken<T>(string verificationToken) where T : class, IUserEntity, new()
     {
         throw new System.NotImplementedException();
     }

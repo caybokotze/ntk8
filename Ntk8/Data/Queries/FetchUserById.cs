@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using Microsoft.Extensions.Logging;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -13,6 +14,11 @@ namespace Ntk8.Data.Queries
 
         public FetchUserById(int id)
         {
+            if (id < 1)
+            {
+                throw new InvalidUserException("Can not query a user with a negative or 0 value primary key");
+            }
+            
             Id = id;
         }
         
@@ -90,7 +96,7 @@ WHERE u.id = @Id;";
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message, e);
+                Logger.LogError(e, "Failed to fetch the user by id: FetchUserById.cs");
                 Result = null;
             }
         }

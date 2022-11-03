@@ -5,7 +5,7 @@
     "sqlPassword": "SqlTracking#1234",
     "sqlHost": "localhost",
     "sqlPort": "3306",
-    "sqlDatabase": "ntk8_tests",
+    "sqlDatabase": "ntk8",
     "migrationTableName": "__migrations"
   }
 }

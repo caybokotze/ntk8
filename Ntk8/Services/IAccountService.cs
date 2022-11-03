@@ -8,9 +8,9 @@ namespace Ntk8.Services
         IUserEntity? CurrentUser { get; }
         bool IsUserAuthenticated { get; }
         AuthenticatedResponse AuthenticateUser(AuthenticateRequest authenticationRequest);
-        void RegisterUser(RegisterRequest registerRequest);
-        void VerifyUserByEmail(string? email);
-        void VerifyUserByVerificationToken(string? token);
+        AuthenticatedResponse RegisterUser(RegisterRequest registerRequest);
+        void VerifyUserByEmail(VerifyUserByEmailRequest? request);
+        void VerifyUserByVerificationToken(VerifyUserByVerificationTokenRequest? request);
         (string resetToken, IUserEntity user) ResetUserPassword(ForgotPasswordRequest forgotPasswordRequest);
         void ResetUserPassword(ResetPasswordRequest resetPasswordRequest);
     }

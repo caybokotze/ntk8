@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using Microsoft.Extensions.Logging;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -12,11 +13,11 @@ namespace Ntk8.Data.Queries
     /// </summary>
     internal class FetchUserByRefreshToken<T> : Query<T?> where T : class, IUserEntity, IUserRoles, IUserRefreshToken, new()
     {
-        public string Token { get; }
+        public string RefreshToken { get; }
 
-        public FetchUserByRefreshToken(string token)
+        public FetchUserByRefreshToken(string? refreshToken)
         {
-            Token = token;
+            RefreshToken = refreshToken ?? throw new InvalidRefreshTokenException("The provided refresh token is null and can not be retrieved");
         }
 
         public override void Execute()
@@ -80,7 +81,7 @@ WHERE rt.token = @Token;";
                         return user;
                     }, new
                     {
-                        Token
+                        Token = RefreshToken
                     });
 
                 var user = result.First();
@@ -89,7 +90,7 @@ WHERE rt.token = @Token;";
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message, e);
+                Logger.LogError(e, "Failed to fetch user by refresh token: FetchUserByRefreshToken");
                 Result = null;
             }
         }

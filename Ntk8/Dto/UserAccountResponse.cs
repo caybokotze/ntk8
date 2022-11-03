@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Dto
 {
-    public class UserAccountResponse : IUserPrimaryProperties, IUserRoles, IUserVerificationStatus
+    public class UserAccountResponse : IUserPrimitiveProperties, IUserRoles, IUserVerificationStatus
     {
         public int Id { get; set; }
         public string? Title { get; set; }

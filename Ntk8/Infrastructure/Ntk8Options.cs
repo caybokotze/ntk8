@@ -38,14 +38,14 @@ public class Ntk8Options<TUser> : IGlobalSettings where TUser : class, IUserEnti
         AuthSettings = authSettings;
     }
     
-    public void OverrideNtk8Commands<TImplementation>() 
-        where TImplementation : class, IUserCommands
+    public void OverrideUserCommands<TImplementation>() 
+        where TImplementation : class, IAccountCommands
     {
         Ntk8CommandType = typeof(TImplementation);
     }
         
-    public void OverrideNtk8Queries<TImplementation>() 
-        where TImplementation : class, IUserQueries
+    public void OverrideUserQueries<TImplementation>() 
+        where TImplementation : class, IAccountQueries
     {
         Ntk8QueryType = typeof(TImplementation);
     }

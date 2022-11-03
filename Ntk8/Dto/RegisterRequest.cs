@@ -5,7 +5,7 @@ using Ntk8.Dto.Interfaces;
 
 namespace Ntk8.Dto
 {
-    public class RegisterRequest : IUserPrimaryProperties
+    public class RegisterRequest : IUserPrimitiveProperties
     {
         public string? Title { get; set; }
         [Required]

@@ -22,7 +22,7 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
             var randomId = GetRandomInt();
             // act
             sut.DeleteRolesForUserById(randomId);
@@ -40,7 +40,7 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
             var randomId = GetRandomInt();
             // act
             sut.DeleteUserById(randomId);
@@ -60,7 +60,7 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var refreshTokenId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertRefreshToken>()).Returns(refreshTokenId);
-            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
             var randomRefreshToken = GetRandom<RefreshToken>();
             // act
             var result = sut.InsertRefreshToken(randomRefreshToken);
@@ -80,7 +80,7 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var roleId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertRole>()).Returns(roleId);
-            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
             var randomRole = GetRandom<Role>();
             // act
             var result = sut.InsertRole(randomRole);
@@ -100,8 +100,8 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var userId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertUser>()).Returns(userId);
-            var sut = Substitute.For<UserCommands>(commandExecutor);
-            var randomUser = GetRandom<TestUserEntity>();
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
+            var randomUser = GetRandom<TestUser>();
             // act
             var result = sut.InsertUser(randomUser);
             // assert
@@ -120,7 +120,7 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var roleId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertUserRole>()).Returns(roleId);
-            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
             var userRole = GetRandom<UserRole>();
             // act
             var result = sut.InsertUserRole(userRole);
@@ -138,7 +138,7 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
             var refreshToken = GetRandom<RefreshToken>();
             // act
             sut.UpdateRefreshToken(refreshToken);
@@ -155,8 +155,8 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<UserCommands>(commandExecutor);
-            var user = GetRandom<TestUserEntity>();
+            var sut = Substitute.For<AccountCommands>(commandExecutor);
+            var user = GetRandom<TestUser>();
             // act
             sut.UpdateUser(user);
             // assert

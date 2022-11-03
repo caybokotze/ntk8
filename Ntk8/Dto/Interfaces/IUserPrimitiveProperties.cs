@@ -1,6 +1,6 @@
 namespace Ntk8.Dto.Interfaces
 {
-    public interface IUserPrimaryProperties
+    public interface IUserPrimitiveProperties
     {
         string? Title { get; set; }
         string? FirstName { get; set; }

@@ -14,16 +14,18 @@ namespace Ntk8.Tests
             // arrange
             // act
             // ReSharper disable once EntityNameCapturedOnly.Local
-            IUserPrimaryProperties primaryProperties;
+            IUserPrimitiveProperties primitiveProperties;
             // assert
-            Expect(typeof(IUserPrimaryProperties))
-                .To.Have.Property(nameof(primaryProperties.Title));
-            Expect(typeof(IUserPrimaryProperties))
-                .To.Have.Property(nameof(primaryProperties.Email));
-            Expect(typeof(IUserPrimaryProperties))
-                .To.Have.Property(nameof(primaryProperties.FirstName));
-            Expect(typeof(IUserPrimaryProperties))
-                .To.Have.Property(nameof(primaryProperties.LastName));
+            Expect(typeof(IUserPrimitiveProperties))
+                .To.Have.Property(nameof(primitiveProperties.Title));
+            Expect(typeof(IUserPrimitiveProperties))
+                .To.Have.Property(nameof(primitiveProperties.Email));
+            Expect(typeof(IUserPrimitiveProperties))
+                .To.Have.Property(nameof(primitiveProperties.FirstName));
+            Expect(typeof(IUserPrimitiveProperties))
+                .To.Have.Property(nameof(primitiveProperties.LastName));
+            Expect(typeof(IUserPrimitiveProperties))
+                .To.Have.Property(nameof(primitiveProperties.TelNumber));
         }
     }
 }

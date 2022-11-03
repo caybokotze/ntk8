@@ -6,14 +6,15 @@ using Ntk8.Dto;
 using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Utilities;
+using ScopeFunction.Utils;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Ntk8.Services
 {
     public class AccountService<T> : IAccountService where T : class, IUserEntity, new()
     {
-        private readonly IUserCommands _userCommands;
-        private readonly IUserQueries _userQueries;
+        private readonly IAccountCommands _accountCommands;
+        private readonly IAccountQueries _accountQueries;
         private readonly ITokenService _tokenService;
         private readonly IAuthSettings _authSettings;
         private readonly IUserEntity _userEntity;
@@ -22,8 +23,8 @@ namespace Ntk8.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountService(
-            IUserCommands userCommands,
-            IUserQueries userQueries,
+            IAccountCommands accountCommands,
+            IAccountQueries accountQueries,
             ITokenService tokenService,
             IAuthSettings authSettings,
             IUserEntity userEntity,
@@ -31,8 +32,8 @@ namespace Ntk8.Services
             IGlobalSettings globalSettings,
             IHttpContextAccessor httpContextAccessor)
         {
-            _userCommands = userCommands;
-            _userQueries = userQueries;
+            _accountCommands = accountCommands;
+            _accountQueries = accountQueries;
             _tokenService = tokenService;
             _authSettings = authSettings;
             _userEntity = userEntity;
@@ -54,7 +55,7 @@ namespace Ntk8.Services
         /// <exception cref="InvalidPasswordException"></exception>
         public AuthenticatedResponse AuthenticateUser(AuthenticateRequest authenticationRequest)
         {
-            var user = _userQueries.FetchUserByEmailAddress<T>(authenticationRequest.Email 
+            var user = _accountQueries.FetchUserByEmailAddress<T>(authenticationRequest.Email 
                                                                          ?? string.Empty);
             
             if (user is null)
@@ -80,18 +81,18 @@ namespace Ntk8.Services
 
             try
             {
-                _userCommands.InsertRefreshToken(refreshToken);
+                _accountCommands.InsertRefreshToken(refreshToken);
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message, e);
+                _logger.LogError(e, "An error has occurred within the AccountService");
                 _logger.LogInformation("Trying again");
                 
                 var newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
-                _userCommands.InsertRefreshToken(newRefreshToken);
+                _accountCommands.InsertRefreshToken(newRefreshToken);
             }
 
-            var response = user.MapFromTo(new AuthenticatedResponse());
+            var response = user.MapTo(new AuthenticatedResponse());
 
             if (_globalSettings.UseJwt)
             {
@@ -103,10 +104,10 @@ namespace Ntk8.Services
         }
 
         
-        public void RegisterUser(RegisterRequest registerRequest)
+        public AuthenticatedResponse RegisterUser(RegisterRequest registerRequest)
         {
-            var existingUser = _userQueries
-                .FetchUserByEmailAddress<T>(registerRequest.Email ?? string.Empty);
+            var existingUser = _accountQueries
+                .FetchUserByEmailAddress<T>(registerRequest.Email);
             
             if (existingUser is not null)
             {
@@ -118,11 +119,11 @@ namespace Ntk8.Services
                 existingUser.DateModified = DateTime.UtcNow;
                 existingUser.DateResetTokenExpires = DateTime.UtcNow
                     .AddSeconds(_authSettings.UserVerificationTokenTTL);
-                _userCommands.UpdateUser(existingUser);
-                return;
+                _accountCommands.UpdateUser(existingUser);
+                return existingUser.MapTo(new AuthenticatedResponse());
             }
 
-            var user = registerRequest.MapFromTo((T)_userEntity);
+            var user = registerRequest.MapTo((T)_userEntity);
             
             user.IsActive = true;
             user.VerificationToken = TokenHelpers.GenerateCryptoRandomToken();
@@ -132,24 +133,24 @@ namespace Ntk8.Services
                 .AddSeconds(_authSettings.UserVerificationTokenTTL);
             user.PasswordSalt = TokenHelpers.GenerateCryptoRandomToken();
             user.PasswordHash = BC.HashPassword($"{registerRequest.Password}{user.PasswordSalt}");
-
-            _userCommands.InsertUser(user);
+            user.Id = _accountCommands.InsertUser(user);
+            return user.MapTo(new AuthenticatedResponse());
         }
 
         /// <summary>
         /// Verifies the user using the email
         /// </summary>
-        /// <param name="email"></param>
+        /// <param name="request"></param>
         /// <exception cref="UserNotFoundException"></exception>
         /// <exception cref="UserIsVerifiedException"></exception>
-        public void VerifyUserByEmail(string? email)
+        public void VerifyUserByEmail(VerifyUserByEmailRequest? request)
         {
-            if (email is null)
+            if (request?.Email is null)
             {
                 throw new InvalidEmailAddressException("The email provided was null");
             }
             
-            var user = _userQueries.FetchUserByEmailAddress<T>(email);
+            var user = _accountQueries.FetchUserByEmailAddress<T>(request.Email);
 
             if (user is null)
             {
@@ -165,23 +166,28 @@ namespace Ntk8.Services
             user.DateVerified = DateTime.UtcNow;
             user.VerificationToken = null;
             
-            _userCommands.UpdateUser(user);
+            _accountCommands.UpdateUser(user);
         }
 
         /// <summary>
         /// Verifies the user using the verification token
         /// </summary>
-        /// <param name="token"></param>
-        /// <exception cref="InvalidValidationTokenException"></exception>
+        /// <param name="request"></param>
+        /// <exception cref="InvalidVerificationTokenException"></exception>
         /// <exception cref="VerificationTokenExpiredException"></exception>
         /// <exception cref="UserIsVerifiedException"></exception>
-        public void VerifyUserByVerificationToken(string token)
+        public void VerifyUserByVerificationToken(VerifyUserByVerificationTokenRequest? request)
         {
-            var user = _userQueries.FetchUserByVerificationToken<T>(token);
+            if (request?.Token is null)
+            {
+                throw new InvalidVerificationTokenException("A invalid null token was provided");
+            }
+            
+            var user = _accountQueries.FetchUserByVerificationToken<T>(request.Token);
 
             if (user is null)
             {
-                throw new InvalidValidationTokenException();
+                throw new InvalidVerificationTokenException();
             }
 
             if (user.DateResetTokenExpires != null
@@ -202,7 +208,7 @@ namespace Ntk8.Services
             user.VerificationToken = null;
             user.IsActive = true;
 
-            _userCommands.UpdateUser(user);
+            _accountCommands.UpdateUser(user);
         }
 
         /// <summary>
@@ -213,7 +219,7 @@ namespace Ntk8.Services
         /// <exception cref="UserNotFoundException"></exception>
         public (string resetToken, IUserEntity user) ResetUserPassword(ForgotPasswordRequest forgotPasswordRequest)
         {
-            var user = _userQueries.FetchUserByEmailAddress<T>(forgotPasswordRequest.Email ?? string.Empty);
+            var user = _accountQueries.FetchUserByEmailAddress<T>(forgotPasswordRequest.Email ?? string.Empty);
             
             if (user is null)
             {
@@ -225,7 +231,7 @@ namespace Ntk8.Services
                 user.DateResetTokenExpires = DateTime.UtcNow
                     .AddSeconds(_authSettings.PasswordResetTokenTTL);
                 
-                _userCommands.UpdateUser(user);
+                _accountCommands.UpdateUser(user);
                 
                 return (user.ResetToken, user);
             }
@@ -234,7 +240,7 @@ namespace Ntk8.Services
             user.DateResetTokenExpires = DateTime.UtcNow
                 .AddSeconds(_authSettings.PasswordResetTokenTTL);
 
-            _userCommands.UpdateUser(user);
+            _accountCommands.UpdateUser(user);
 
             return (user.ResetToken, user);
         }
@@ -246,7 +252,7 @@ namespace Ntk8.Services
         /// <exception cref="InvalidResetTokenException"></exception>
         public void ResetUserPassword(ResetPasswordRequest resetPasswordRequest)
         {
-            var user = _userQueries.FetchUserByResetToken<T>(resetPasswordRequest.Token ?? string.Empty);
+            var user = _accountQueries.FetchUserByResetToken<T>(resetPasswordRequest.Token ?? string.Empty);
 
             if (user is null)
             {
@@ -267,7 +273,7 @@ namespace Ntk8.Services
             user.ResetToken = null;
             user.DateResetTokenExpires = null;
 
-            _userCommands.UpdateUser(user);
+            _accountCommands.UpdateUser(user);
         }
     }
 }

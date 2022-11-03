@@ -14,11 +14,11 @@ namespace Ntk8.Data.Commands
 
         public override void Execute()
         {
-            Result = Execute(@"UPDATE refresh_tokens 
+            Result = QueryFirst<int>(@"UPDATE refresh_tokens 
                         SET expires = @Expires,
                         date_revoked = @DateRevoked,
                         revoked_by_ip = @RevokedByIp
-                        WHERE token = @Token;",
+                        WHERE token = @Token; SELECT last_insert_id();",
                 RefreshToken);
         }
     }

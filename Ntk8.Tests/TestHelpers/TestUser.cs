@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Ntk8.Models;
 using Ntk8.Utilities;
-using PeanutButter.RandomGenerators;
 
 namespace Ntk8.Tests.TestHelpers
 {
-    public class TestUserEntity : IUserEntity
+    public class TestUser : IUserEntity
     {
-        public TestUserEntity()
+        public TestUser()
         {
             DateCreated = DateTime.UtcNow;
             DateModified = DateTime.UtcNow;
@@ -18,9 +17,9 @@ namespace Ntk8.Tests.TestHelpers
             UserRoles = Array.Empty<UserRole>();
         }
         
-        public static TestUserEntity Create()
+        public static TestUser Create()
         {
-            var user = new TestUserEntity
+            var user = new TestUser
             {
                 AcceptedTerms = true,
                 FirstName = Faker.Name.First(),

@@ -15,18 +15,18 @@ namespace Ntk8.Middleware
 {
     public class JwtMiddleware<T> : IMiddleware where T : class, IUserEntity, new()
     {
-        private readonly IUserQueries _userQueries;
+        private readonly IAccountQueries _accountQueries;
         private readonly IAuthSettings _authSettings;
         private readonly ITokenService _tokenService;
         private readonly IGlobalSettings _globalSettings;
 
         public JwtMiddleware(
-            IUserQueries userQueries,
+            IAccountQueries accountQueries,
             IAuthSettings authSettings,
             ITokenService tokenService,
             IGlobalSettings globalSettings)
         {
-            _userQueries = userQueries;
+            _accountQueries = accountQueries;
             _authSettings = authSettings;
             _tokenService = tokenService;
             _globalSettings = globalSettings;
@@ -102,7 +102,7 @@ namespace Ntk8.Middleware
                         .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                         .Value ?? string.Empty);
 
-                    user = _userQueries.FetchUserById<T>(accountId);
+                    user = _accountQueries.FetchUserById<T>(accountId);
 
                     if (user is null)
                     {
@@ -120,7 +120,7 @@ namespace Ntk8.Middleware
                 }
                 case false:
                 {
-                    user = _userQueries.FetchUserByRefreshToken<T>(token);
+                    user = _accountQueries.FetchUserByRefreshToken<T>(token);
                 
                     if (user?.RefreshToken?.IsActive ?? false)
                     {

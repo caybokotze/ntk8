@@ -21,15 +21,15 @@ public class Nkt8QueriesTests
         {
             // arrange
             var queryExecutor = Substitute.For<IQueryExecutor>();
-            var randomUser = GetRandom<TestUserEntity>();
-            queryExecutor.Execute(Arg.Any<FetchUserById<TestUserEntity>>())
+            var randomUser = GetRandom<TestUser>();
+            queryExecutor.Execute(Arg.Any<FetchUserById<TestUser>>())
                 .Returns(randomUser);
-            var sut = Substitute.For<UserQueries>(queryExecutor);
+            var sut = Substitute.For<AccountQueries>(queryExecutor);
             // act
             var result = sut.FetchUserById(3);
             // assert
             Expect(queryExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<FetchUserById<TestUserEntity>>(s => s.Id == 3));
+                .Execute(Arg.Is<FetchUserById<TestUser>>(s => s.Id == 3));
             Expect(result).To.Equal(randomUser);
         }
     }
@@ -42,13 +42,13 @@ public class Nkt8QueriesTests
         {
             // arrange
             var queryExecutor = Substitute.For<IQueryExecutor>();
-            var sut = Substitute.For<UserQueries>(queryExecutor);
+            var sut = Substitute.For<AccountQueries>(queryExecutor);
             // act
             var email = GetRandomEmail();
             sut.FetchUserByEmailAddress(email);
             // assert
             Expect(queryExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<FetchUserByEmailAddress<TestUserEntity>>(s => s.EmailAddress == email));
+                .Execute(Arg.Is<FetchUserByEmailAddress<TestUser>>(s => s.EmailAddress == email));
         }
     }
 
@@ -60,13 +60,13 @@ public class Nkt8QueriesTests
         {
             // arrange
             var queryExecutor = Substitute.For<IQueryExecutor>();
-            var sut = Substitute.For<UserQueries>(queryExecutor);
+            var sut = Substitute.For<AccountQueries>(queryExecutor);
             // act
             var refreshToken = GetRandomAlphaString();
             sut.FetchUserByRefreshToken(refreshToken);
             // assert
             Expect(queryExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<FetchUserByRefreshToken<TestUserEntity>>(s => s.Token == refreshToken));
+                .Execute(Arg.Is<FetchUserByRefreshToken<TestUser>>(s => s.Token == refreshToken));
         }
     }
 
@@ -78,13 +78,13 @@ public class Nkt8QueriesTests
         {
             // arrange
             var queryExecutor = Substitute.For<IQueryExecutor>();
-            var sut = Substitute.For<UserQueries>(queryExecutor);
+            var sut = Substitute.For<AccountQueries>(queryExecutor);
             // act
             var resetToken = GetRandomAlphaString();
             sut.FetchUserByResetToken(resetToken);
             // assert
             Expect(queryExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<FetchUserByResetToken<TestUserEntity>>(s => s.Token == resetToken));
+                .Execute(Arg.Is<FetchUserByResetToken<TestUser>>(s => s.Token == resetToken));
         }
     }
 
@@ -96,13 +96,13 @@ public class Nkt8QueriesTests
         {
             // arrange
             var queryExecutor = Substitute.For<IQueryExecutor>();
-            var sut = Substitute.For<UserQueries>(queryExecutor);
+            var sut = Substitute.For<AccountQueries>(queryExecutor);
             // act
             var verificationToken = GetRandomAlphaString();
             sut.FetchUserByVerificationToken(verificationToken);
             // assert
             Expect(queryExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<FetchUserByVerificationToken<TestUserEntity>>(s => s.Token == verificationToken));
+                .Execute(Arg.Is<FetchUserByVerificationToken<TestUser>>(s => s.Token == verificationToken));
         }
     }
 }

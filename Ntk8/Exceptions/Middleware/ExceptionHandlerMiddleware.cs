@@ -18,7 +18,7 @@ namespace Ntk8.Exceptions.Middleware
         {
         }
 
-        public ExceptionHandlerMiddleware(int errorCode, Func<T, HttpContext, string> errorMessageGenerator)
+        protected ExceptionHandlerMiddleware(int errorCode, Func<T, HttpContext, string> errorMessageGenerator)
         {
             _errorCode = errorCode;
             _errorMessageGenerator = errorMessageGenerator;
@@ -34,6 +34,7 @@ namespace Ntk8.Exceptions.Middleware
             {
                 context.Response.StatusCode = _errorCode;
                 var content = _errorMessageGenerator.Invoke(ex, context);
+                
                 if (string.IsNullOrWhiteSpace(content))
                 {
                     return;

@@ -27,7 +27,7 @@ namespace Ntk8.Tests.Services
             {
                 // arrange
                 var tokenService = Create();
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
                 // act
                 // assert
@@ -42,7 +42,7 @@ namespace Ntk8.Tests.Services
                 var authSettings = CreateAuthSettings();
                 var tokenService = Create(authSettings:authSettings);
 
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
 
                 // act
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles);
@@ -82,7 +82,7 @@ namespace Ntk8.Tests.Services
                     var authSettings = CreateAuthSettings();
                     authSettings.RefreshTokenSecret = GetRandomString(20, 22);
                     var tokenService = Create(authSettings:authSettings);
-                    var user = TestUserEntity.Create();
+                    var user = TestUser.Create();
                     // act
                     // assert
                     Expect(() => tokenService
@@ -100,9 +100,9 @@ namespace Ntk8.Tests.Services
             public void ShouldGetSingleRefreshTokenAndUser()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Create(ntk8Queries);
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 
                 var refreshToken = tokenService.GenerateRefreshToken(user.Id);
 
@@ -124,11 +124,11 @@ namespace Ntk8.Tests.Services
             public void ShouldThrowWhenNoTokensAreFound()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Create(ntk8Queries);
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 var token = tokenService.GenerateJwtToken(user.Id, user.Roles!);
-                var randomUser = TestUserEntity.Create();
+                var randomUser = TestUser.Create();
                 randomUser.RefreshToken = null;
 
                 ntk8Queries.FetchUserByRefreshToken(Arg.Any<string>())
@@ -142,15 +142,15 @@ namespace Ntk8.Tests.Services
             }
         }
         
-        private static TokenService<TestUserEntity> Create(
-            IUserQueries? ntk8Queries = null,
-            IUserCommands? ntk8Commands = null,
+        private static TokenService<TestUser> Create(
+            IAccountQueries? ntk8Queries = null,
+            IAccountCommands? ntk8Commands = null,
             AuthSettings? authSettings = null,
             IHttpContextAccessor? httpContextAccessor = null)
         {
-            return new TokenService<TestUserEntity>(
-                ntk8Commands ?? Substitute.For<UserCommands>(),
-                ntk8Queries ?? Substitute.For<UserQueries>(),
+            return new TokenService<TestUser>(
+                ntk8Commands ?? Substitute.For<AccountCommands>(),
+                ntk8Queries ?? Substitute.For<AccountQueries>(),
                 authSettings ?? CreateAuthSettings(),
                 httpContextAccessor ?? Substitute.For<IHttpContextAccessor>());
         }

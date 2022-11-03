@@ -6,6 +6,13 @@ namespace Ntk8.Demo;
 
 public class UserEntity : IUserEntity
 {
+    public UserEntity()
+    {
+        Roles = Array.Empty<Role>();
+        DateCreated = DateTime.UtcNow;
+        DateModified = DateTime.UtcNow;
+    }
+    
     public int Id { get; set; }
     public string? Title { get; set; }
     public string? FirstName { get; set; }
@@ -28,5 +35,6 @@ public class UserEntity : IUserEntity
     public DateTime? DateOfPasswordReset { get; set; }
     public DateTime? DateResetTokenExpires { get; set; }
     public RefreshToken? RefreshToken { get; set; }
-    public Role?[]? Roles { get; set; }
+    public Role[] Roles { get; set; }
+    public bool IsVerified => DateVerified is not null && VerificationToken is null;
 }

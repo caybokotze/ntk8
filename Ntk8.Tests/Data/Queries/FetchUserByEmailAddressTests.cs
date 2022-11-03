@@ -28,10 +28,10 @@ namespace Ntk8.Tests.Data.Queries
                     // arrange
                     var queryExecutor = Resolve<IQueryExecutor>();
                     var commandExecutor = Resolve<ICommandExecutor>();
-                    var user = TestUserEntity.Create();
+                    var user = TestUser.Create();
                     // act
                     var userId = commandExecutor.Execute(new InsertUser(user));
-                    var expectedUser = queryExecutor.Execute(new FetchUserByEmailAddress<TestUserEntity>(user.Email ?? string.Empty));
+                    var expectedUser = queryExecutor.Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
                     user.Id = userId;
                     // assert
                     Expect(user.DateCreated).To.Approximately.Equal((DateTime)expectedUser?.DateCreated!);
@@ -65,7 +65,7 @@ namespace Ntk8.Tests.Data.Queries
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = TestUserEntity.Create();
+                    var user = TestUser.Create();
                     var roleId = GetRandomInt(100);
                     var userRoles = new List<UserRole>
                     {
@@ -111,7 +111,7 @@ namespace Ntk8.Tests.Data.Queries
 
                     // act
                     var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress<TestUserEntity>(user.Email ?? string.Empty));
+                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
 
                     // assert
                     Expect(result).Not.To.Be.Null();
@@ -128,18 +128,18 @@ namespace Ntk8.Tests.Data.Queries
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
                     
-                    var user = TestUserEntity.Create();
+                    var user = TestUser.Create();
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));
 
-                    var refreshToken = TestUserEntity.CreateValidRefreshToken();
+                    var refreshToken = TestUser.CreateValidRefreshToken();
                     refreshToken.UserId = userId;
                     var refreshId = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
                     refreshToken.Id = refreshId;
                     
                     // act
                     var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress<TestUserEntity>(user.Email ?? string.Empty));
+                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
 
                     // assert
                     Expect(result?.RefreshToken?.Expires)
@@ -169,7 +169,7 @@ namespace Ntk8.Tests.Data.Queries
                         var commandExecutor = Resolve<ICommandExecutor>();
                         var queryExecutor = Resolve<IQueryExecutor>();
                     
-                        var user = TestUserEntity.Create();
+                        var user = TestUser.Create();
                         var userId = commandExecutor
                             .Execute(new InsertUser(user));
 
@@ -186,7 +186,7 @@ namespace Ntk8.Tests.Data.Queries
                     
                         // act
                         var result = queryExecutor
-                            .Execute(new FetchUserByEmailAddress<TestUserEntity>(user.Email ?? string.Empty));
+                            .Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
 
                         // assert
                         Expect(result?.RefreshToken?.DateCreated)
@@ -219,7 +219,7 @@ namespace Ntk8.Tests.Data.Queries
 
                     // act
                     var result = queryExecutor
-                        .Execute(new FetchUserByEmailAddress<TestUserEntity>(user.Email ?? string.Empty));
+                        .Execute(new FetchUserByEmailAddress<TestUser>(user.Email ?? string.Empty));
 
                     // assert
                     Expect(result).Not.To.Be.Null();

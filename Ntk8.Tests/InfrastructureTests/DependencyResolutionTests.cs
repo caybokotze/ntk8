@@ -90,8 +90,8 @@ public class DependencyResolutionTests
             {
                 // arrange
                 // act
-                var firstResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUserEntity>>();
-                var secondResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUserEntity>>();
+                var firstResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUser>>();
+                var secondResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUser>>();
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();

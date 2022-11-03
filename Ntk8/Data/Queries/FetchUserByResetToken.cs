@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using Microsoft.Extensions.Logging;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -11,9 +12,9 @@ namespace Ntk8.Data.Queries
     {
         public string Token { get; }
 
-        public FetchUserByResetToken(string token)
+        public FetchUserByResetToken(string? token)
         {
-            Token = token;
+            Token = token ?? throw new InvalidResetTokenException("The provided reset token is null and can not be retrieved");
         }
 
         public override void Execute()
@@ -90,7 +91,7 @@ WHERE u.reset_token = @Token;";
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message, e);
+                Logger.LogError(e, "Failed to fetch user by reset token: FetchUserByResetToken");
                 Result = null;
             }
         }

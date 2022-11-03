@@ -16,10 +16,26 @@ using Ntk8.Tests.TestModels;
 using NUnit.Framework;
 using static NExpect.Expectations;
 
-namespace Ntk8.Tests.Infrastructure;
+namespace Ntk8.Tests.InfrastructureTests;
 
 public class ContainerExtensionTests
 {
+    [TestFixture]
+    public class WhenResolvingDependencies
+    {
+        [TestFixture]
+        public class WhenResolvingTransient
+        {
+            
+        }
+
+        [TestFixture]
+        public class WhenResolvingSingleton
+        {
+            
+        }
+    }
+    
     [TestFixture]
     public class WhenConfiguringCustomOptions
     {
@@ -45,14 +61,14 @@ public class ContainerExtensionTests
 
                         webHost.ConfigureServices(config =>
                         {
-                            config.ConfigureNtk8<TestUserEntity>(c => { c.OverrideNtk8Commands<TestCommandType>(); });
+                            config.ConfigureNtk8<TestUser>(c => { c.OverrideUserCommands<TestCommandType>(); });
                         });
                     });
 
                 var host = await hostBuilder.StartAsync();
                 var serviceProvider = host.Services;
                 // act
-                var resolvedType = serviceProvider.GetRequiredService<IUserCommands>();
+                var resolvedType = serviceProvider.GetRequiredService<IAccountCommands>();
                 // assert
                 Expect(resolvedType.GetType()).To.Equal(typeof(TestCommandType));
             }
@@ -79,7 +95,7 @@ public class ContainerExtensionTests
 
                             webHost.ConfigureServices(config =>
                             {
-                                config.ConfigureNtk8<TestUserEntity>();
+                                config.ConfigureNtk8<TestUser>();
                                 config.AddTransient<IQueryExecutor, QueryExecutor>();
                                 config.AddTransient<ICommandExecutor, CommandExecutor>();
                                 config.AddTransient<IExecutable, Executable>();
@@ -91,11 +107,11 @@ public class ContainerExtensionTests
                     var host = await hostBuilder.StartAsync();
                     var serviceProvider = host.Services;
                     // act
-                    var resolvedType = serviceProvider.GetRequiredService<IUserCommands>();
+                    var resolvedType = serviceProvider.GetRequiredService<IAccountCommands>();
                     // assert
                     Expect(resolvedType.GetType())
                         .To
-                        .Equal(typeof(UserCommands));
+                        .Equal(typeof(AccountCommands));
                 }
             }
         }
@@ -122,14 +138,14 @@ public class ContainerExtensionTests
 
                         webHost.ConfigureServices(config =>
                         {
-                            config.ConfigureNtk8<TestUserEntity>(c => { c.OverrideNtk8Queries<TestQueryType>(); });
+                            config.ConfigureNtk8<TestUser>(c => { c.OverrideUserQueries<TestQueryType>(); });
                         });
                     });
 
                 var host = await hostBuilder.StartAsync();
                 var serviceProvider = host.Services;
                 // act
-                var resolvedType = serviceProvider.GetRequiredService<IUserQueries>();
+                var resolvedType = serviceProvider.GetRequiredService<IAccountQueries>();
                 // assert
                 Expect(resolvedType.GetType()).To.Equal(typeof(TestQueryType));
             }
@@ -156,7 +172,7 @@ public class ContainerExtensionTests
 
                             webHost.ConfigureServices(config =>
                             {
-                                config.ConfigureNtk8<TestUserEntity>();
+                                config.ConfigureNtk8<TestUser>();
                                 config.AddTransient<IQueryExecutor, QueryExecutor>();
                                 config.AddTransient<IExecutable, Executable>();
                                 config.AddTransient<IQueryable, Queryable>();
@@ -167,11 +183,11 @@ public class ContainerExtensionTests
                     var host = await hostBuilder.StartAsync();
                     var serviceProvider = host.Services;
                     // act
-                    var resolvedType = serviceProvider.GetRequiredService<IUserQueries>();
+                    var resolvedType = serviceProvider.GetRequiredService<IAccountQueries>();
                     // assert
                     Expect(resolvedType.GetType())
                         .To
-                        .Equal(typeof(UserQueries));
+                        .Equal(typeof(AccountQueries));
                 }
             }
         }

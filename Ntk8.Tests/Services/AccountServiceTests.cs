@@ -11,7 +11,6 @@ using Ntk8.Exceptions;
 using Ntk8.Models;
 using Ntk8.Services;
 using Ntk8.Tests.TestHelpers;
-using Ntk8.Utilities;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -51,7 +50,7 @@ namespace Ntk8.Tests.Services
             public void ShouldGenerateNewJwtToken()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IUserEntity>();
                 var validJwtToken = TestTokenHelpers
@@ -87,8 +86,8 @@ namespace Ntk8.Tests.Services
                 public void ShouldThrow()
                 {
                     // arrange
-                    var ntk8Queries = Substitute.For<IUserQueries>();
-                    var user = TestUserEntity.Create();
+                    var ntk8Queries = Substitute.For<IAccountQueries>();
+                    var user = TestUser.Create();
                     user.DateVerified = null;
                     user.DateOfPasswordReset = null;
                     ntk8Queries.FetchUserByEmailAddress(user.Email ?? string.Empty)
@@ -107,7 +106,7 @@ namespace Ntk8.Tests.Services
             public void ShouldGenerateNewRefreshToken()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IUserEntity>();
                 var validJwtToken = TestTokenHelpers
@@ -146,7 +145,7 @@ namespace Ntk8.Tests.Services
             public void ShouldInvalidateOldRefreshToken()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IUserEntity>();
                 var validJwtToken = TestTokenHelpers
@@ -188,7 +187,7 @@ namespace Ntk8.Tests.Services
             public void ShouldAttachUserRolesToUserResponse()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IUserEntity>();
                 user.Roles = GetRandomArray<Role>();
@@ -230,7 +229,7 @@ namespace Ntk8.Tests.Services
             public void ShouldSetRefreshTokenCookie()
             {
                 // arrange
-                var ntk8Queries = Substitute.For<IUserQueries>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var user = GetRandom<IUserEntity>();
                 user.Roles = GetRandomArray<Role>();
@@ -278,7 +277,7 @@ namespace Ntk8.Tests.Services
                 public void ShouldReturnJwtTokenWithResponse()
                 {
                     // arrange
-                    var ntk8Queries = Substitute.For<IUserQueries>();
+                    var ntk8Queries = Substitute.For<IAccountQueries>();
                     var tokenService = Substitute.For<ITokenService>();
                     var user = GetRandom<IUserEntity>();
                     user.Roles = GetRandomArray<Role>();
@@ -334,7 +333,7 @@ namespace Ntk8.Tests.Services
                 public void ShouldNotReturnJwtTokenWithResponse()
                 {
                     // arrange
-                    var ntk8Queries = Substitute.For<IUserQueries>();
+                    var ntk8Queries = Substitute.For<IAccountQueries>();
                     var tokenService = Substitute.For<ITokenService>();
                     var user = GetRandom<IUserEntity>();
                     user.Roles = GetRandomArray<Role>();
@@ -394,7 +393,7 @@ namespace Ntk8.Tests.Services
                 public void ShouldThrowIfUserIsVerifiedAndExists()
                 {
                     // arrange
-                    var ntk8Queries = Substitute.For<IUserQueries>();
+                    var ntk8Queries = Substitute.For<IAccountQueries>();
                     var user = GetRandom<IUserEntity>();
                     var registerRequest = user.MapFromTo(new RegisterRequest());
                     ntk8Queries.FetchUserByEmailAddress(user.Email ?? string.Empty).Returns(user);
@@ -414,8 +413,8 @@ namespace Ntk8.Tests.Services
                     public void ShouldUpdateVerificationToken()
                     {
                         // arrange
-                        var ntk8Queries = Substitute.For<IUserQueries>();
-                        var ntk8Commands = Substitute.For<IUserCommands>();
+                        var ntk8Queries = Substitute.For<IAccountQueries>();
+                        var ntk8Commands = Substitute.For<IAccountCommands>();
                         var user = GetRandom<IUserEntity>();
                         user.DateVerified = null;
                         user.DateOfPasswordReset = null;
@@ -523,13 +522,13 @@ namespace Ntk8.Tests.Services
             public void ShouldExecuteUpdateUserCommand()
             {
                 // arrange
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 user.DateResetTokenExpires = DateTime.UtcNow.AddMinutes(-1);
                 var authSettings = GetRandom<AuthSettings>();
                 authSettings.PasswordResetTokenTTL = 100;
                 var resetPasswordRequest = GetRandom<ResetPasswordRequest>();
-                var ntk8Queries = Substitute.For<IUserQueries>();
-                var ntk8Commands = Substitute.For<IUserCommands>();
+                var ntk8Queries = Substitute.For<IAccountQueries>();
+                var ntk8Commands = Substitute.For<IAccountCommands>();
                 ntk8Queries.FetchUserByResetToken(resetPasswordRequest.Token!).Returns(user);
                 var sut = Create(
                     ntk8Queries: ntk8Queries, 
@@ -541,7 +540,7 @@ namespace Ntk8.Tests.Services
                 // assert
                 Expect(ntk8Commands)
                     .To.Have.Received(1)
-                    .UpdateUser(Arg.Is<TestUserEntity>(s => s.Email == user.Email
+                    .UpdateUser(Arg.Is<TestUser>(s => s.Email == user.Email
                                                       && s.ResetToken == null 
                                                       && s.DateResetTokenExpires == null));
             }
@@ -627,20 +626,20 @@ namespace Ntk8.Tests.Services
         }
 
 
-        private static AccountService<TestUserEntity> Create(
-            IUserQueries? ntk8Queries = null,
-            IUserCommands? ntk8Commands = null,
+        private static AccountService<TestUser> Create(
+            IAccountQueries? ntk8Queries = null,
+            IAccountCommands? ntk8Commands = null,
             ITokenService? tokenService = null,
             IAuthSettings? authSettings = null,
             GlobalSettings? globalSettings = null)
         {
-            return new AccountService<TestUserEntity>(
-                ntk8Commands ?? Substitute.For<IUserCommands>(),
-                ntk8Queries ?? Substitute.For<IUserQueries>(),
+            return new AccountService<TestUser>(
+                ntk8Commands ?? Substitute.For<IAccountCommands>(),
+                ntk8Queries ?? Substitute.For<IAccountQueries>(),
                 tokenService ?? Substitute.For<ITokenService>(),
                 authSettings ?? CreateAuthSettings(),
                 GetRandom<IUserEntity>(),
-                Substitute.For<ILogger<AccountService<TestUserEntity>>>(),
+                Substitute.For<ILogger<AccountService<TestUser>>>(),
                 globalSettings ?? GetRandom<GlobalSettings>(),
                 Substitute.For<IHttpContextAccessor>());
         }

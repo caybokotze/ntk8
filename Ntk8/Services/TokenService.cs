@@ -27,19 +27,19 @@ namespace Ntk8.Services
 
     public class TokenService<T> : ITokenService where T : class, IUserEntity, new()
     {
-        private readonly IUserCommands _userCommands;
-        private readonly IUserQueries _userQueries;
+        private readonly IAccountCommands _accountCommands;
+        private readonly IAccountQueries _accountQueries;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
-            IUserCommands userCommands,
-            IUserQueries userQueries,
+            IAccountCommands accountCommands,
+            IAccountQueries accountQueries,
             IAuthSettings authSettings,
             IHttpContextAccessor contextAccessor)
         {
-            _userCommands = userCommands;
-            _userQueries = userQueries;
+            _accountCommands = accountCommands;
+            _accountQueries = accountQueries;
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
@@ -59,12 +59,12 @@ namespace Ntk8.Services
             
             token.DateRevoked = DateTime.UtcNow;
             token.RevokedByIp = _contextAccessor.GetIpAddress();
-            _userCommands.UpdateRefreshToken(token);
+            _accountCommands.UpdateRefreshToken(token);
         }
 
         public (bool isActive, int userId, Role[] roles) IsRefreshTokenActive(string token)
         {
-            var user = _userQueries.FetchUserByRefreshToken<T>(token);
+            var user = _accountQueries.FetchUserByRefreshToken<T>(token);
 
             if (user is null)
             {

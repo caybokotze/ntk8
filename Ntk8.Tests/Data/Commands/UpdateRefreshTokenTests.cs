@@ -1,9 +1,7 @@
 using System;
 using System.Transactions;
-using Dapper.CQRS;
 using NExpect;
-using Ntk8.Data.Commands;
-using Ntk8.Data.Queries;
+using Ntk8.DatabaseServices;
 using Ntk8.Tests.TestHelpers;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
@@ -23,29 +21,22 @@ public class UpdateRefreshTokenTests
             using var scope = new TransactionScope();
             
             // arrange
-            var queryExecutor = Resolve<IQueryExecutor>();
-            var commandExecutor = Resolve<ICommandExecutor>();
+            var queryExecutor = Resolve<IAccountQueries>();
+            var commandExecutor = Resolve<IAccountCommands>();
             var refreshToken = TestTokenHelpers.CreateRefreshToken();
-            var user = TestUserEntity.Create();
+            var user = TestUser.Create();
             
             // act
-            var userid = commandExecutor.Execute(new InsertUser(user));
+            var userid = commandExecutor.InsertUser(user);
             refreshToken.UserId = userid;
-            var refreshTokenId = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
-            var initialRetrievedUser = queryExecutor
-                .Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
 
-            if (initialRetrievedUser is not null)
-            {
-                refreshToken.DateRevoked = DateTime.UtcNow.AddMinutes(5);
-                refreshToken.Expires = DateTime.UtcNow.AddDays(1);
-                refreshToken.RevokedByIp = RandomValueGen.GetRandomIPv4Address();
-            }
+            var refreshTokenId = commandExecutor.InsertRefreshToken(refreshToken);
+
+            queryExecutor.FetchUserByRefreshToken<TestUser>(refreshToken.Token);
             
-            commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
-            
-            var secondRetrievedUser =
-                queryExecutor.Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
+            commandExecutor.UpdateRefreshToken(refreshToken);
+
+            var secondRetrievedUser = queryExecutor.FetchUserByRefreshToken<TestUser>(refreshToken.Token);
 
             var expectedRefreshToken = secondRetrievedUser?.RefreshToken;
             
@@ -67,42 +58,40 @@ public class UpdateRefreshTokenTests
             using var scope = new TransactionScope();
             
             // arrange
-            var queryExecutor = Resolve<IQueryExecutor>();
-            var commandExecutor = Resolve<ICommandExecutor>();
-            var refreshToken = TestTokenHelpers.CreateRefreshToken();
+            var queryExecutor = Resolve<IAccountQueries>();
+            var commandExecutor = Resolve<IAccountCommands>();
+            var refreshToken1 = TestTokenHelpers.CreateRefreshToken();
             var refreshToken2 = TestTokenHelpers.CreateRefreshToken();
             refreshToken2.DateCreated = DateTime.UtcNow.AddDays(1);
-            var user = TestUserEntity.Create();
+            var user = TestUser.Create();
             
             // act
-            var userid = commandExecutor.Execute(new InsertUser(user));
-            refreshToken.UserId = userid;
+            var userid = commandExecutor.InsertUser(user);
+            refreshToken1.UserId = userid;
             refreshToken2.UserId = userid;
-            var _ = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
-            var __ = commandExecutor.Execute(new InsertRefreshToken(refreshToken2));
-            var initialRetrievedUser = queryExecutor
-                .Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
 
-            if (initialRetrievedUser is not null)
-            {
-                refreshToken.DateRevoked = DateTime.UtcNow.AddMinutes(5);
-                refreshToken.Expires = DateTime.UtcNow.AddDays(1);
-                refreshToken.RevokedByIp = RandomValueGen.GetRandomIPv4Address();
-            }
+            var _ = commandExecutor.InsertRefreshToken(refreshToken1);
+            var __ = commandExecutor.InsertRefreshToken(refreshToken2);
             
-            commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
+            var initialRetrievedUser = queryExecutor.FetchUserByRefreshToken<TestUser>(refreshToken1.Token);
+
             
+            refreshToken1.DateRevoked = DateTime.UtcNow.AddMinutes(5);
+            refreshToken1.Expires = DateTime.UtcNow.AddDays(1);
+            refreshToken1.RevokedByIp = RandomValueGen.GetRandomIPv4Address();
+            
+            commandExecutor.UpdateRefreshToken(refreshToken1);
+
             var secondRetrievedUser =
-                queryExecutor.Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
+                queryExecutor.FetchUserByRefreshToken<TestUser>(refreshToken1.Token);
 
-            var thirdRetrievedUser = queryExecutor
-                .Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken2.Token ?? string.Empty));
-            
-            var expectedRefreshToken = secondRetrievedUser?.RefreshToken;
-            var secondRefreshToken = thirdRetrievedUser?.RefreshToken;
+            var thirdRetrievedUser = queryExecutor.FetchUserByRefreshToken<TestUser>(refreshToken2.Token);
+
+            var expectedRefreshToken = secondRetrievedUser.RefreshToken;
+            var secondRefreshToken = thirdRetrievedUser.RefreshToken;
             
             // assert
-            Expect(expectedRefreshToken?.Token).To.Equal(refreshToken.Token);
+            Expect(expectedRefreshToken?.Token).To.Equal(refreshToken1.Token);
             Expect(secondRefreshToken?.Token).To.Equal(refreshToken2.Token);
             Expect(expectedRefreshToken?.Token).Not.To.Equal(refreshToken2.Token);
         }

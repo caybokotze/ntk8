@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using Dapper.CQRS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using Ntk8.DatabaseServices;
+using Ntk8.Dto;
 using Ntk8.Infrastructure;
 using Ntk8.Services;
+using ScopeFunction.Utils;
 using static ScopeFunction.Utils.AppSettingsBuilder;
 
 namespace Ntk8.Demo
@@ -29,13 +30,26 @@ namespace Ntk8.Demo
             app.UseNtk8JwtMiddleware<UserEntity>();
             app.UseNtk8ExceptionMiddleware();
 
-            var _ = new AuthHandler(app, 
-                app.Resolve<IAccountService>(),
-                app.Resolve<IQueryExecutor>(),
-                app.Resolve<ICommandExecutor>(),
-                app.Resolve<ITokenService>(),
-                app.Resolve<IHttpContextAccessor>());
+            app.MapPost("/login", (AuthenticateRequest request, IAccountService accountService) => 
+                accountService.AuthenticateUser(request));
             
+            app.MapPost("/register", (RegisterRequest request, IAccountService accountService) => 
+                accountService.RegisterUser(request));
+            
+            app.MapPost("/verify-by-email", (VerifyUserByEmailRequest request, IAccountService accountService) => 
+                accountService.VerifyUserByEmail(request));
+
+            app.MapPost("/verify-by-verification-token",
+                (VerifyUserByVerificationTokenRequest request, IAccountService accountService) => accountService.VerifyUserByVerificationToken(request));
+
+            app.MapPost("/update-user",
+                (UpdateRequest request, IAccountQueries accountQueries, IAccountCommands accountCommands) =>
+                {
+                    var dbUser = accountQueries.FetchUserById<UserEntity>(request.Id);
+                    request.MapTo(dbUser);
+                    accountCommands.UpdateUser(dbUser);
+                });
+
             await app.RunAsync();
         }
         
@@ -51,11 +65,12 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
             builder.Services.AddTransient<IDbConnection, DbConnection>(_ => 
                 new MySqlConnection(GetConnectionString()));
+            
             builder.Services.AddHttpContextAccessor();
+            
             builder.Services.ConfigureNtk8<UserEntity>(o =>
             {
                 o.UseJwt = true;
-                o.OverrideNtk8Queries<UserQueries>();
                 o.ConfigureAuthSettings(a =>
                 {
                     a.JwtTTL = 1000;

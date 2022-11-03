@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper.CQRS;
 using Microsoft.Extensions.Logging;
+using Ntk8.Exceptions;
 using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
@@ -11,8 +12,12 @@ namespace Ntk8.Data.Queries
     {
         public string Token { get; }
 
-        public FetchUserByVerificationToken(string token)
+        public FetchUserByVerificationToken(string? token)
         {
+            if (token is null)
+            {
+                throw new InvalidVerificationTokenException("");
+            }
             Token = token;
         }
 
@@ -90,7 +95,7 @@ WHERE u.verification_token = @Token;";
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message, e);
+                Logger.LogError(e, "Failed to fetch user by verification token: FetchUserByVerificationToken");
                 Result = null;
             }
         }

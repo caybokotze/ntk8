@@ -19,7 +19,7 @@ namespace Ntk8.Models
         bool IsVerified { get; }
     }
     
-    public interface IUserEntity : IUserPrimaryProperties, IUserRoles, IUserRefreshToken, IUserVerificationStatus
+    public interface IUserEntity : IUserPrimitiveProperties, IUserRoles, IUserRefreshToken, IUserVerificationStatus
     {
         int Id { get; set; }
         bool IsActive { get; set; }

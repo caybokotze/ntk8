@@ -20,28 +20,27 @@ public static class ContainerExtensions
     {
         var ntk8Options = new Ntk8Options<TUser>();
         options?.Invoke(ntk8Options);
-
         var commandType = ntk8Options.GetNtk8CommandType();
         var queryType = ntk8Options.GetNtk8QueryType();
 
         if (queryType is null)
         {
-            serviceCollection.AddTransient<IUserQueries, UserQueries>();
+            serviceCollection.AddTransient<IAccountQueries, AccountQueries>();
         }
 
         if (queryType is not null)
         {
-            serviceCollection.AddTransient(typeof(IUserQueries), queryType);
+            serviceCollection.AddTransient(typeof(IAccountQueries), queryType);
         }
 
         if (commandType is null)
         {
-            serviceCollection.AddTransient<IUserCommands, UserCommands>();
+            serviceCollection.AddTransient<IAccountCommands, AccountCommands>();
         }
 
         if (commandType is not null)
         {
-            serviceCollection.AddTransient(typeof(IUserCommands), commandType);
+            serviceCollection.AddTransient(typeof(IAccountCommands), commandType);
         }
 
         serviceCollection.AddSingleton<IGlobalSettings, GlobalSettings>(_ => new GlobalSettings
@@ -80,6 +79,10 @@ public static class ContainerExtensions
             .AddSingleton<InvalidEmailAddressExceptionMiddleware, InvalidEmailAddressExceptionMiddleware>();
         serviceCollection
             .AddSingleton<PasswordResetTokenExpiredExceptionMiddleware, PasswordResetTokenExpiredExceptionMiddleware>();
+        serviceCollection
+            .AddSingleton<InvalidUserExceptionMiddleware, InvalidUserExceptionMiddleware>();
+        serviceCollection
+            .AddSingleton<InvalidRoleExceptionMiddleware, InvalidRoleExceptionMiddleware>();
     }
     
     public static void RegisterNtk8Services<TUser>(

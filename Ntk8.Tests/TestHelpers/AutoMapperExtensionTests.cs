@@ -1,7 +1,6 @@
 using NExpect;
 using Ntk8.Dto;
 using Ntk8.Models;
-using Ntk8.Utilities;
 using NUnit.Framework;
 using static NExpect.Expectations;
 using static PeanutButter.RandomGenerators.RandomValueGen;
@@ -88,7 +87,7 @@ namespace Ntk8.Tests.TestHelpers
                 public void ShouldMapFromImplementedInterface()
                 {
                     // arrange
-                    var user = TestUserEntity.Create();
+                    var user = TestUser.Create();
                     // act
                     // assert
                 }

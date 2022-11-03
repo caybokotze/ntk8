@@ -1,15 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Dapper.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using NExpect;
 using NSubstitute;
 using Ntk8.Constants;
-using Ntk8.Data.Queries;
 using Ntk8.DatabaseServices;
 using Ntk8.Middleware;
 using Ntk8.Models;
@@ -34,7 +30,7 @@ namespace Ntk8.Tests.MiddlewareTests
             // arrange
             // act
             // assert
-            Expect(typeof(JwtMiddleware<TestUserEntity>)
+            Expect(typeof(JwtMiddleware<TestUser>)
                 .Implements(typeof(IMiddleware)))
                 .To
                 .Be
@@ -72,9 +68,9 @@ namespace Ntk8.Tests.MiddlewareTests
             public async Task ShouldAddUserToTheHttpContext()
             {
                 // arrange
-                var authSettings = TestUserEntity.CreateValidAuthenticationSettings();
-                var user = TestUserEntity.Create();
-                var queries = Substitute.For<IUserQueries>();
+                var authSettings = TestUser.CreateValidAuthenticationSettings();
+                var user = TestUser.Create();
+                var queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
                 var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
@@ -91,7 +87,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 };
 
                 var middleware = Substitute
-                    .For<JwtMiddleware<TestUserEntity>>(
+                    .For<JwtMiddleware<TestUser>>(
                         queries, 
                         authSettings, 
                         tokenService,
@@ -137,9 +133,9 @@ namespace Ntk8.Tests.MiddlewareTests
             public async Task ShouldIgnoreAndByPass()
             {
                 // arrange
-                var authSettings = TestUserEntity.CreateValidAuthenticationSettings();
-                var user = TestUserEntity.Create();
-                var queries = Substitute.For<IUserQueries>();
+                var authSettings = TestUser.CreateValidAuthenticationSettings();
+                var user = TestUser.Create();
+                var queries = Substitute.For<IAccountQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
                 var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
@@ -154,7 +150,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 };
 
                 var middleware = Substitute
-                    .For<JwtMiddleware<TestUserEntity>>(
+                    .For<JwtMiddleware<TestUser>>(
                         queries, 
                         authSettings, 
                         tokenService,
@@ -182,9 +178,9 @@ namespace Ntk8.Tests.MiddlewareTests
             public void ShouldAttachAccountToHttpContext()
             {
                 // arrange
-                var ntk8Query = Substitute.For<IUserQueries>();
+                var ntk8Query = Substitute.For<IAccountQueries>();
                 var secret = GetRandomString(40);
-                var user = TestUserEntity.Create();
+                var user = TestUser.Create();
                 var token = TestTokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var tokenService = Substitute.For<ITokenService>();
                 tokenService
@@ -213,13 +209,13 @@ namespace Ntk8.Tests.MiddlewareTests
             }
         }
 
-        public static JwtMiddleware<TestUserEntity> Create(
+        public static JwtMiddleware<TestUser> Create(
             IAuthSettings? authSettings = null, 
-            IUserQueries? ntk8Queries = null,
+            IAccountQueries? ntk8Queries = null,
             ITokenService? tokenService = null)
         {
-            return new JwtMiddleware<TestUserEntity>(
-                ntk8Queries ?? Substitute.For<IUserQueries>(),
+            return new JwtMiddleware<TestUser>(
+                ntk8Queries ?? Substitute.For<IAccountQueries>(),
                 authSettings ?? new AuthSettings
                 {
                     RefreshTokenSecret = GetRandomString(40),
