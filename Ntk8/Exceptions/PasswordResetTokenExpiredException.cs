@@ -6,8 +6,7 @@ namespace Ntk8.Exceptions;
 [Serializable]
 public class PasswordResetTokenExpiredException : Exception
 {
-    protected PasswordResetTokenExpiredException(SerializationInfo info, StreamingContext streamingContext) : base(info,
-        streamingContext)
+    protected PasswordResetTokenExpiredException(SerializationInfo info, StreamingContext streamingContext) : base(info, streamingContext)
     {
         
     }

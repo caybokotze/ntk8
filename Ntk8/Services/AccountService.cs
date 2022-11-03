@@ -142,8 +142,13 @@ namespace Ntk8.Services
         /// <param name="email"></param>
         /// <exception cref="UserNotFoundException"></exception>
         /// <exception cref="UserIsVerifiedException"></exception>
-        public void VerifyUserByEmail(string email)
+        public void VerifyUserByEmail(string? email)
         {
+            if (email is null)
+            {
+                throw new InvalidEmailAddressException("The email provided was null");
+            }
+            
             var user = _userQueries.FetchUserByEmailAddress<T>(email);
 
             if (user is null)

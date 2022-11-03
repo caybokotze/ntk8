@@ -48,7 +48,7 @@ namespace Ntk8.Demo
             builder.MapPost("/new-token", NewToken);
             builder.MapPost("/update", Update);
             builder.MapPost("/request-reset", RequestPasswordReset);
-            builder.MapPost("/reset-password", ResetPassword);
+            // builder.MapPost("/reset-password", ResetPassword);
         }
 
         public async Task Update(HttpContext context)
@@ -66,6 +66,8 @@ namespace Ntk8.Demo
         {
             var verifyRequest = await context
                 .DeserializeRequestBody<VerifyEmailRequest>();
+            
+            _accountService.VerifyUserByEmail(verifyRequest.Email ?? string.Empty);
             
             var user = _queryExecutor
                 .Execute(new FetchUserByEmailAddress<UserEntity>(verifyRequest.Email));

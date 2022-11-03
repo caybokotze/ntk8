@@ -114,8 +114,7 @@ namespace Ntk8.Middleware
                     {
                         throw new InvalidRefreshTokenException();
                     }
-                    
-                    
+
                     httpContext.Items.Add(AuthenticationConstants.CurrentUser, user);
                     break;
                 }
