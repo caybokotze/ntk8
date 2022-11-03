@@ -18,7 +18,7 @@ namespace Ntk8.Tests.TestHelpers
             public void ShouldMapAllAvailableProperties()
             {
                 // arrange
-                var user = GetRandom<IBaseUser>();
+                var user = GetRandom<IUserEntity>();
                 // act
                 var request = user.MapFromTo(new RegisterRequest());
                 // assert
@@ -35,7 +35,7 @@ namespace Ntk8.Tests.TestHelpers
             public void ShouldOverrideInstanceProperties()
             {
                 // arrange
-                var user = GetRandom<IBaseUser>();
+                var user = GetRandom<IUserEntity>();
                 var request = GetRandom<RegisterRequest>();
                 var requestPassword = request.Password;
                 // act
@@ -56,7 +56,7 @@ namespace Ntk8.Tests.TestHelpers
                 [Test]
                 public void ShouldMapFromInterface()
                 {
-                    var user = GetRandom<IBaseUser>();
+                    var user = GetRandom<IUserEntity>();
                     var registerRequest = new RegisterRequest();
                     var result = user.MapFromTo(registerRequest);
                     Expect(result.Email)
@@ -68,7 +68,7 @@ namespace Ntk8.Tests.TestHelpers
                 public void ShouldMapToInterface()
                 {
                     var userRegistration = GetRandom<RegisterRequest>();
-                    var user = GetRandom<IBaseUser>();
+                    var user = GetRandom<IUserEntity>();
                     var result = userRegistration.MapFromTo(user);
 
                     Expect(userRegistration.Email)
@@ -88,7 +88,7 @@ namespace Ntk8.Tests.TestHelpers
                 public void ShouldMapFromImplementedInterface()
                 {
                     // arrange
-                    var user = TestUser.Create();
+                    var user = TestUserEntity.Create();
                     // act
                     // assert
                 }

@@ -27,10 +27,10 @@ namespace Ntk8.Tests.Data.Queries
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
                     // act
-                    var expectedUser = TestUser.Create();
+                    var expectedUser = TestUserEntity.Create();
                     expectedUser.RefreshToken = null;
                     var userId = commandExecutor.Execute(new InsertUser(expectedUser));
-                    var actualUser = queryExecutor.Execute(new FetchUserById<TestUser>(userId));
+                    var actualUser = queryExecutor.Execute(new FetchUserById<TestUserEntity>(userId));
                     expectedUser.Id = userId;
                     expectedUser.Roles = null;
                     actualUser!.Roles = null;
@@ -69,7 +69,7 @@ namespace Ntk8.Tests.Data.Queries
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<IBaseUser>();
+                    var user = GetRandom<IUserEntity>();
                     var refreshToken = GetRandom<RefreshToken>();
                     // act
                     var userId = commandExecutor
@@ -78,7 +78,7 @@ namespace Ntk8.Tests.Data.Queries
                     var refreshTokenId = commandExecutor
                         .Execute(new InsertRefreshToken(refreshToken));
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById<TestUser>(userId));
+                        .Execute(new FetchUserById<TestUserEntity>(userId));
                     refreshToken.Id = refreshTokenId;
                     // assert
                     var expectedToken = expectedUser!.RefreshToken;
@@ -108,7 +108,7 @@ namespace Ntk8.Tests.Data.Queries
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<IBaseUser>();
+                    var user = GetRandom<IUserEntity>();
                     var refreshToken = GetRandom<Ntk8.Models.RefreshToken>();
                     // act
                     var userId = commandExecutor
@@ -128,7 +128,7 @@ namespace Ntk8.Tests.Data.Queries
                             UserId = userId
                         }));
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById<TestUser>(userId));
+                        .Execute(new FetchUserById<TestUserEntity>(userId));
                     // assert
                     Expect(expectedUser?.Roles)
                         .To.Contain.Exactly(1)
@@ -144,7 +144,7 @@ namespace Ntk8.Tests.Data.Queries
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<IBaseUser>();
+                    var user = GetRandom<IUserEntity>();
                     var refreshToken = GetRandom<Ntk8.Models.RefreshToken>();
                     // act
                     var userId = commandExecutor
@@ -178,7 +178,7 @@ namespace Ntk8.Tests.Data.Queries
                     }
                     
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById<TestUser>(userId));
+                        .Execute(new FetchUserById<TestUserEntity>(userId));
                     // assert
                     Expect(expectedUser?.Roles)
                         .To.Deep.Equal(roles);
@@ -197,12 +197,12 @@ namespace Ntk8.Tests.Data.Queries
                     // arrange
                     var commandExecutor = Resolve<ICommandExecutor>();
                     var queryExecutor = Resolve<IQueryExecutor>();
-                    var user = GetRandom<IBaseUser>();
+                    var user = GetRandom<IUserEntity>();
                     // act
                     var userId = commandExecutor
                         .Execute(new InsertUser(user));
                     var expectedUser = queryExecutor
-                        .Execute(new FetchUserById<TestUser>(userId));
+                        .Execute(new FetchUserById<TestUserEntity>(userId));
                     // assert
                     Expect(expectedUser?.Roles?.Length).To.Equal(0);
                     Expect(expectedUser?.RefreshToken).To.Be.Null();

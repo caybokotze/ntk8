@@ -4,23 +4,23 @@ using Ntk8.Models;
 
 namespace Ntk8.DatabaseServices;
 
-public interface INtk8Commands
+public interface IUserCommands
 {
     void DeleteRolesForUserById(int id);
     void DeleteUserById(int id);
     long InsertRefreshToken(RefreshToken refreshToken);
     int InsertRole(Role role);
-    int InsertUser(IBaseUser user);
+    int InsertUser(IUserEntity userEntity);
     int InsertUserRole(UserRole userRole);
     void UpdateRefreshToken(RefreshToken refreshToken);
-    void UpdateUser(IBaseUser user);
+    void UpdateUser(IUserEntity userEntity);
 }
 
-public class Ntk8Commands : INtk8Commands
+public class UserCommands : IUserCommands
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public Ntk8Commands(ICommandExecutor commandExecutor)
+    public UserCommands(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
     }
@@ -45,9 +45,9 @@ public class Ntk8Commands : INtk8Commands
         return _commandExecutor.Execute(new InsertRole(role));
     }
 
-    public int InsertUser(IBaseUser user)
+    public int InsertUser(IUserEntity userEntity)
     {
-        return _commandExecutor.Execute(new InsertUser(user));
+        return _commandExecutor.Execute(new InsertUser(userEntity));
     }
 
     public int InsertUserRole(UserRole userRole)
@@ -60,8 +60,8 @@ public class Ntk8Commands : INtk8Commands
         _commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
     }
 
-    public void UpdateUser(IBaseUser user)
+    public void UpdateUser(IUserEntity userEntity)
     {
-        _commandExecutor.Execute(new UpdateUser(user));
+        _commandExecutor.Execute(new UpdateUser(userEntity));
     }
 }

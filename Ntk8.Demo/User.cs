@@ -4,7 +4,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Demo;
 
-public class User : IBaseUser
+public class UserEntity : IUserEntity
 {
     public int Id { get; set; }
     public string? Title { get; set; }

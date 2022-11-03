@@ -13,20 +13,20 @@ using Ntk8.Utilities;
 
 namespace Ntk8.Middleware
 {
-    public class JwtMiddleware<T> : IMiddleware where T : class, IBaseUser, new()
+    public class JwtMiddleware<T> : IMiddleware where T : class, IUserEntity, new()
     {
-        private readonly INtk8Queries<T> _ntk8Queries;
+        private readonly IUserQueries _userQueries;
         private readonly IAuthSettings _authSettings;
         private readonly ITokenService _tokenService;
         private readonly IGlobalSettings _globalSettings;
 
         public JwtMiddleware(
-            INtk8Queries<T> ntk8Queries,
+            IUserQueries userQueries,
             IAuthSettings authSettings,
             ITokenService tokenService,
             IGlobalSettings globalSettings)
         {
-            _ntk8Queries = ntk8Queries;
+            _userQueries = userQueries;
             _authSettings = authSettings;
             _tokenService = tokenService;
             _globalSettings = globalSettings;
@@ -85,7 +85,7 @@ namespace Ntk8.Middleware
 
         public void MountUserToContext(HttpContext httpContext, string token, bool useJwt)
         {
-            IBaseUser? user;
+            IUserEntity? user;
             switch (useJwt)
             {
                 case true:
@@ -102,7 +102,7 @@ namespace Ntk8.Middleware
                         .First(x => x.Type == AuthenticationConstants.PrimaryKeyValue)
                         .Value ?? string.Empty);
 
-                    user = _ntk8Queries.FetchUserById(accountId);
+                    user = _userQueries.FetchUserById<T>(accountId);
 
                     if (user is null)
                     {
@@ -121,7 +121,7 @@ namespace Ntk8.Middleware
                 }
                 case false:
                 {
-                    user = _ntk8Queries.FetchUserByRefreshToken(token);
+                    user = _userQueries.FetchUserByRefreshToken<T>(token);
                 
                     if (user?.RefreshToken?.IsActive ?? false)
                     {

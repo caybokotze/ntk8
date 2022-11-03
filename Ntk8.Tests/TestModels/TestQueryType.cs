@@ -3,29 +3,29 @@ using Ntk8.Tests.TestHelpers;
 
 namespace Ntk8.Tests.TestModels;
 
-public class TestQueryType : INtk8Queries<TestUser>
+public class TestQueryType : IUserQueries
 {
-    public TestUser? FetchUserById(int id)
+    public TestUserEntity? FetchUserById(int id)
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUser? FetchUserByEmailAddress(string emailAddress)
+    public TestUserEntity? FetchUserByEmailAddress(string emailAddress)
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUser? FetchUserByRefreshToken(string refreshToken)
+    public TestUserEntity? FetchUserByRefreshToken(string refreshToken)
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUser? FetchUserByResetToken(string resetToken)
+    public TestUserEntity? FetchUserByResetToken(string resetToken)
     {
         throw new System.NotImplementedException();
     }
 
-    public TestUser? FetchUserByVerificationToken(string verificationToken)
+    public TestUserEntity? FetchUserByVerificationToken(string verificationToken)
     {
         throw new System.NotImplementedException();
     }

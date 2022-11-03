@@ -24,7 +24,7 @@ public class DependencyResolutionTests
             {
                 [TestCase(typeof(IHttpContextAccessor))]
                 [TestCase(typeof(IAuthSettings))]
-                [TestCase(typeof(IBaseUser))]
+                [TestCase(typeof(IUserEntity))]
                 public void ShouldResolveAsSingleton(Type type)
                 {
                     // arrange
@@ -90,8 +90,8 @@ public class DependencyResolutionTests
             {
                 // arrange
                 // act
-                var firstResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUser>>();
-                var secondResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUser>>();
+                var firstResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUserEntity>>();
+                var secondResolve = ServiceProvider?.GetRequiredService<JwtMiddleware<TestUserEntity>>();
                 // assert
                 Expect(firstResolve).To.Not.Be.Null();
                 Expect(secondResolve).To.Not.Be.Null();

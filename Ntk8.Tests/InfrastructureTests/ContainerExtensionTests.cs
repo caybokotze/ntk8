@@ -45,14 +45,14 @@ public class ContainerExtensionTests
 
                         webHost.ConfigureServices(config =>
                         {
-                            config.ConfigureNtk8<TestUser>(c => { c.OverrideNtk8Commands<TestCommandType>(); });
+                            config.ConfigureNtk8<TestUserEntity>(c => { c.OverrideNtk8Commands<TestCommandType>(); });
                         });
                     });
 
                 var host = await hostBuilder.StartAsync();
                 var serviceProvider = host.Services;
                 // act
-                var resolvedType = serviceProvider.GetRequiredService<INtk8Commands>();
+                var resolvedType = serviceProvider.GetRequiredService<IUserCommands>();
                 // assert
                 Expect(resolvedType.GetType()).To.Equal(typeof(TestCommandType));
             }
@@ -79,7 +79,7 @@ public class ContainerExtensionTests
 
                             webHost.ConfigureServices(config =>
                             {
-                                config.ConfigureNtk8<TestUser>();
+                                config.ConfigureNtk8<TestUserEntity>();
                                 config.AddTransient<IQueryExecutor, QueryExecutor>();
                                 config.AddTransient<ICommandExecutor, CommandExecutor>();
                                 config.AddTransient<IExecutable, Executable>();
@@ -91,11 +91,11 @@ public class ContainerExtensionTests
                     var host = await hostBuilder.StartAsync();
                     var serviceProvider = host.Services;
                     // act
-                    var resolvedType = serviceProvider.GetRequiredService<INtk8Commands>();
+                    var resolvedType = serviceProvider.GetRequiredService<IUserCommands>();
                     // assert
                     Expect(resolvedType.GetType())
                         .To
-                        .Equal(typeof(Ntk8Commands));
+                        .Equal(typeof(UserCommands));
                 }
             }
         }
@@ -122,14 +122,14 @@ public class ContainerExtensionTests
 
                         webHost.ConfigureServices(config =>
                         {
-                            config.ConfigureNtk8<TestUser>(c => { c.OverrideNtk8Queries<TestQueryType>(); });
+                            config.ConfigureNtk8<TestUserEntity>(c => { c.OverrideNtk8Queries<TestQueryType>(); });
                         });
                     });
 
                 var host = await hostBuilder.StartAsync();
                 var serviceProvider = host.Services;
                 // act
-                var resolvedType = serviceProvider.GetRequiredService<INtk8Queries<TestUser>>();
+                var resolvedType = serviceProvider.GetRequiredService<IUserQueries>();
                 // assert
                 Expect(resolvedType.GetType()).To.Equal(typeof(TestQueryType));
             }
@@ -156,7 +156,7 @@ public class ContainerExtensionTests
 
                             webHost.ConfigureServices(config =>
                             {
-                                config.ConfigureNtk8<TestUser>();
+                                config.ConfigureNtk8<TestUserEntity>();
                                 config.AddTransient<IQueryExecutor, QueryExecutor>();
                                 config.AddTransient<IExecutable, Executable>();
                                 config.AddTransient<IQueryable, Queryable>();
@@ -167,11 +167,11 @@ public class ContainerExtensionTests
                     var host = await hostBuilder.StartAsync();
                     var serviceProvider = host.Services;
                     // act
-                    var resolvedType = serviceProvider.GetRequiredService<INtk8Queries<TestUser>>();
+                    var resolvedType = serviceProvider.GetRequiredService<IUserQueries>();
                     // assert
                     Expect(resolvedType.GetType())
                         .To
-                        .Equal(typeof(Ntk8Queries<TestUser>));
+                        .Equal(typeof(UserQueries));
                 }
             }
         }

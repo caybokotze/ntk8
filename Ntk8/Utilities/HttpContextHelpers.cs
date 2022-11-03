@@ -17,11 +17,11 @@ public static class HttpContextHelpers
             .ToString();
     }
 
-    public static IBaseUser? GetCurrentUser(this HttpContext httpContext)
+    public static IUserEntity? GetCurrentUser(this HttpContext httpContext)
     {
         if(httpContext.Items.TryGetValue(AuthenticationConstants.CurrentUser, out var value))
         {
-            return (IBaseUser?) value ?? null;
+            return (IUserEntity?) value ?? null;
         }
 
         return null;

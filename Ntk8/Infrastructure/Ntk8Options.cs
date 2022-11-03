@@ -4,7 +4,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Infrastructure;
 
-public class Ntk8Options<TUser> : IGlobalSettings where TUser : class, IBaseUser, new()
+public class Ntk8Options<TUser> : IGlobalSettings where TUser : class, IUserEntity, new()
 {
     public Ntk8Options()
     {
@@ -39,13 +39,13 @@ public class Ntk8Options<TUser> : IGlobalSettings where TUser : class, IBaseUser
     }
     
     public void OverrideNtk8Commands<TImplementation>() 
-        where TImplementation : class, INtk8Commands
+        where TImplementation : class, IUserCommands
     {
         Ntk8CommandType = typeof(TImplementation);
     }
         
     public void OverrideNtk8Queries<TImplementation>() 
-        where TImplementation : class, INtk8Queries<TUser>
+        where TImplementation : class, IUserQueries
     {
         Ntk8QueryType = typeof(TImplementation);
     }

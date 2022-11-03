@@ -4,15 +4,15 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class UpdateUser : Command<int>
+    internal class UpdateUser : Command<int>
     {
-        public IBaseUser BaseUser { get; }
+        public IUserEntity UserEntity { get; }
 
-        public UpdateUser(IBaseUser baseUserModel)
+        public UpdateUser(IUserEntity userEntityModel)
         {
-            BaseUser = baseUserModel;
-            BaseUser.Email = baseUserModel.Email?.ToLowerInvariant();
-            BaseUser.DateModified = DateTime.UtcNow;
+            UserEntity = userEntityModel;
+            UserEntity.Email = userEntityModel.Email?.ToLowerInvariant();
+            UserEntity.DateModified = DateTime.UtcNow;
         }
 
         public override void Execute()
@@ -38,7 +38,7 @@ namespace Ntk8.Data.Commands
             date_modified = @DateModified,
             date_created = @DateCreated,
             is_active = @IsActive
-            WHERE id = @Id;", BaseUser);
+            WHERE id = @Id;", UserEntity);
         }
     }
 }

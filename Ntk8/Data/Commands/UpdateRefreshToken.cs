@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class UpdateRefreshToken : Command<int>
+    internal class UpdateRefreshToken : Command<int>
     {
         public readonly RefreshToken RefreshToken;
 

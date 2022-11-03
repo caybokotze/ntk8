@@ -7,7 +7,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Queries
 {
-    public class FetchUserById<T> : Query<T?> where T : class, IBaseUser, new()
+    internal class FetchUserById<T> : Query<T?> where T : class, IUserEntity, IUserRoles, IUserRefreshToken, new()
     {
         public int Id { get; }
 

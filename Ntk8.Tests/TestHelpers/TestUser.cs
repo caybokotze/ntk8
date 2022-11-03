@@ -8,17 +8,19 @@ using PeanutButter.RandomGenerators;
 
 namespace Ntk8.Tests.TestHelpers
 {
-    public class TestUser : IBaseUser
+    public class TestUserEntity : IUserEntity
     {
-        public TestUser()
+        public TestUserEntity()
         {
             DateCreated = DateTime.UtcNow;
             DateModified = DateTime.UtcNow;
+            Roles = Array.Empty<Role>();
+            UserRoles = Array.Empty<UserRole>();
         }
         
-        public static TestUser Create()
+        public static TestUserEntity Create()
         {
-            var user = new TestUser
+            var user = new TestUserEntity
             {
                 AcceptedTerms = true,
                 FirstName = Faker.Name.First(),
@@ -77,7 +79,7 @@ namespace Ntk8.Tests.TestHelpers
             return refreshToken;
         }
 
-        private static UserRole[] CreateRandomUserRoles(IBaseUser user)
+        private static UserRole[] CreateRandomUserRoles(IUserEntity userEntity)
         {
             var roleId = Faker.RandomNumber.Next();
             var userRoles = new List<UserRole>
@@ -90,7 +92,7 @@ namespace Ntk8.Tests.TestHelpers
                         RoleName = Faker.Internet.UserName()
                     },
                     RoleId = roleId,
-                    UserId = user.Id
+                    UserId = userEntity.Id
                 },
                 new()
                 {
@@ -100,7 +102,7 @@ namespace Ntk8.Tests.TestHelpers
                         RoleName = Faker.Internet.UserName()
                     },
                     RoleId = roleId + 1,
-                    UserId = user.Id
+                    UserId = userEntity.Id
                 }
             };
             return userRoles.ToArray();
@@ -128,7 +130,8 @@ namespace Ntk8.Tests.TestHelpers
         public DateTime? DateOfPasswordReset { get; set; }
         public DateTime? DateResetTokenExpires { get; set; }
         public RefreshToken? RefreshToken { get; set; }
-        public Role?[]? Roles { get; set; }
-        public UserRole[]? UserRoles { get; set; }
+        public Role[] Roles { get; set; }
+        public UserRole[] UserRoles { get; set; }
+        public bool IsVerified => DateVerified is not null && VerificationToken is null;
     }
 }

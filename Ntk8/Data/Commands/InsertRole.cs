@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertRole : Command<int>
+    internal class InsertRole : Command<int>
     {
         public Role Role { get; }
 

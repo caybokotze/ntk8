@@ -34,7 +34,7 @@ namespace Ntk8.Tests.MiddlewareTests
             // arrange
             // act
             // assert
-            Expect(typeof(JwtMiddleware<TestUser>)
+            Expect(typeof(JwtMiddleware<TestUserEntity>)
                 .Implements(typeof(IMiddleware)))
                 .To
                 .Be
@@ -72,9 +72,9 @@ namespace Ntk8.Tests.MiddlewareTests
             public async Task ShouldAddUserToTheHttpContext()
             {
                 // arrange
-                var authSettings = TestUser.CreateValidAuthenticationSettings();
-                var user = TestUser.Create();
-                var queries = Substitute.For<INtk8Queries<TestUser>>();
+                var authSettings = TestUserEntity.CreateValidAuthenticationSettings();
+                var user = TestUserEntity.Create();
+                var queries = Substitute.For<IUserQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
                 var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
@@ -91,7 +91,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 };
 
                 var middleware = Substitute
-                    .For<JwtMiddleware<TestUser>>(
+                    .For<JwtMiddleware<TestUserEntity>>(
                         queries, 
                         authSettings, 
                         tokenService,
@@ -137,9 +137,9 @@ namespace Ntk8.Tests.MiddlewareTests
             public async Task ShouldIgnoreAndByPass()
             {
                 // arrange
-                var authSettings = TestUser.CreateValidAuthenticationSettings();
-                var user = TestUser.Create();
-                var queries = Substitute.For<INtk8Queries<TestUser>>();
+                var authSettings = TestUserEntity.CreateValidAuthenticationSettings();
+                var user = TestUserEntity.Create();
+                var queries = Substitute.For<IUserQueries>();
                 var tokenService = Substitute.For<ITokenService>();
                 var validToken = TestTokenHelpers.CreateValidJwtToken(authSettings.RefreshTokenSecret, user.Id);
                 var validTokenAsString = TestTokenHelpers.CreateValidJwtTokenAsString(authSettings.RefreshTokenSecret!, user.Id);
@@ -154,7 +154,7 @@ namespace Ntk8.Tests.MiddlewareTests
                 };
 
                 var middleware = Substitute
-                    .For<JwtMiddleware<TestUser>>(
+                    .For<JwtMiddleware<TestUserEntity>>(
                         queries, 
                         authSettings, 
                         tokenService,
@@ -182,9 +182,9 @@ namespace Ntk8.Tests.MiddlewareTests
             public void ShouldAttachAccountToHttpContext()
             {
                 // arrange
-                var ntk8Query = Substitute.For<INtk8Queries<TestUser>>();
+                var ntk8Query = Substitute.For<IUserQueries>();
                 var secret = GetRandomString(40);
-                var user = TestUser.Create();
+                var user = TestUserEntity.Create();
                 var token = TestTokenHelpers.CreateValidJwtToken(secret, user.Id);
                 var tokenService = Substitute.For<ITokenService>();
                 tokenService
@@ -213,13 +213,13 @@ namespace Ntk8.Tests.MiddlewareTests
             }
         }
 
-        public static JwtMiddleware<TestUser> Create(
+        public static JwtMiddleware<TestUserEntity> Create(
             IAuthSettings? authSettings = null, 
-            INtk8Queries<TestUser>? ntk8Queries = null,
+            IUserQueries? ntk8Queries = null,
             ITokenService? tokenService = null)
         {
-            return new JwtMiddleware<TestUser>(
-                ntk8Queries ?? Substitute.For<INtk8Queries<TestUser>>(),
+            return new JwtMiddleware<TestUserEntity>(
+                ntk8Queries ?? Substitute.For<IUserQueries>(),
                 authSettings ?? new AuthSettings
                 {
                     RefreshTokenSecret = GetRandomString(40),

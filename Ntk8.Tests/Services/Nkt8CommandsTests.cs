@@ -22,7 +22,7 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
+            var sut = Substitute.For<UserCommands>(commandExecutor);
             var randomId = GetRandomInt();
             // act
             sut.DeleteRolesForUserById(randomId);
@@ -40,7 +40,7 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
+            var sut = Substitute.For<UserCommands>(commandExecutor);
             var randomId = GetRandomInt();
             // act
             sut.DeleteUserById(randomId);
@@ -60,7 +60,7 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var refreshTokenId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertRefreshToken>()).Returns(refreshTokenId);
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
+            var sut = Substitute.For<UserCommands>(commandExecutor);
             var randomRefreshToken = GetRandom<RefreshToken>();
             // act
             var result = sut.InsertRefreshToken(randomRefreshToken);
@@ -80,7 +80,7 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var roleId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertRole>()).Returns(roleId);
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
+            var sut = Substitute.For<UserCommands>(commandExecutor);
             var randomRole = GetRandom<Role>();
             // act
             var result = sut.InsertRole(randomRole);
@@ -100,13 +100,13 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var userId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertUser>()).Returns(userId);
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
-            var randomUser = GetRandom<TestUser>();
+            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var randomUser = GetRandom<TestUserEntity>();
             // act
             var result = sut.InsertUser(randomUser);
             // assert
             Expect(commandExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<InsertUser>(s => s.BaseUser == randomUser));
+                .Execute(Arg.Is<InsertUser>(s => s.UserEntity == randomUser));
             Expect(result).To.Equal(userId);
         }
     }
@@ -120,7 +120,7 @@ public class Nkt8CommandsTests
             var commandExecutor = Substitute.For<ICommandExecutor>();
             var roleId = GetRandomInt();
             commandExecutor.Execute(Arg.Any<InsertUserRole>()).Returns(roleId);
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
+            var sut = Substitute.For<UserCommands>(commandExecutor);
             var userRole = GetRandom<UserRole>();
             // act
             var result = sut.InsertUserRole(userRole);
@@ -138,7 +138,7 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
+            var sut = Substitute.For<UserCommands>(commandExecutor);
             var refreshToken = GetRandom<RefreshToken>();
             // act
             sut.UpdateRefreshToken(refreshToken);
@@ -155,13 +155,13 @@ public class Nkt8CommandsTests
         {
             // arrange
             var commandExecutor = Substitute.For<ICommandExecutor>();
-            var sut = Substitute.For<Ntk8Commands>(commandExecutor);
-            var user = GetRandom<TestUser>();
+            var sut = Substitute.For<UserCommands>(commandExecutor);
+            var user = GetRandom<TestUserEntity>();
             // act
             sut.UpdateUser(user);
             // assert
             Expect(commandExecutor).To.Have.Received(1)
-                .Execute(Arg.Is<UpdateUser>(s => s.BaseUser == user));
+                .Execute(Arg.Is<UpdateUser>(s => s.UserEntity == user));
         }
     }
 }

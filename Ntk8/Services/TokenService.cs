@@ -25,21 +25,21 @@ namespace Ntk8.Services
         SecurityToken ValidateJwtSecurityToken(string jwtToken, string refreshTokenSecret);
     }
 
-    public class TokenService<TUser> : ITokenService where TUser : class, IBaseUser, new()
+    public class TokenService<T> : ITokenService where T : class, IUserEntity, new()
     {
-        private readonly INtk8Commands _ntk8Commands;
-        private readonly INtk8Queries<TUser> _ntk8Queries;
+        private readonly IUserCommands _userCommands;
+        private readonly IUserQueries _userQueries;
         private readonly IAuthSettings _authSettings;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public TokenService(
-            INtk8Commands ntk8Commands,
-            INtk8Queries<TUser> ntk8Queries,
+            IUserCommands userCommands,
+            IUserQueries userQueries,
             IAuthSettings authSettings,
             IHttpContextAccessor contextAccessor)
         {
-            _ntk8Commands = ntk8Commands;
-            _ntk8Queries = ntk8Queries;
+            _userCommands = userCommands;
+            _userQueries = userQueries;
             _authSettings = authSettings;
             _contextAccessor = contextAccessor;
         }
@@ -59,12 +59,12 @@ namespace Ntk8.Services
             
             token.DateRevoked = DateTime.UtcNow;
             token.RevokedByIp = _contextAccessor.GetIpAddress();
-            _ntk8Commands.UpdateRefreshToken(token);
+            _userCommands.UpdateRefreshToken(token);
         }
 
-        public (bool isActive, int userId, Role[]? roles) IsRefreshTokenActive(string token)
+        public (bool isActive, int userId, Role[] roles) IsRefreshTokenActive(string token)
         {
-            var user = _ntk8Queries.FetchUserByRefreshToken(token);
+            var user = _userQueries.FetchUserByRefreshToken<T>(token);
 
             if (user is null)
             {

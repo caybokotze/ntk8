@@ -2,7 +2,7 @@ using Dapper.CQRS;
 
 namespace Ntk8.Data.Commands
 {
-    public class DeleteRolesForUserById : Command
+    internal class DeleteRolesForUserById : Command
     {
         public int UserId { get; }
 

@@ -56,7 +56,7 @@ namespace Ntk8.Demo
 
             var updateRequest = await context.DeserializeRequestBody<UpdateRequest>();
 
-            var user = _queryExecutor.Execute(new FetchUserByEmailAddress<User>(updateRequest.Email));
+            var user = _queryExecutor.Execute(new FetchUserByEmailAddress<UserEntity>(updateRequest.Email));
             user.TelNumber = updateRequest.TelNumber;
 
             _commandExecutor.Execute(new UpdateUser(user));
@@ -68,7 +68,7 @@ namespace Ntk8.Demo
                 .DeserializeRequestBody<VerifyEmailRequest>();
             
             var user = _queryExecutor
-                .Execute(new FetchUserByEmailAddress<User>(verifyRequest.Email));
+                .Execute(new FetchUserByEmailAddress<UserEntity>(verifyRequest.Email));
             
             _accountService
                 .VerifyUserByVerificationToken(user.VerificationToken);
@@ -158,7 +158,7 @@ namespace Ntk8.Demo
             
             ValidateModel(resetTokenRequest);
 
-            var user = _queryExecutor.Execute(new FetchUserByRefreshToken<User>(resetTokenRequest.Token));
+            var user = _queryExecutor.Execute(new FetchUserByRefreshToken<UserEntity>(resetTokenRequest.Token));
             var response = _tokenService.GenerateJwtToken(user.Id, user.Roles.ToArray());
             await context.SerialiseResponseBody(response);
         }

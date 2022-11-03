@@ -58,7 +58,7 @@ public class AuthSettingsTests
 
                     webHost.ConfigureServices(config =>
                     {
-                        config.ConfigureNtk8<TestUser>(options =>
+                        config.ConfigureNtk8<TestUserEntity>(options =>
                         {
                             options.ConfigureAuthSettings(c =>
                             {

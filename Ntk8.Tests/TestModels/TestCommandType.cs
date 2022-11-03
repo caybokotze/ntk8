@@ -3,7 +3,7 @@ using Ntk8.Models;
 
 namespace Ntk8.Tests.TestModels;
 
-public class TestCommandType : INtk8Commands
+public class TestCommandType : IUserCommands
 {
     public void DeleteRolesForUserById(int id)
     {
@@ -25,7 +25,7 @@ public class TestCommandType : INtk8Commands
         throw new System.NotImplementedException();
     }
 
-    public int InsertUser(IBaseUser user)
+    public int InsertUser(IUserEntity userEntity)
     {
         throw new System.NotImplementedException();
     }
@@ -45,7 +45,7 @@ public class TestCommandType : INtk8Commands
         throw new System.NotImplementedException();
     }
 
-    public void UpdateUser(IBaseUser user)
+    public void UpdateUser(IUserEntity userEntity)
     {
         throw new System.NotImplementedException();
     }

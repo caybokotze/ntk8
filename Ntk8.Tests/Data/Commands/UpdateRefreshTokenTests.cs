@@ -26,14 +26,14 @@ public class UpdateRefreshTokenTests
             var queryExecutor = Resolve<IQueryExecutor>();
             var commandExecutor = Resolve<ICommandExecutor>();
             var refreshToken = TestTokenHelpers.CreateRefreshToken();
-            var user = TestUser.Create();
+            var user = TestUserEntity.Create();
             
             // act
             var userid = commandExecutor.Execute(new InsertUser(user));
             refreshToken.UserId = userid;
             var refreshTokenId = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
             var initialRetrievedUser = queryExecutor
-                .Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token ?? string.Empty));
+                .Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
 
             if (initialRetrievedUser is not null)
             {
@@ -45,7 +45,7 @@ public class UpdateRefreshTokenTests
             commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
             
             var secondRetrievedUser =
-                queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token ?? string.Empty));
+                queryExecutor.Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
 
             var expectedRefreshToken = secondRetrievedUser?.RefreshToken;
             
@@ -72,7 +72,7 @@ public class UpdateRefreshTokenTests
             var refreshToken = TestTokenHelpers.CreateRefreshToken();
             var refreshToken2 = TestTokenHelpers.CreateRefreshToken();
             refreshToken2.DateCreated = DateTime.UtcNow.AddDays(1);
-            var user = TestUser.Create();
+            var user = TestUserEntity.Create();
             
             // act
             var userid = commandExecutor.Execute(new InsertUser(user));
@@ -81,7 +81,7 @@ public class UpdateRefreshTokenTests
             var _ = commandExecutor.Execute(new InsertRefreshToken(refreshToken));
             var __ = commandExecutor.Execute(new InsertRefreshToken(refreshToken2));
             var initialRetrievedUser = queryExecutor
-                .Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token ?? string.Empty));
+                .Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
 
             if (initialRetrievedUser is not null)
             {
@@ -93,10 +93,10 @@ public class UpdateRefreshTokenTests
             commandExecutor.Execute(new UpdateRefreshToken(refreshToken));
             
             var secondRetrievedUser =
-                queryExecutor.Execute(new FetchUserByRefreshToken<TestUser>(refreshToken.Token ?? string.Empty));
+                queryExecutor.Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken.Token ?? string.Empty));
 
             var thirdRetrievedUser = queryExecutor
-                .Execute(new FetchUserByRefreshToken<TestUser>(refreshToken2.Token ?? string.Empty));
+                .Execute(new FetchUserByRefreshToken<TestUserEntity>(refreshToken2.Token ?? string.Empty));
             
             var expectedRefreshToken = secondRetrievedUser?.RefreshToken;
             var secondRefreshToken = thirdRetrievedUser?.RefreshToken;

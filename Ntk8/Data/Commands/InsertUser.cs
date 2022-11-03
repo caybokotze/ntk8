@@ -4,17 +4,17 @@ using Ntk8.Models;
 
 namespace Ntk8.Data.Commands
 {
-    public class InsertUser : Command<int>
+    internal class InsertUser : Command<int>
     {
-        public IBaseUser BaseUser { get; }
+        public IUserEntity UserEntity { get; }
 
-        public InsertUser(IBaseUser baseUser)
+        public InsertUser(IUserEntity userEntity)
         {
-            BaseUser = baseUser;
-            baseUser.Guid = Guid.NewGuid();
-            BaseUser.Email = baseUser.Email?.ToLowerInvariant();
-            BaseUser.DateModified = DateTime.UtcNow;
-            BaseUser.DateCreated = DateTime.UtcNow;
+            UserEntity = userEntity;
+            userEntity.Guid = Guid.NewGuid();
+            UserEntity.Email = userEntity.Email?.ToLowerInvariant();
+            UserEntity.DateModified = DateTime.UtcNow;
+            UserEntity.DateCreated = DateTime.UtcNow;
         }
 
         public override void Execute()
@@ -63,7 +63,7 @@ namespace Ntk8.Data.Commands
             SELECT last_insert_id();";
 
             Result = QueryFirst<int>(sql,
-                BaseUser);
+                UserEntity);
         }
     }
 }

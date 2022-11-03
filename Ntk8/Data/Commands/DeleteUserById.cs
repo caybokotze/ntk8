@@ -2,7 +2,7 @@
 
 namespace Ntk8.Data.Commands
 {
-    public class DeleteUserById : Command<int>
+    internal class DeleteUserById : Command<int>
     {
         public int Id { get; }
 

@@ -10,7 +10,7 @@ namespace Ntk8.Data.Queries
     /// <summary>
     /// Will return the user and the refresh token on the user object.
     /// </summary>
-    public class FetchUserByRefreshToken<T> : Query<T?> where T : class, IBaseUser, new()
+    internal class FetchUserByRefreshToken<T> : Query<T?> where T : class, IUserEntity, IUserRoles, IUserRefreshToken, new()
     {
         public string Token { get; }
 

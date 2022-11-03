@@ -4,12 +4,26 @@ using Ntk8.Dto.Interfaces;
 
 namespace Ntk8.Models
 {
-    public interface IBaseUser : IUserPrimaryProperties
+    public interface IUserRoles
+    {
+        Role[] Roles { get; set; }
+    }
+
+    public interface IUserRefreshToken
+    {
+        RefreshToken? RefreshToken { get; set; }
+    }
+
+    public interface IUserVerificationStatus
+    {
+        bool IsVerified { get; }
+    }
+    
+    public interface IUserEntity : IUserPrimaryProperties, IUserRoles, IUserRefreshToken, IUserVerificationStatus
     {
         int Id { get; set; }
         bool IsActive { get; set; }
         Guid Guid { get; set; }
-        string? TelNumber { get; set; }
         string? Username { get; set; }
         int? AccessFailedCount { get; set; }
         bool? LockoutEnabled { get; set; }
@@ -23,8 +37,5 @@ namespace Ntk8.Models
         DateTime? DateVerified { get; set; }
         DateTime? DateOfPasswordReset { get; set; }
         DateTime? DateResetTokenExpires { get; set; }
-        RefreshToken? RefreshToken { get; set; }
-        Role[]? Roles { get; set; }
-        bool IsVerified => DateVerified.HasValue || DateOfPasswordReset.HasValue;
     }
 }

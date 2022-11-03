@@ -20,7 +20,7 @@ namespace Ntk8.Tests.Data.Commands
             using (Transactions.UncommittedRead())
             {
                 // arrange
-                var user = TestUser.Create();
+                var user = TestUserEntity.Create();
                 var commandExecutor = Resolve<ICommandExecutor>();
                 var queryExecutor = Resolve<IQueryExecutor>();
                 
@@ -28,7 +28,7 @@ namespace Ntk8.Tests.Data.Commands
                 var id = commandExecutor
                     .Execute(new InsertUser(user));
                 var expectedUser = queryExecutor
-                    .Execute(new FetchUserById<TestUser>(id)); 
+                    .Execute(new FetchUserById<TestUserEntity>(id)); 
                 
                 // assert
                 Expect(id)
@@ -63,7 +63,7 @@ namespace Ntk8.Tests.Data.Commands
             using (Transactions.UncommittedRead())
             {
                 // arrange
-                var user = RandomValueGen.GetRandom<IBaseUser>();
+                var user = RandomValueGen.GetRandom<IUserEntity>();
                 var commandExecutor = Resolve<ICommandExecutor>();
                 var queryExecutor = Resolve<IQueryExecutor>();
                 
@@ -72,7 +72,7 @@ namespace Ntk8.Tests.Data.Commands
                     .Execute(new InsertUser(user));
 
                 var expectedUser = queryExecutor
-                    .Execute(new FetchUserById<TestUser>(id));
+                    .Execute(new FetchUserById<TestUserEntity>(id));
                 
                 // assert
                 Expect(expectedUser?.DateCreated)

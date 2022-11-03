@@ -18,18 +18,18 @@ namespace Ntk8.Tests.Data.Commands
             using (Transactions.UncommittedRead())
             {
                 // arrange
-                var user = TestUser.Create();
+                var user = TestUserEntity.Create();
                 var commandExecutor = Resolve<ICommandExecutor>();
                 var queryExecutor = Resolve<IQueryExecutor>();
                 // act
                 var id = commandExecutor.Execute(new InsertUser(user));
-                var updatedUser = TestUser.Create();
+                var updatedUser = TestUserEntity.Create();
                 updatedUser.UserRoles = null;
                 updatedUser.Roles = null;
                 updatedUser.RefreshToken = null;
                 updatedUser.Id = id;
                 commandExecutor.Execute(new UpdateUser(updatedUser));
-                var expected = queryExecutor.Execute(new FetchUserById<TestUser>(id));
+                var expected = queryExecutor.Execute(new FetchUserById<TestUserEntity>(id));
                 Expect(updatedUser.DateModified).To.Approximately.Equal(expected!.DateModified);
                 Expect(updatedUser.DateCreated).To.Approximately.Equal(expected.DateCreated);
                 Expect(updatedUser.DateVerified).To.Approximately.Equal((DateTime) expected.DateVerified!);

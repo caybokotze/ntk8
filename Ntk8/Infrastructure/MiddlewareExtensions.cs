@@ -7,7 +7,7 @@ namespace Ntk8.Infrastructure
 {
     public static class MiddlewareExtensions
     {
-        public static void UseNtk8JwtMiddleware<T>(this IApplicationBuilder builder) where T : class, IBaseUser, new()
+        public static void UseNtk8JwtMiddleware<T>(this IApplicationBuilder builder) where T : class, IUserEntity, new()
         {
             builder.UseMiddleware<JwtMiddleware<T>>();
         }

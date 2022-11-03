@@ -15,7 +15,7 @@ public static class ContainerExtensions
         Action<Ntk8Options<TUser>>? options = null)
         where TUser : 
         class, 
-        IBaseUser, 
+        IUserEntity, 
         new()
     {
         var ntk8Options = new Ntk8Options<TUser>();
@@ -26,22 +26,22 @@ public static class ContainerExtensions
 
         if (queryType is null)
         {
-            serviceCollection.AddTransient<INtk8Queries<TUser>, Ntk8Queries<TUser>>();
+            serviceCollection.AddTransient<IUserQueries, UserQueries>();
         }
 
         if (queryType is not null)
         {
-            serviceCollection.AddTransient(typeof(INtk8Queries<TUser>), queryType);
+            serviceCollection.AddTransient(typeof(IUserQueries), queryType);
         }
 
         if (commandType is null)
         {
-            serviceCollection.AddTransient<INtk8Commands, Ntk8Commands>();
+            serviceCollection.AddTransient<IUserCommands, UserCommands>();
         }
 
         if (commandType is not null)
         {
-            serviceCollection.AddTransient(typeof(INtk8Commands), commandType);
+            serviceCollection.AddTransient(typeof(IUserCommands), commandType);
         }
 
         serviceCollection.AddSingleton<IGlobalSettings, GlobalSettings>(_ => new GlobalSettings
@@ -85,10 +85,10 @@ public static class ContainerExtensions
     public static void RegisterNtk8Services<TUser>(
         this IServiceCollection serviceCollection) 
         where TUser : class, 
-        IBaseUser, 
+        IUserEntity, 
         new()
     {
-        serviceCollection.AddTransient<IBaseUser, TUser>();
+        serviceCollection.AddTransient<IUserEntity, TUser>();
         serviceCollection.AddTransient<JwtMiddleware<TUser>, JwtMiddleware<TUser>>();
         serviceCollection.AddTransient<ITokenService, TokenService<TUser>>();
         serviceCollection.AddTransient<IAccountService, AccountService<TUser>>();

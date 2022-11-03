@@ -26,7 +26,7 @@ namespace Ntk8.Demo
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             var app = builder.Build();
             app.UseRouting();
-            app.UseNtk8JwtMiddleware<User>();
+            app.UseNtk8JwtMiddleware<UserEntity>();
             app.UseNtk8ExceptionMiddleware();
 
             var _ = new AuthHandler(app, 
@@ -52,10 +52,10 @@ namespace Ntk8.Demo
             builder.Services.AddTransient<IDbConnection, DbConnection>(_ => 
                 new MySqlConnection(GetConnectionString()));
             builder.Services.AddHttpContextAccessor();
-            builder.Services.ConfigureNtk8<User>(o =>
+            builder.Services.ConfigureNtk8<UserEntity>(o =>
             {
                 o.UseJwt = true;
-                o.OverrideNtk8Queries<Ntk8Queries<User>>();
+                o.OverrideNtk8Queries<UserQueries>();
                 o.ConfigureAuthSettings(a =>
                 {
                     a.JwtTTL = 1000;
